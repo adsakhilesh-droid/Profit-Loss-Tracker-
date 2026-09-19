@@ -1,0 +1,797 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#111827">
+<title>DE Trade Tracker</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Tax Tracker">
+<style>
+:root{
+ --bg:#f3f4f6;--app:#f8fafc;--card:#fff;--soft:#f8fafc;--line:#e5e7eb;--line2:#eef0f2;
+ --ink:#111827;--muted:#6b7280;--good:#087443;--bad:#b42318;--warn:#9a6700;
+ --inputbg:#fff;--inputline:#d1d5db;--danger-bg:#fee2e2;--danger:#991b1b;--goodbg:#f0fdf4;
+ --shadow:0 2px 8px #00000008;
+}
+@media (prefers-color-scheme:dark){
+ :root{
+  --bg:#020617;--app:#0f172a;--card:#1e293b;--soft:#162032;--line:#334155;--line2:#2b3a52;
+  --ink:#f1f5f9;--muted:#94a3b8;--good:#4ade80;--bad:#f87171;--warn:#fbbf24;
+  --inputbg:#0f172a;--inputline:#475569;--danger-bg:#450a0a;--danger:#fca5a5;--goodbg:#052e1b;
+  --shadow:none;
+ }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;color:var(--ink);font-variant-numeric:tabular-nums}
+button{font-family:inherit;cursor:pointer}
+.app{max-width:520px;margin:auto;min-height:100vh;background:var(--app)}
+.sticky{position:sticky;top:0;z-index:5}
+.top{background:#111827;color:#fff;padding:16px 18px;display:flex;justify-content:space-between;align-items:center;gap:12px}
+.top h1{font-size:21px;margin:0 0 4px}.top p{margin:0;color:#cbd5e1;font-size:13px}
+.top select{width:auto;padding:8px 10px;font-size:15px;font-weight:700;background:#1f2937;color:#fff;border:1px solid #374151}
+.tabs{display:flex;background:var(--card);border-bottom:1px solid var(--line);overflow-x:auto}
+.tab{flex:1 0 auto;padding:13px 10px;border:0;border-bottom:3px solid transparent;background:var(--card);font-weight:700;color:var(--muted);white-space:nowrap;font-size:13px}
+.tab.active{color:var(--ink);border-bottom-color:var(--ink)}
+main{padding:16px}.panel{display:none}.panel.active{display:block}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:13px;box-shadow:var(--shadow)}
+.card h3{margin:0 0 8px;font-size:16px}
+.big{font-size:29px;font-weight:800}.muted{color:var(--muted);font-size:13px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.metric{background:var(--soft);border-radius:12px;padding:12px}
+.metric b{display:block;margin-top:5px;font-size:18px}
+.metric small{display:block;margin-top:3px;font-size:11px;color:var(--muted);font-weight:400}
+label{display:block;font-weight:700;font-size:13px;margin:12px 0 6px}
+label.chk{display:flex;gap:10px;align-items:flex-start;font-weight:600;margin:14px 0 0;line-height:1.4}
+input,select{width:100%;padding:12px;border:1px solid var(--inputline);border-radius:10px;font-size:16px;background:var(--inputbg);color:var(--ink);font-family:inherit}
+input[type=checkbox]{width:auto;margin-top:2px}
+:is(button,input,select):focus-visible{outline:2px solid #3b82f6;outline-offset:2px}
+button.primary{width:100%;border:0;background:var(--ink);color:var(--card);padding:13px;border-radius:11px;font-weight:800;font-size:15px;margin-top:13px}
+button.secondary{border:1px solid var(--inputline);background:var(--card);color:var(--ink);padding:10px 12px;border-radius:10px;font-weight:700}
+button.block{width:100%;margin-top:10px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.row2{display:flex;gap:10px}.row2>div{flex:1;min-width:0}
+.line{display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid var(--line2);font-size:14px}
+.line:last-child{border:0}
+.line.net{font-size:17px;font-weight:800}
+.good{color:var(--good)}.bad{color:var(--bad)}.warn{color:var(--warn)}.dim{color:var(--muted)}
+.txn{padding:12px 0;border-bottom:1px solid var(--line2)}.txn:last-child{border:0}
+.txn .title{font-weight:750}.txn .meta{font-size:12px;color:var(--muted);margin-top:3px}
+.txn .amt{text-align:right}.txn .amt small{display:block;font-size:11px;color:var(--muted);font-weight:400;margin-top:2px}
+.txn .btns{display:flex;gap:6px;justify-content:flex-end;margin-top:8px}
+.empty{text-align:center;padding:28px;color:var(--muted)}
+.smallbtn{border:0;background:var(--soft);color:var(--ink);padding:6px 10px;border-radius:8px;font-size:12px;font-weight:700;border:1px solid var(--line)}
+.smallbtn.del{background:var(--danger-bg);color:var(--danger);border-color:transparent}
+.note{font-size:12px;line-height:1.5;color:var(--muted)}
+.seg{display:inline-flex;background:var(--soft);border:1px solid var(--line);border-radius:10px;padding:2px;flex:none}
+.seg button{border:0;background:transparent;padding:6px 10px;border-radius:8px;font-weight:700;font-size:12px;color:var(--muted)}
+.seg button.on{background:var(--ink);color:var(--card)}
+.bar{height:10px;background:var(--soft);border:1px solid var(--line);border-radius:99px;overflow:hidden;margin:10px 0 8px}
+.bar>i{display:block;height:100%;background:var(--ink);border-radius:99px;transition:width .3s}
+.bar>i.full{background:var(--warn)}
+.mrow{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line2);font-size:14px}
+.mrow:last-child{border:0}
+.mrow.zero{opacity:.5}
+.mrow .r{text-align:right}
+.mrow small{display:block;font-size:11px;color:var(--muted);font-weight:400}
+.chip{font-style:normal;font-size:10px;font-weight:800;padding:2px 6px;border-radius:99px;margin-left:6px;background:var(--soft);border:1px solid var(--line);color:var(--muted)}
+.filters{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0 4px}
+.filters input[type=search]{grid-column:1/-1}
+.filters select,.filters input{padding:10px;font-size:14px}
+.toast{position:fixed;left:50%;bottom:calc(16px + env(safe-area-inset-bottom));transform:translate(-50%,20px);background:#111827;color:#fff;border:1px solid #374151;padding:11px 14px;border-radius:12px;font-size:14px;display:flex;gap:14px;align-items:center;max-width:92%;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:20}
+.toast.show{opacity:1;transform:translate(-50%,0);pointer-events:auto}
+.toast button{border:0;background:transparent;color:#93c5fd;font-weight:800;font-size:14px;padding:0}
+svg .bp{fill:var(--good)}svg .bn{fill:var(--bad)}svg .bz{fill:var(--muted);opacity:.5}
+svg .cl{fill:var(--muted);font-size:10px;font-family:inherit}
+svg .axis{stroke:var(--line);stroke-width:1}
+svg .avgl{stroke:var(--warn);stroke-width:1.5;stroke-dasharray:4 3}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="app">
+<div class="sticky">
+<header class="top">
+ <div><h1>🇩🇪 DE Trade Tracker</h1><p>Capital gains • loss pots • Sparer-Pauschbetrag</p></div>
+ <select id="year" aria-label="Tax year"></select>
+</header>
+<nav class="tabs">
+<button class="tab active" data-tab="dashboard">Overview</button>
+<button class="tab" data-tab="add">Add</button>
+<button class="tab" data-tab="history">History</button>
+<button class="tab" data-tab="capgains">Cap. Gains Tax</button>
+<button class="tab" data-tab="settings">Settings</button>
+</nav>
+</div>
+<main>
+
+<!-- ============ OVERVIEW ============ -->
+<section id="dashboard" class="panel active">
+<div class="card">
+ <div class="muted">Estimated amount in hand · <span id="yearTitle"></span></div>
+ <div class="big" id="net"></div>
+ <div class="muted" style="margin-top:4px">Before-tax profit / loss: <b id="netGross"></b></div>
+ <div class="grid" style="margin-top:12px" id="kpis"></div>
+</div>
+
+<div class="card">
+ <h3>Sparer-Pauschbetrag</h3>
+ <div class="bar"><i id="allowFill"></i></div>
+ <div id="allowText" class="muted"></div>
+</div>
+
+<div class="card">
+ <h3>Tax estimate</h3>
+ <div id="taxLines"></div>
+ <p class="note" id="taxNote"></p>
+</div>
+
+<div class="card">
+ <h3>Verlustverrechnungstöpfe</h3>
+ <div class="line"><span>Aktienverlusttopf</span><b id="stockCarry"></b></div>
+ <div class="line"><span>Sonstiger Verlusttopf</span><b id="otherCarry"></b></div>
+ <p class="note">Two loss pots, tracked on a before-tax basis. Stock losses only offset stock gains; other losses offset any capital gain. This is a personal estimate and does not reproduce every bank's depot-specific tax ledger.</p>
+</div>
+
+<div class="card">
+ <div class="row">
+  <h3 style="margin:0">Monthly profit</h3>
+  <div class="seg" role="group" aria-label="Show amounts">
+   <button id="segNet" onclick="setBasis('net')">After tax</button>
+   <button id="segGross" onclick="setBasis('gross')">Before tax</button>
+  </div>
+ </div>
+ <div class="grid" style="margin-top:12px" id="avgBox"></div>
+ <p class="note" id="avgNote"></p>
+ <div id="chart"></div>
+ <p class="note" style="margin:2px 0 8px">Dashed line = monthly average (months at €0 are ignored).</p>
+ <div id="months"></div>
+</div>
+
+<div class="card">
+ <h3>Trade stats</h3>
+ <p class="muted" id="statsSub" style="margin:-4px 0 10px"></p>
+ <div class="grid" id="statsGrid"></div>
+ <div id="topWrap"></div>
+</div>
+</section>
+
+<!-- ============ ADD / EDIT ============ -->
+<section id="add" class="panel">
+<div class="card">
+ <h3 id="formTitle">Add transaction</h3>
+ <label for="date">Date</label><input id="date" type="date" onchange="syncAmounts()">
+ <label for="desc">Description</label><input id="desc" placeholder="e.g. Palantir sale">
+ <label for="kind">Category</label>
+ <select id="kind" onchange="onKindChange()">
+  <option value="stockGain">Stock sale gain</option>
+  <option value="stockLoss">Stock sale loss</option>
+  <option value="otherGain">Other capital gain (dividend/ETF/etc.)</option>
+  <option value="otherLoss">Other capital loss</option>
+  <option value="taxRefund">Tax refund (not taxed)</option>
+ </select>
+ <div class="row2">
+  <div><label for="amtNet" id="lblNet">After tax (€)</label><input id="amtNet" type="number" inputmode="decimal" step="0.01" min="0" placeholder="0.00" oninput="onAmt('net')"></div>
+  <div id="grossCol"><label for="amtGross">Before tax (€)</label><input id="amtGross" type="number" inputmode="decimal" step="0.01" min="0" placeholder="0.00" oninput="onAmt('gross')"></div>
+ </div>
+ <p class="note" id="rateNote"></p>
+ <label class="chk" id="refundBox" style="display:none"><input type="checkbox" id="addRefund"><span>Also log the estimated tax refund (<b id="refundAmt">€0,00</b>) as a separate entry</span></label>
+ <button class="primary" id="saveBtn" onclick="saveTxn()">Save transaction</button>
+ <button class="secondary block" id="cancelEdit" style="display:none" onclick="cancelEdit()">Cancel edit</button>
+</div>
+</section>
+
+<!-- ============ HISTORY ============ -->
+<section id="history" class="panel">
+<div class="card">
+ <div class="row"><h3 style="margin:0">Transactions</h3><button class="secondary" onclick="exportCSV()">Export CSV</button></div>
+ <div class="filters">
+  <input id="hSearch" type="search" placeholder="Search description…" oninput="renderHistory()" aria-label="Search">
+  <select id="hKind" onchange="renderHistory()" aria-label="Category">
+   <option value="all">All categories</option>
+   <option value="stockGain">Stock gain</option><option value="stockLoss">Stock loss</option>
+   <option value="otherGain">Other gain</option><option value="otherLoss">Other loss</option>
+   <option value="taxRefund">Tax refund</option>
+  </select>
+  <select id="hMonth" onchange="renderHistory()" aria-label="Month">
+   <option value="all">All months</option>
+   <option value="0">Jan</option><option value="1">Feb</option><option value="2">Mar</option><option value="3">Apr</option>
+   <option value="4">May</option><option value="5">Jun</option><option value="6">Jul</option><option value="7">Aug</option>
+   <option value="8">Sep</option><option value="9">Oct</option><option value="10">Nov</option><option value="11">Dec</option>
+  </select>
+  <label class="chk" style="grid-column:1/-1;margin:2px 0 0"><input type="checkbox" id="hAll" onchange="renderHistory()"><span>Show all years (default: selected year)</span></label>
+ </div>
+ <p class="muted" id="histSummary" style="margin:8px 0 0"></p>
+ <div id="historyList"></div>
+ <p class="note">Amounts follow the After tax / Before tax switch on the Overview. An after-tax loss is the loss minus the tax refund it triggers.</p>
+</div>
+</section>
+
+<!-- ============ CAPITAL GAINS ESTIMATOR ============ -->
+<section id="capgains" class="panel">
+<div class="card">
+ <div class="row"><h3 style="margin:0">🇩🇪 Capital Gains Tax</h3><button class="secondary" onclick="fillCGFromYear()">Use my year data</button></div>
+ <p class="muted" style="margin-top:4px">Quick estimator • gains before tax</p>
+
+ <label for="cgProfit">Gains already realized this year (€)</label>
+ <input id="cgProfit" type="number" inputmode="decimal" step="0.01" value="1000" oninput="calcCG()">
+
+ <div class="row2">
+  <div><label for="cgAllowance">Annual allowance (€)</label><input id="cgAllowance" type="number" inputmode="decimal" step="1" placeholder="e.g. 1000" oninput="calcCG()"></div>
+  <div><label for="cgUsed">Allowance already used (€)</label><input id="cgUsed" type="number" inputmode="decimal" step="0.01" value="0" oninput="calcCG()"></div>
+ </div>
+
+ <label for="cgChurch">Church tax</label>
+ <select id="cgChurch" onchange="calcCG()">
+  <option value="0">No church tax</option>
+  <option value="0.08">8% church tax</option>
+  <option value="0.09">9% church tax</option>
+ </select>
+
+ <div class="card" style="background:var(--soft);box-shadow:none;margin-top:16px;margin-bottom:0">
+  <div class="line"><span>Taxable profit</span><b id="cgTaxable">€0,00</b></div>
+  <div class="line"><span>Capital gains tax</span><b id="cgTax">€0,00</b></div>
+  <div class="line"><span>Solidarity surcharge</span><b id="cgSoli">€0,00</b></div>
+  <div class="line"><span>Church tax</span><b id="cgChurchTax">€0,00</b></div>
+  <div class="line"><span>Tax due on gains</span><b id="cgNet">€0,00</b></div>
+  <div class="line net"><span>Amount in hand</span><b id="cgHand">€0,00</b></div>
+ </div>
+ <button class="secondary block" onclick="resetCG()">Reset</button>
+</div>
+
+<div class="card">
+ <h3>🎯 What do I need to sell for?</h3>
+ <p class="muted" style="margin-top:-4px">Enter the after-tax amount you want in hand. Uses the allowance and church tax above.</p>
+ <label for="cgTarget">Amount I want in hand (€)</label>
+ <input id="cgTarget" type="number" inputmode="decimal" step="0.01" min="0" placeholder="e.g. 500" oninput="calcCG()">
+ <div class="card" style="background:var(--soft);box-shadow:none;margin-top:16px;margin-bottom:0">
+  <div class="line net"><span>Profit needed (before tax)</span><b id="cgNeedGross">€0,00</b></div>
+  <div class="line"><span>Tax on it</span><b id="cgNeedTax">€0,00</b></div>
+  <div class="line"><span>Covered by allowance</span><b id="cgNeedAllow">€0,00</b></div>
+ </div>
+</div>
+
+<div class="card">
+ <h3>📉 Refund if I book a loss</h3>
+ <p class="muted" style="margin-top:-4px">Offsets the loss against the gains above</p>
+ <label for="cgLoss">Loss you're considering booking (€)</label>
+ <input id="cgLoss" type="number" inputmode="decimal" step="0.01" min="0" value="0" oninput="calcCG()">
+ <div class="card" style="background:var(--goodbg);box-shadow:none;margin-top:16px;margin-bottom:0">
+  <div class="line"><span>Tax already due (before loss)</span><b id="cgTaxBefore">€0,00</b></div>
+  <div class="line"><span>Tax due after booking loss</span><b id="cgTaxAfter">€0,00</b></div>
+  <div class="line net"><span>Estimated refund / tax saved</span><b id="cgRefund" class="good">€0,00</b></div>
+  <div class="line" id="cgCarryRow" style="display:none"><span>Loss carried to next year</span><b id="cgCarry">€0,00</b></div>
+ </div>
+ <p class="note">Assumes the loss offsets this year's gains before the Sparer-Pauschbetrag is applied, matching how German banks net capital income within a depot. If the loss exceeds your gains, the excess isn't refunded this year — it carries forward.</p>
+</div>
+</section>
+
+<!-- ============ SETTINGS ============ -->
+<section id="settings" class="panel">
+<div class="card">
+ <h3>German tax settings</h3>
+ <label for="allowance">Sparer-Pauschbetrag (€)</label><input id="allowance" type="number" inputmode="decimal" step="1" onchange="saveSettings()">
+ <label for="allowUsed">Allowance already used outside this tracker (€)</label><input id="allowUsed" type="number" inputmode="decimal" step="0.01" onchange="saveSettings()">
+ <label for="church">Church tax</label>
+ <select id="church" onchange="saveSettings()"><option value="0">No church tax</option><option value="8">8%</option><option value="9">9%</option></select>
+ <label for="startStock">Starting stock-loss carryforward (€)</label><input id="startStock" type="number" inputmode="decimal" step="0.01" onchange="saveSettings()">
+ <label for="startOther">Starting other-loss carryforward (€)</label><input id="startOther" type="number" inputmode="decimal" step="0.01" onchange="saveSettings()">
+ <p class="note">Default allowance is €1,000 for an individual. Jointly assessed spouses generally have €2,000. Enter only the portion not already represented in this app. Starting carryforwards apply to the current calendar year.</p>
+</div>
+
+<div class="card">
+ <h3>Backup</h3>
+ <p class="muted" style="margin-top:-4px">Your data lives only in this browser. Save a backup file now and then.</p>
+ <button class="secondary block" onclick="exportJSON()">Download backup (.json)</button>
+ <button class="secondary block" onclick="document.getElementById('restoreFile').click()">Restore from backup…</button>
+ <input id="restoreFile" type="file" accept="application/json,.json" style="display:none" onchange="importJSON(this)">
+ <button class="secondary block" onclick="clearAll()">Delete all local data</button>
+</div>
+
+<div class="card">
+ <h3>Import 2026 trade log</h3>
+ <p class="muted" style="margin-top:-4px">Loads your 2026 weekly P/L entries (<span id="seedCount"></span> transactions) into the tracker</p>
+ <button class="primary" style="margin-top:6px" onclick="importSeedData()">Import 2026 trades</button>
+ <p class="note">Safe to click once — importing again will not duplicate entries already loaded.</p>
+</div>
+
+<div class="card"><p class="note" id="modelNote"></p></div>
+</section>
+
+</main>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+const KEY='deTaxTrackerV2';
+const DEFAULTS={allowance:1000,allowUsed:0,church:0,startStock:0,startOther:0,basis:'net'};
+const KINDS={stockGain:'Stock gain',stockLoss:'Stock loss',otherGain:'Other gain',otherLoss:'Other loss',taxRefund:'Tax refund'};
+const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const $=id=>document.getElementById(id);
+const eur=n=>new Intl.NumberFormat('de-DE',{style:'currency',currency:'EUR'}).format(n||0);
+const pctFmt=n=>(n*100).toLocaleString('de-DE',{maximumFractionDigits:3})+' %';
+const r2=v=>Math.round(v*100)/100;
+const isGain=k=>k==='stockGain'||k==='otherGain';
+const isLoss=k=>k==='stockLoss'||k==='otherLoss';
+const label=k=>KINDS[k]||k;
+const yearOf=d=>+String(d).slice(0,4);
+const cls=v=>Math.abs(v)<0.005?'dim':(v<0?'bad':'good');
+const today=()=>new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,10);
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
+function newId(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
+
+let _lc={};   // ledger cache, cleared whenever data or settings change
+let state=loadState();
+function loadState(){
+ let s=null;
+ try{s=JSON.parse(localStorage.getItem(KEY)||'null')}catch(e){}
+ s=s||{};
+ return {txns:Array.isArray(s.txns)?s.txns:[],settings:Object.assign({},DEFAULTS,s.settings||{})};
+}
+function persist(){_lc={};try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){toast('Could not save — browser storage is full or blocked.')}}
+
+/* ---------- toast ---------- */
+let toastTimer;
+function toast(msg,actionLabel,action){
+ const el=$('toast');el.innerHTML='';
+ const s=document.createElement('span');s.textContent=msg;el.appendChild(s);
+ if(action){const b=document.createElement('button');b.textContent=actionLabel;b.onclick=()=>{action();hideToast()};el.appendChild(b)}
+ el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(hideToast,action?7000:3500);
+}
+function hideToast(){$('toast').classList.remove('show')}
+
+/* ---------- tax maths ----------
+   25% Abgeltungsteuer, 5.5% Soli on that tax, church tax k (8/9%) on that tax.
+   With church tax the base rate shrinks: 25% / (1 + 25% * k).  k=0 -> 26.375% total. */
+function taxRates(churchPct){
+ const k=(churchPct===undefined?(+state.settings.church||0):churchPct)/100;
+ const cap=0.25/(1+0.25*k),soli=cap*0.055,church=cap*k,total=cap+soli+church;
+ return {cap,soli,church,total,nf:1-total,k};
+}
+/* ---------- chronological ledger ----------
+   Brokers apply the Sparer-Pauschbetrag and loss pots to the FIRST gains of the year, so the first
+   part of your gains carries no tax (after tax = before tax). We replay the year in date order:
+   - shield = open allowance + loss pots that can be used against this gain
+   - gain entered after tax: gross = net if net <= shield, else (net - rate*shield)/(1 - rate)
+   - taxed part of a gain goes into a pool; a later loss offsets that pool and gets the tax back (refund)
+   - a loss that finds no taxed gains yet becomes a pot that shields later gains */
+const orderKey=(x,i)=>x.date+'|'+String(i).padStart(6,'0');
+function ledgerInit(year){
+ const cur=year===new Date().getFullYear();
+ return {room:Math.max(0,(+state.settings.allowance||0)-(+state.settings.allowUsed||0)),
+  potStock:cur?(+state.settings.startStock||0):0,potOther:cur?(+state.settings.startOther||0):0,taxedStock:0,taxedOther:0};
+}
+const shieldFor=(L,kind)=>L.room+L.potOther+(kind==='stockGain'?L.potStock:0);
+const poolFor=(L,kind)=>kind==='stockLoss'?L.taxedStock:L.taxedStock+L.taxedOther;
+const gainGross=(net,S,r)=>net<=S?net:(net-r*S)/(1-r);
+const gainNet=(gross,S,r)=>gross<=S?gross:gross-r*(gross-S);
+const lossAfter=(gross,P,r)=>gross-r*Math.min(gross,P);
+const lossGrossFromAfter=(after,P,r)=>after<=P*(1-r)?after/(1-r):after+r*P;
+function stepGain(L,x,net,R){
+ const S=shieldFor(L,x.kind),g=gainGross(net,S,R.total),absorbed=Math.min(g,S);
+ let need=absorbed;
+ if(x.kind==='stockGain'){const u=Math.min(need,L.potStock);L.potStock-=u;need-=u}
+ let u=Math.min(need,L.potOther);L.potOther-=u;need-=u;
+ u=Math.min(need,L.room);L.room-=u;need-=u;
+ if(x.kind==='stockGain')L.taxedStock+=g-absorbed;else L.taxedOther+=g-absorbed;
+ return {gross:g,taxfree:absorbed};
+}
+function stepLoss(L,x,gross,R){
+ let rest=gross,off=0;
+ if(x.kind==='stockLoss'){off=Math.min(rest,L.taxedStock);L.taxedStock-=off;rest-=off;L.potStock+=rest}
+ else{
+  let o=Math.min(rest,L.taxedOther);L.taxedOther-=o;rest-=o;off+=o;
+  o=Math.min(rest,L.taxedStock);L.taxedStock-=o;rest-=o;off+=o;L.potOther+=rest;
+ }
+ return {refund:off*R.total};
+}
+// limit {date,idx}: only entries before that position; excludeId: skip the entry being edited
+function runLedger(year,limit,excludeId){
+ const R=taxRates(),L=ledgerInit(year),rows={};
+ state.txns.map((x,i)=>({x,i})).filter(o=>yearOf(o.x.date)===year&&o.x.id!==excludeId)
+  .sort((a,b)=>orderKey(a.x,a.i).localeCompare(orderKey(b.x,b.i)))
+  .forEach(o=>{
+   if(limit&&!(o.x.date<limit.date||(o.x.date===limit.date&&o.i<limit.idx)))return;
+   const a=+o.x.amount||0;
+   if(isGain(o.x.kind))rows[o.x.id]=stepGain(L,o.x,a,R);
+   else if(isLoss(o.x.kind))rows[o.x.id]=stepLoss(L,o.x,a,R);
+  });
+ return {L,rows,R};
+}
+const ledger=year=>_lc[year]||(_lc[year]=runLedger(year));
+// value of one entry on a chosen basis (gains +, losses -).
+// gain: entered after tax.  loss: entered before tax; after tax = loss minus the refund it triggers.
+function val(x,basis){
+ const a=+x.amount||0;
+ if(!isGain(x.kind)&&!isLoss(x.kind))return 0;
+ const row=ledger(yearOf(x.date)).rows[x.id];
+ if(isGain(x.kind))return basis==='net'?a:(row?row.gross:a);
+ return -(basis==='net'?a-(row?row.refund:0):a);
+}
+function calcYear(year){
+ const R=taxRates(),t=state.txns.filter(x=>yearOf(x.date)===year),lg=ledger(year);
+ let sg=0,sl=0,og=0,ol=0,net=0,netGains=0,grossGains=0,grossLosses=0;
+ t.forEach(x=>{
+  const a=+x.amount||0,g=isGain(x.kind)?(lg.rows[x.id]||{gross:a/R.nf}).gross:0;
+  if(x.kind==='stockGain'){sg+=g;netGains+=a;grossGains+=g;net+=a}
+  else if(x.kind==='otherGain'){og+=g;netGains+=a;grossGains+=g;net+=a}
+  else if(x.kind==='stockLoss'){sl+=a;grossLosses+=a;net-=a}
+  else if(x.kind==='otherLoss'){ol+=a;grossLosses+=a;net-=a}
+  else if(x.kind==='taxRefund'){net+=a}
+ });
+ const cur=year===new Date().getFullYear();
+ let stockPool=(cur?(+state.settings.startStock||0):0)+sl;
+ let otherPool=(cur?(+state.settings.startOther||0):0)+ol;
+ // stock losses only offset stock gains
+ const stockUsed=Math.min(stockPool,sg);stockPool-=stockUsed;sg-=stockUsed;
+ // other losses offset other gains first, then any remaining stock gains
+ let otherUsed=Math.min(otherPool,og);otherPool-=otherUsed;og-=otherUsed;
+ const onStock=Math.min(otherPool,sg);otherPool-=onStock;sg-=onStock;otherUsed+=onStock;
+ const taxBase=sg+og;
+ const remAllow=Math.max(0,(+state.settings.allowance||0)-(+state.settings.allowUsed||0));
+ const allowanceUsed=Math.min(remAllow,taxBase);
+ const taxable=taxBase-allowanceUsed;
+ const capTax=taxable*R.cap,soli=taxable*R.soli,church=taxable*R.church;
+ return {t,R,net,netGains,grossGains,grossLosses,grossPL:grossGains-grossLosses,
+  lossUsed:stockUsed+otherUsed,stockCarry:stockPool,otherCarry:otherPool,
+  taxBase,allowanceUsed,taxable,capTax,soli,church,totalTax:capTax+soli+church};
+}
+function monthlyData(year,R){
+ const m=Array.from({length:12},()=>({net:0,gross:0,n:0})),lg=ledger(year);
+ state.txns.forEach(x=>{
+  if(yearOf(x.date)!==year)return;
+  const i=Math.min(11,Math.max(0,(+String(x.date).slice(5,7)||1)-1)),a=+x.amount||0,o=m[i];
+  o.n++;
+  if(isGain(x.kind)){o.net+=a;o.gross+=(lg.rows[x.id]||{gross:a/R.nf}).gross}
+  else if(isLoss(x.kind)){o.net-=a;o.gross-=a}
+  else if(x.kind==='taxRefund'){o.net+=a}
+ });
+ return m;
+}
+// average over months that are not zero
+function avgActive(vals){
+ const act=vals.filter(v=>Math.abs(v)>=0.005);
+ return {n:act.length,avg:act.length?act.reduce((a,b)=>a+b,0)/act.length:0};
+}
+
+/* ---------- settings ---------- */
+function saveSettings(){
+ const s=state.settings;
+ s.allowance=+$('allowance').value||0;
+ s.allowUsed=+$('allowUsed').value||0;
+ s.church=+$('church').value||0;
+ s.startStock=+$('startStock').value||0;
+ s.startOther=+$('startOther').value||0;
+ persist();render();syncAmounts();
+}
+function syncSettingsUI(){
+ const s=state.settings;
+ $('allowance').value=s.allowance;$('allowUsed').value=s.allowUsed;$('church').value=String(s.church);
+ $('startStock').value=s.startStock;$('startOther').value=s.startOther;
+}
+function setBasis(b){state.settings.basis=b;persist();render()}
+function populateYears(){
+ const sel=$('year'),cur=new Date().getFullYear(),prev=+sel.value||cur;
+ const ys=state.txns.map(x=>yearOf(x.date)).filter(Boolean);
+ const lo=Math.min(cur-4,...ys),hi=Math.max(cur+1,...ys);
+ sel.innerHTML='';
+ for(let y=lo;y<=hi;y++){const o=document.createElement('option');o.value=y;o.textContent=y;sel.appendChild(o)}
+ sel.value=(prev>=lo&&prev<=hi)?prev:cur;
+ sel.onchange=render;
+}
+
+/* ---------- tabs ---------- */
+function goTab(name){
+ if(name!=='add'&&editingId)resetForm();
+ document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===name));
+ document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('active',p.id===name));
+ window.scrollTo(0,0);
+}
+
+/* ---------- add / edit form (after tax <-> before tax) ---------- */
+let src='net',editingId=null;
+function onKindChange(){
+ const k=$('kind').value,refund=k==='taxRefund';
+ $('grossCol').style.display=refund?'none':'';
+ $('lblNet').textContent=refund?'Refund amount (€)':'After tax (€)';
+ $('rateNote').style.display=refund?'none':'';
+ $('refundBox').style.display=(isLoss(k)&&!editingId)?'':'none';
+ syncAmounts();
+}
+function onAmt(which){src=which;syncAmounts()}
+function formCtx(){
+ const kind=$('kind').value,date=$('date').value||today(),year=yearOf(date);
+ let idx=Infinity;
+ if(editingId){const i=state.txns.findIndex(t=>t.id===editingId);if(i>=0&&state.txns[i].date===date)idx=i}
+ const r=runLedger(year,{date,idx},editingId);
+ return {kind,R:r.R,S:isGain(kind)?shieldFor(r.L,kind):0,P:isLoss(kind)?poolFor(r.L,kind):0};
+}
+function syncAmounts(){
+ const k=$('kind').value,nEl=$('amtNet'),gEl=$('amtGross'),c=formCtx(),r=c.R.total;
+ if(k!=='taxRefund'){
+  if(src==='net'){
+   const v=parseFloat(nEl.value),ok=nEl.value!==''&&isFinite(v);
+   gEl.value=ok?r2(isGain(k)?gainGross(v,c.S,r):lossGrossFromAfter(v,c.P,r)).toFixed(2):'';
+  }else{
+   const v=parseFloat(gEl.value),ok=gEl.value!==''&&isFinite(v);
+   nEl.value=ok?r2(isGain(k)?gainNet(v,c.S,r):lossAfter(v,c.P,r)).toFixed(2):'';
+  }
+ }
+ const rate=pctFmt(r);
+ if(isGain(k))$('rateNote').textContent=c.S>0.005
+  ?`${eur(c.S)} of tax-free room is still open on this date (allowance and loss pots), so that part of your gains carries no tax. The rest is taxed at ${rate}.`
+  :`No tax-free room is left on this date, so the full ${rate} applies. Before tax = after tax ÷ (1 − ${rate}).`;
+ else if(isLoss(k))$('rateNote').textContent=c.P>0.005
+  ?`A loss gets back ${rate} of the tax you already paid this year. ${eur(c.P)} of taxed gains are available to offset here. Your broker shows the before-tax loss.`
+  :`No tax has been paid on gains yet this year, so this loss earns no refund. It goes into the loss pot and shields later gains.`;
+ $('refundAmt').textContent=eur(r*Math.min(parseFloat(gEl.value)||0,c.P));
+}
+function resetForm(){
+ editingId=null;src='net';
+ $('date').value=today();$('desc').value='';$('amtNet').value='';$('amtGross').value='';$('addRefund').checked=false;
+ $('formTitle').textContent='Add transaction';$('saveBtn').textContent='Save transaction';$('cancelEdit').style.display='none';
+ onKindChange();
+}
+function cancelEdit(){resetForm();goTab('history')}
+function saveTxn(){
+ const date=$('date').value,kind=$('kind').value,desc=$('desc').value.trim(),c=formCtx(),r=c.R.total;
+ const nV=parseFloat($('amtNet').value),gV=parseFloat($('amtGross').value);
+ let amount;
+ if(kind==='taxRefund')amount=r2(nV);
+ else if(src==='gross')amount=isGain(kind)?r2(gainNet(gV,c.S,r)):r2(gV);
+ else amount=isGain(kind)?r2(nV):r2(lossGrossFromAfter(nV,c.P,r));
+ if(!date||!isFinite(amount)||amount<=0){toast('Enter a date and an amount above 0.');return}
+ if(editingId){
+  const x=state.txns.find(t=>t.id===editingId);
+  if(x){x.date=date;x.desc=desc;x.kind=kind;x.amount=amount}
+ }else{
+  state.txns.push({id:newId(),date,desc,kind,amount});
+  const refund=r2(r*Math.min(amount,c.P));
+  if(isLoss(kind)&&$('addRefund').checked&&refund>0){
+   state.txns.push({id:newId(),date,desc:'Tax refund'+(desc?' – '+desc:''),kind:'taxRefund',amount:refund});
+  }
+ }
+ const wasEdit=!!editingId;
+ persist();resetForm();populateYears();$('year').value=yearOf(date);render();
+ goTab(wasEdit?'history':'dashboard');
+ toast(wasEdit?'Transaction updated.':'Transaction saved.');
+}
+function editTxn(id){
+ const x=state.txns.find(t=>t.id===id);if(!x)return;
+ editingId=id;
+ $('date').value=x.date;$('desc').value=x.desc||'';$('kind').value=x.kind;
+ if(isLoss(x.kind)){src='gross';$('amtGross').value=(+x.amount).toFixed(2);$('amtNet').value=''}
+ else{src='net';$('amtNet').value=(+x.amount).toFixed(2);$('amtGross').value=''}
+ $('addRefund').checked=false;
+ $('formTitle').textContent='Edit transaction';$('saveBtn').textContent='Update transaction';$('cancelEdit').style.display='';
+ onKindChange();
+ goTab('add');
+}
+function delTxn(id){
+ const i=state.txns.findIndex(t=>t.id===id);if(i<0)return;
+ const [x]=state.txns.splice(i,1);
+ persist();render();
+ toast('Transaction deleted.','Undo',()=>{state.txns.push(x);persist();populateYears();render()});
+}
+
+/* ---------- rendering ---------- */
+function render(){
+ const year=+$('year').value,R=taxRates(),basis=state.settings.basis,other=basis==='net'?'gross':'net';
+ const c=calcYear(year);
+ $('yearTitle').textContent=year;
+
+ // hero
+ $('net').textContent=eur(c.net);$('net').className='big '+cls(c.net);
+ $('netGross').textContent=eur(c.grossPL);$('netGross').className=cls(c.grossPL);
+ const met=(l,v)=>`<div class="metric"><span class="muted">${l}</span><b>${v}</b></div>`;
+ $('kpis').innerHTML=met('Gains · after tax',eur(c.netGains))+met('Gains · before tax',eur(c.grossGains))+met('Losses booked',eur(c.grossLosses))+met('Losses used',eur(c.lossUsed));
+
+ // allowance
+ const A=+state.settings.allowance||0,used=Math.min(A,(+state.settings.allowUsed||0)+c.allowanceUsed),pct=A?Math.min(100,used/A*100):0;
+ $('allowFill').style.width=pct+'%';$('allowFill').className=pct>=100?'full':'';
+ $('allowText').innerHTML=`${eur(used)} used of ${eur(A)} · <b>${eur(Math.max(0,A-used))}</b> left`;
+
+ // tax estimate
+ const ln=(a,b,k='')=>`<div class="line ${k}"><span>${a}</span><b>${b}</b></div>`;
+ $('taxLines').innerHTML=ln('Taxable after losses & allowance',eur(c.taxable))+ln('Capital gains tax',eur(c.capTax))+ln('Solidarity surcharge',eur(c.soli))+(R.k>0?ln('Church tax',eur(c.church)):'')+ln('Total tax (est.)',eur(c.totalTax),'net');
+ $('taxNote').textContent=`Combined rate ${pctFmt(R.total)} on the taxable amount.`;
+
+ // loss pots
+ $('stockCarry').textContent=eur(c.stockCarry);$('otherCarry').textContent=eur(c.otherCarry);
+
+ renderMonthly(year,R,basis,other);
+ renderStats(c,basis,R);
+ renderHistory();
+ $('segNet').classList.toggle('on',basis==='net');$('segGross').classList.toggle('on',basis==='gross');
+}
+function renderMonthly(year,R,basis,other){
+ const mo=monthlyData(year,R),vals=mo.map(m=>m[basis]),ovals=mo.map(m=>m[other]);
+ const aN=avgActive(mo.map(m=>m.net)),aG=avgActive(mo.map(m=>m.gross)),aS=basis==='net'?aN:aG;
+ const now=new Date(),elapsed=year<now.getFullYear()?12:(year===now.getFullYear()?now.getMonth()+1:0);
+ const zeroPast=vals.slice(0,elapsed).filter(v=>Math.abs(v)<0.005).length;
+ const active=vals.map((v,i)=>Math.abs(v)>=0.005?i:-1).filter(i=>i>=0);
+ let best=-1,worst=-1;
+ if(active.length>1){best=active.reduce((a,i)=>vals[i]>vals[a]?i:a,active[0]);worst=active.reduce((a,i)=>vals[i]<vals[a]?i:a,active[0])}
+ const met=(l,v,k,sub)=>`<div class="metric"><span class="muted">${l}</span><b class="${k}">${v}</b>${sub?`<small>${sub}</small>`:''}</div>`;
+ $('avgBox').innerHTML=
+  met('Monthly avg · after tax',aN.n?eur(aN.avg):'—',cls(aN.avg),aN.n+' active month'+(aN.n===1?'':'s'))+
+  met('Monthly avg · before tax',aG.n?eur(aG.avg):'—',cls(aG.avg),aG.n+' active month'+(aG.n===1?'':'s'))+
+  met('Best month',best>=0?eur(vals[best]):'—',best>=0?cls(vals[best]):'dim',best>=0?MONTHS[best]:'')+
+  met('Weakest month',worst>=0?eur(vals[worst]):'—',worst>=0?cls(vals[worst]):'dim',worst>=0?MONTHS[worst]:'');
+ $('avgNote').textContent=aS.n?`Averages skip months at €0${zeroPast?` (${zeroPast} empty month${zeroPast===1?'':'s'} so far this year)`:''}.`:'No months with activity in this year yet.';
+ $('chart').innerHTML=chartSVG(vals,aS.avg,aS.n);
+ let rows='',total=0;
+ vals.forEach((v,i)=>{
+  const z=Math.abs(v)<0.005;total+=v;
+  const chip=i===best?'<em class="chip">best</em>':(i===worst?'<em class="chip">weakest</em>':'');
+  rows+=`<div class="mrow${z?' zero':''}"><span>${MONTHS[i]}${chip}</span><span class="r">${z?'<span class="dim">—</span>':`<b class="${cls(v)}">${eur(v)}</b><small>${eur(ovals[i])} ${other==='net'?'after':'before'} tax</small>`}</span></div>`;
+ });
+ rows+=`<div class="mrow"><b>Year total</b><b class="${cls(total)}">${eur(total)}</b></div>`;
+ $('months').innerHTML=rows;
+}
+function chartSVG(vals,avg,n){
+ const W=460,H=150,top=12,bot=22,bw=24,cnt=12,gap=(W-cnt*bw)/(cnt+1);
+ const max=Math.max(0,...vals),min=Math.min(0,...vals),span=(max-min)||1,ph=H-top-bot,y0=top+ph*(max/span);
+ let s=`<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Monthly profit chart"><line x1="0" x2="${W}" y1="${y0}" y2="${y0}" class="axis"/>`;
+ vals.forEach((v,i)=>{
+  const x=gap+i*(bw+gap),z=Math.abs(v)<0.005,h=z?0:Math.max(2,Math.abs(v)/span*ph);
+  if(z)s+=`<rect x="${x}" y="${y0-1}" width="${bw}" height="2" rx="1" class="bz"/>`;
+  else s+=`<rect x="${x}" y="${v>0?y0-h:y0}" width="${bw}" height="${h}" rx="3" class="${v>0?'bp':'bn'}"/>`;
+  s+=`<text x="${x+bw/2}" y="${H-7}" text-anchor="middle" class="cl">${MONTHS[i]}</text>`;
+ });
+ if(n>0){const ya=y0-avg/span*ph;s+=`<line x1="0" x2="${W}" y1="${ya}" y2="${ya}" class="avgl"/>`}
+ return s+'</svg>';
+}
+function renderStats(c,basis,R){
+ const tr=c.t.filter(x=>isGain(x.kind)||isLoss(x.kind)).map(x=>({d:(x.desc||'Unnamed').trim()||'Unnamed',v:val(x,basis)}));
+ $('statsSub').textContent=(basis==='net'?'After tax':'Before tax')+' · switch above to change';
+ if(!tr.length){$('statsGrid').innerHTML='<div class="empty" style="grid-column:1/-1">No trades in this year yet.</div>';$('topWrap').innerHTML='';return}
+ const w=tr.filter(x=>x.v>0),l=tr.filter(x=>x.v<0);
+ const sw=w.reduce((a,x)=>a+x.v,0),sl=-l.reduce((a,x)=>a+x.v,0),total=sw-sl;
+ const bestT=tr.reduce((a,x)=>x.v>a.v?x:a,tr[0]),worstT=tr.reduce((a,x)=>x.v<a.v?x:a,tr[0]);
+ const met=(a,b,k,sub)=>`<div class="metric"><span class="muted">${a}</span><b class="${k||''}">${b}</b>${sub?`<small>${escapeHtml(sub)}</small>`:''}</div>`;
+ $('statsGrid').innerHTML=
+  met('Trades',String(tr.length),'',w.length+' wins · '+l.length+' losses')+
+  met('Win rate',(w.length/tr.length*100).toLocaleString('de-DE',{maximumFractionDigits:1})+' %')+
+  met('Avg win',w.length?eur(sw/w.length):'—','good')+
+  met('Avg loss',l.length?eur(-sl/l.length):'—',l.length?'bad':'dim')+
+  met('Profit factor',sl>0?(sw/sl).toLocaleString('de-DE',{maximumFractionDigits:2}):'—','','wins ÷ losses')+
+  met('Avg per trade',eur(total/tr.length),cls(total))+
+  met('Best trade',eur(bestT.v),cls(bestT.v),bestT.d)+
+  met('Worst trade',eur(worstT.v),cls(worstT.v),worstT.d);
+ const g={};
+ tr.forEach(x=>{const k=x.d.toLowerCase();(g[k]=g[k]||{d:x.d,v:0,n:0}).v+=x.v;g[k].n++});
+ const arr=Object.values(g).sort((a,b)=>b.v-a.v);
+ const top=arr.slice(0,5),bottom=arr.slice(-3).filter(x=>x.v<0&&!top.includes(x)).reverse();
+ const row=x=>`<div class="line"><span>${escapeHtml(x.d)} <span class="dim">· ${x.n}×</span></span><b class="${cls(x.v)}">${eur(x.v)}</b></div>`;
+ $('topWrap').innerHTML=`<h3 style="margin:16px 0 4px">Top by name</h3>${top.map(row).join('')}`+(bottom.length?`<h3 style="margin:16px 0 4px">Weakest</h3>${bottom.map(row).join('')}`:'');
+}
+function renderHistory(){
+ const el=$('historyList'),R=taxRates(),basis=state.settings.basis,other=basis==='net'?'gross':'net';
+ const q=$('hSearch').value.trim().toLowerCase(),kf=$('hKind').value,mf=$('hMonth').value,all=$('hAll').checked,y=+$('year').value;
+ const list=state.txns.filter(x=>(all||yearOf(x.date)===y)&&(!q||(x.desc||'').toLowerCase().includes(q))&&(kf==='all'||x.kind===kf)&&(mf==='all'||(+String(x.date).slice(5,7)-1)===+mf))
+  .sort((a,b)=>b.date.localeCompare(a.date)||String(b.id).localeCompare(String(a.id)));
+ if(!state.txns.length){$('histSummary').textContent='';el.innerHTML='<div class="empty">No transactions yet. Add one, or import your trade log in Settings.</div>';return}
+ if(!list.length){$('histSummary').textContent='';el.innerHTML='<div class="empty">No transactions match these filters.</div>';return}
+ const sum=b=>list.reduce((a,x)=>a+(x.kind==='taxRefund'?(b==='net'?+x.amount:0):val(x,b)),0);
+ $('histSummary').textContent=`${list.length} entr${list.length===1?'y':'ies'} · total ${eur(sum(basis))} ${basis==='net'?'after':'before'} tax`;
+ el.innerHTML=list.map(x=>{
+  const a=+x.amount||0;let main,sub='';
+  if(x.kind==='taxRefund')main=`<b class="good">+${eur(a)}</b>`;
+  else{
+   const v=val(x,basis),o=val(x,other);
+   main=`<b class="${cls(v)}">${v>0?'+':''}${eur(v)}</b>`;
+   sub=`<small>${eur(o)} ${other==='net'?'after':'before'} tax</small>`;
+  }
+  const id=escapeHtml(x.id);
+  return `<div class="txn"><div class="row"><div><div class="title">${escapeHtml(x.desc||'Transaction')}</div><div class="meta">${escapeHtml(x.date)} • ${label(x.kind)}</div></div><div class="amt">${main}${sub}</div></div><div class="btns"><button class="smallbtn" data-act="edit" data-id="${id}">Edit</button><button class="smallbtn del" data-act="del" data-id="${id}">Delete</button></div></div>`;
+ }).join('');
+}
+$('historyList').addEventListener('click',e=>{
+ const b=e.target.closest('button[data-act]');if(!b)return;
+ b.dataset.act==='del'?delTxn(b.dataset.id):editTxn(b.dataset.id);
+});
+
+/* ---------- export / backup ---------- */
+function download(name,type,text){
+ const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type}));a.download=name;
+ document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+}
+function exportCSV(){
+ const R=taxRates();
+ const sorted=[...state.txns].sort((a,b)=>a.date.localeCompare(b.date));
+ const rows=[['Date','Description','Category','Before tax','After tax (losses incl. refund)'],
+  ...sorted.map(x=>x.kind==='taxRefund'?[x.date,x.desc||'',label(x.kind),'',r2(+x.amount)]:[x.date,x.desc||'',label(x.kind),r2(val(x,'gross')),r2(val(x,'net'))])];
+ const csv=rows.map(r=>r.map(v=>`"${String(v).replaceAll('"','""')}"`).join(',')).join('\n');
+ download('german_tax_transactions.csv','text/csv;charset=utf-8','\ufeff'+csv);
+}
+function exportJSON(){
+ download('de-tax-tracker-backup-'+today()+'.json','application/json',JSON.stringify({app:'deTaxTracker',version:2,exportedAt:new Date().toISOString(),txns:state.txns,settings:state.settings},null,1));
+}
+function importJSON(input){
+ const f=input.files[0];input.value='';if(!f)return;
+ const rd=new FileReader();
+ rd.onload=()=>{
+  try{
+   const d=JSON.parse(rd.result);
+   const ok=d&&Array.isArray(d.txns)&&d.txns.every(x=>x&&x.id!==undefined&&/^\d{4}-\d{2}-\d{2}$/.test(x.date)&&KINDS[x.kind]&&isFinite(+x.amount));
+   if(!ok)throw new Error('bad file');
+   if(!confirm('Replace everything in the app with this backup ('+d.txns.length+' transactions)?'))return;
+   state={txns:d.txns.map(x=>({id:String(x.id),date:x.date,desc:String(x.desc||''),kind:x.kind,amount:+x.amount})),settings:Object.assign({},DEFAULTS,d.settings||{})};
+   persist();syncSettingsUI();populateYears();render();syncAmounts();calcCG();toast('Backup restored.');
+  }catch(e){toast('That file is not a valid backup.')}
+ };
+ rd.readAsText(f);
+}
+function clearAll(){if(confirm('Delete all transactions and settings?')){localStorage.removeItem(KEY);location.reload()}}
+
+/* ---------- capital gains estimator ---------- */
+function taxOn(gain,remaining,R){
+ const taxable=Math.max(0,gain-remaining);
+ return {taxable,tax:taxable*R.cap,soli:taxable*R.soli,ct:taxable*R.church,total:taxable*R.total};
+}
+function calcCG(){
+ const p=Math.max(0,+$('cgProfit').value||0),a=Math.max(0,+$('cgAllowance').value||0),u=Math.max(0,+$('cgUsed').value||0);
+ const loss=Math.max(0,+$('cgLoss').value||0),R=taxRates((+$('cgChurch').value||0)*100),remaining=Math.max(0,a-u);
+
+ const before=taxOn(p,remaining,R);
+ $('cgTaxable').textContent=eur(before.taxable);$('cgTax').textContent=eur(before.tax);$('cgSoli').textContent=eur(before.soli);
+ $('cgChurchTax').textContent=eur(before.ct);$('cgNet').textContent=eur(before.total);$('cgHand').textContent=eur(p-before.total);
+
+ // target amount in hand -> profit needed
+ const N=Math.max(0,+$('cgTarget').value||0);let G,tax;
+ if(N<=remaining){G=N;tax=0}else{G=(N-R.total*remaining)/(1-R.total);tax=(G-remaining)*R.total}
+ $('cgNeedGross').textContent=eur(G);$('cgNeedTax').textContent=eur(tax);$('cgNeedAllow').textContent=eur(Math.min(G,remaining));
+
+ // loss scenario
+ const after=taxOn(Math.max(0,p-loss),remaining,R),carry=Math.max(0,loss-p);
+ $('cgTaxBefore').textContent=eur(before.total);$('cgTaxAfter').textContent=eur(after.total);
+ $('cgRefund').textContent=eur(Math.max(0,before.total-after.total));
+ $('cgCarryRow').style.display=carry>0?'flex':'none';
+ if(carry>0)$('cgCarry').textContent=eur(carry);
+}
+function resetCG(){
+ $('cgProfit').value=1000;$('cgAllowance').value=state.settings.allowance;$('cgUsed').value=0;
+ $('cgChurch').value='0';$('cgLoss').value=0;$('cgTarget').value='';calcCG();
+}
+function fillCGFromYear(){
+ const c=calcYear(+$('year').value),ch=+state.settings.church||0;
+ $('cgProfit').value=r2(c.taxBase);$('cgAllowance').value=state.settings.allowance;$('cgUsed').value=state.settings.allowUsed;
+ $('cgChurch').value=({8:'0.08',9:'0.09'})[ch]||'0';
+ calcCG();toast('Filled from '+$('year').value+': gains after loss offset, before allowance.');
+}
+
+/* ---------- seed import ---------- */
+const SEED_2026_TXNS=[{"id":"seed001","date":"2026-03-02","desc":"Aerovironment","kind":"stockGain","amount":104.03},{"id":"seed002","date":"2026-03-02","desc":"Nasdaq","kind":"stockGain","amount":23.2},{"id":"seed003","date":"2026-03-02","desc":"Droneshield","kind":"stockGain","amount":118.6},{"id":"seed004","date":"2026-03-02","desc":"Renk Group","kind":"stockGain","amount":124.79},{"id":"seed005","date":"2026-03-09","desc":"Rheinmetall","kind":"stockGain","amount":117.57},{"id":"seed006","date":"2026-03-09","desc":"Infineon Technologies","kind":"stockGain","amount":47.57},{"id":"seed007","date":"2026-03-09","desc":"Rheinmetall","kind":"stockGain","amount":169.07},{"id":"seed008","date":"2026-03-09","desc":"Nanobiotix","kind":"stockGain","amount":88.75},{"id":"seed009","date":"2026-03-16","desc":"Broadcom","kind":"stockGain","amount":43.19},{"id":"seed010","date":"2026-03-16","desc":"Broadcom","kind":"stockGain","amount":61.07},{"id":"seed011","date":"2026-03-16","desc":"Cameco","kind":"stockGain","amount":129.25},{"id":"seed012","date":"2026-03-16","desc":"Schneider","kind":"stockGain","amount":30.42},{"id":"seed013","date":"2026-03-16","desc":"Broadcom","kind":"stockGain","amount":28.0},{"id":"seed014","date":"2026-03-30","desc":"Rheinmetall","kind":"stockLoss","amount":121.5},{"id":"seed015","date":"2026-03-30","desc":"Tax refund","kind":"taxRefund","amount":23.97},{"id":"seed016","date":"2026-03-30","desc":"Broadcom","kind":"stockGain","amount":21.0},{"id":"seed017","date":"2026-03-30","desc":"Broadcom","kind":"stockGain","amount":10.0},{"id":"seed018","date":"2026-03-30","desc":"Rheinmetall","kind":"stockGain","amount":14.0},{"id":"seed019","date":"2026-03-30","desc":"Rheinmetall","kind":"stockGain","amount":38.32},{"id":"seed020","date":"2026-04-07","desc":"Rheinmetall","kind":"stockGain","amount":36.04},{"id":"seed021","date":"2026-04-07","desc":"Rheinmetall","kind":"stockGain","amount":40.08},{"id":"seed022","date":"2026-04-07","desc":"Rheinmetall","kind":"stockGain","amount":139.69},{"id":"seed023","date":"2026-04-07","desc":"Rheinmetall","kind":"stockGain","amount":38.93},{"id":"seed024","date":"2026-04-07","desc":"Rheinmetall","kind":"stockLoss","amount":10.0},{"id":"seed025","date":"2026-04-07","desc":"Aerovironment","kind":"stockGain","amount":69.93},{"id":"seed026","date":"2026-04-07","desc":"Tax refund","kind":"taxRefund","amount":2.71},{"id":"seed027","date":"2026-04-07","desc":"Rheinmetall","kind":"stockGain","amount":61.18},{"id":"seed028","date":"2026-04-07","desc":"Rheinmetall","kind":"stockGain","amount":53.92},{"id":"seed029","date":"2026-04-13","desc":"Rheinmetall","kind":"stockGain","amount":237.56},{"id":"seed030","date":"2026-04-13","desc":"Rheinmetall","kind":"stockGain","amount":53.93},{"id":"seed031","date":"2026-04-13","desc":"Rheinmetall","kind":"stockGain","amount":129.54},{"id":"seed032","date":"2026-04-13","desc":"Rheinmetall","kind":"stockGain","amount":43.68},{"id":"seed033","date":"2026-04-20","desc":"Rheinmetall","kind":"stockGain","amount":30.58},{"id":"seed034","date":"2026-04-20","desc":"WisdomTree Oil","kind":"stockGain","amount":33.82},{"id":"seed035","date":"2026-04-20","desc":"Eli Lilly","kind":"stockGain","amount":31.67},{"id":"seed036","date":"2026-04-20","desc":"BAE Systems","kind":"stockGain","amount":3.29},{"id":"seed037","date":"2026-04-27","desc":"Rheinmetall","kind":"stockLoss","amount":1166.0},{"id":"seed038","date":"2026-04-27","desc":"Tax refund","kind":"taxRefund","amount":307.0},{"id":"seed039","date":"2026-05-04","desc":"Rheinmetall","kind":"stockGain","amount":65.58},{"id":"seed040","date":"2026-05-04","desc":"Aerovironment","kind":"stockGain","amount":25.53},{"id":"seed041","date":"2026-05-11","desc":"Rheinmetall","kind":"stockGain","amount":78.04},{"id":"seed042","date":"2026-05-18","desc":"Renk","kind":"stockGain","amount":133.98},{"id":"seed043","date":"2026-05-18","desc":"Renk","kind":"stockGain","amount":82.6},{"id":"seed044","date":"2026-05-18","desc":"Renk","kind":"stockGain","amount":18.84},{"id":"seed045","date":"2026-05-18","desc":"Renk","kind":"stockGain","amount":74.82},{"id":"seed046","date":"2026-05-25","desc":"Ondas","kind":"stockGain","amount":86.4},{"id":"seed047","date":"2026-05-25","desc":"Sivers","kind":"stockGain","amount":91.2},{"id":"seed048","date":"2026-05-25","desc":"Sivers","kind":"stockGain","amount":41.83},{"id":"seed049","date":"2026-05-25","desc":"Sivers","kind":"stockGain","amount":69.84},{"id":"seed050","date":"2026-05-25","desc":"Sivers","kind":"stockGain","amount":52.56},{"id":"seed051","date":"2026-05-25","desc":"Sivers","kind":"stockLoss","amount":1235.93},{"id":"seed052","date":"2026-05-25","desc":"Sivers","kind":"stockGain","amount":76.9},{"id":"seed053","date":"2026-05-25","desc":"Tax refund","kind":"taxRefund","amount":305.43},{"id":"seed054","date":"2026-06-01","desc":"Rheinmetall","kind":"stockGain","amount":48.48},{"id":"seed055","date":"2026-06-01","desc":"Palantir","kind":"stockGain","amount":343.49},{"id":"seed056","date":"2026-06-01","desc":"Sivers","kind":"stockGain","amount":32.43},{"id":"seed057","date":"2026-06-01","desc":"Rigetti","kind":"stockGain","amount":233.85},{"id":"seed058","date":"2026-06-09","desc":"Ondas","kind":"stockGain","amount":36.59},{"id":"seed059","date":"2026-06-09","desc":"Ondas","kind":"stockGain","amount":16.16},{"id":"seed060","date":"2026-06-09","desc":"Sivers","kind":"stockGain","amount":34.12},{"id":"seed061","date":"2026-06-09","desc":"Ondas","kind":"stockGain","amount":16.47},{"id":"seed062","date":"2026-07-02","desc":"Sivers","kind":"stockGain","amount":16.56},{"id":"seed063","date":"2026-07-02","desc":"Sivers","kind":"stockGain","amount":12.57},{"id":"seed064","date":"2026-07-06","desc":"Palantir","kind":"stockGain","amount":8.8},{"id":"seed065","date":"2026-07-06","desc":"Lam Research","kind":"stockGain","amount":16.37},{"id":"seed066","date":"2026-07-06","desc":"Aerovironment","kind":"stockGain","amount":11.17},{"id":"seed067","date":"2026-07-06","desc":"AXT","kind":"stockGain","amount":94.61},{"id":"seed068","date":"2026-07-13","desc":"Palantir","kind":"stockGain","amount":33.71},{"id":"seed069","date":"2026-07-13","desc":"AXT","kind":"stockGain","amount":130.22},{"id":"seed070","date":"2026-07-13","desc":"Palantir","kind":"stockGain","amount":92.96},{"id":"seed071","date":"2026-07-20","desc":"Western Digital","kind":"stockGain","amount":3.97},{"id":"seed072","date":"2026-07-27","desc":"Palantir","kind":"stockGain","amount":69.0},{"id":"seed073","date":"2026-07-27","desc":"Palantir","kind":"stockGain","amount":78.11},{"id":"seed074","date":"2026-07-27","desc":"Aerovironment","kind":"stockGain","amount":4.66},{"id":"seed075","date":"2026-08-03","desc":"Palantir","kind":"stockGain","amount":238.9},{"id":"seed076","date":"2026-08-03","desc":"Western Digital","kind":"stockGain","amount":3.67},{"id":"seed077","date":"2026-08-13","desc":"Ondas","kind":"stockGain","amount":372.97},{"id":"seed078","date":"2026-08-17","desc":"Western Digital","kind":"stockGain","amount":76.18},{"id":"seed079","date":"2026-08-17","desc":"Ondas","kind":"stockGain","amount":13.04},{"id":"seed080","date":"2026-08-24","desc":"Uranium Energy","kind":"stockGain","amount":7.08},{"id":"seed081","date":"2026-08-24","desc":"Western Digital","kind":"stockGain","amount":36.39},{"id":"seed082","date":"2026-08-24","desc":"Samsung SDI","kind":"stockGain","amount":5.77},{"id":"seed083","date":"2026-09-01","desc":"Western Digital","kind":"stockGain","amount":29.86},{"id":"seed084","date":"2026-09-01","desc":"Western Digital","kind":"stockGain","amount":33.18},{"id":"seed085","date":"2026-09-01","desc":"Western Digital","kind":"stockGain","amount":53.23},{"id":"seed086","date":"2026-09-01","desc":"Renk","kind":"stockGain","amount":12.33},{"id":"seed087","date":"2026-09-07","desc":"Nanobiotix","kind":"stockGain","amount":7.97},{"id":"seed088","date":"2026-09-07","desc":"Uranium Energy","kind":"stockGain","amount":34.48},{"id":"seed089","date":"2026-09-07","desc":"Aerovironment","kind":"stockGain","amount":72.81},{"id":"seed090","date":"2026-09-07","desc":"Aerovironment","kind":"stockGain","amount":48.48},{"id":"seed091","date":"2026-09-15","desc":"Western Digital","kind":"stockGain","amount":60.59},{"id":"seed092","date":"2026-09-15","desc":"Siemens Energy","kind":"stockGain","amount":6.13},{"id":"seed093","date":"2026-09-15","desc":"Lam Research","kind":"stockGain","amount":4.7},{"id":"seed094","date":"2026-09-15","desc":"WTI","kind":"stockGain","amount":5.05},{"id":"seed095","date":"2026-09-15","desc":"Lam Research","kind":"stockGain","amount":37.67}];
+function importSeedData(){
+ const existingIds=new Set(state.txns.map(x=>x.id));
+ const toAdd=SEED_2026_TXNS.filter(x=>!existingIds.has(x.id));
+ if(!toAdd.length){toast('Already imported.');return}
+ state.txns=state.txns.concat(toAdd);
+ persist();populateYears();render();
+ goTab('dashboard');toast(toAdd.length+' transactions imported.');
+}
+
+/* ---------- init ---------- */
+document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>goTab(b.dataset.tab));
+$('seedCount').textContent=SEED_2026_TXNS.length;
+$('modelNote').textContent='Tax model: 25% Abgeltungsteuer plus 5.5% solidarity surcharge on that tax. With church tax (8/9%) the base rate is reduced to 25% ÷ (1 + 25% × church rate), the statutory adjustment. Gains are entered after tax. The year is replayed in date order: the first gains use up the Sparer-Pauschbetrag and any loss pots tax-free (after tax = before tax), and only the rest is grossed up with the combined rate. Losses are entered before tax and refund the tax already paid on earlier gains. Losses are offset before the Sparer-Pauschbetrag. Stock-sale losses only offset stock-sale gains; other capital losses offset any capital gain. Estimates only — your bank\'s figures and your tax return are what count.';
+populateYears();
+syncSettingsUI();
+$('cgAllowance').value=state.settings.allowance;
+resetForm();
+render();
+calcCG();
+
+if('serviceWorker' in navigator){
+ window.addEventListener('load',()=>{
+  navigator.serviceWorker.register('sw.js').catch(()=>{});
+ });
+}
+</script>
+</body>
+</html>
