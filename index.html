@@ -1,4 +1,3 @@
-
 <!doctype html>
 <html lang="en">
 <head>
@@ -208,6 +207,11 @@ svg .bp{fill:var(--good)}svg .bn{fill:var(--bad)}svg .bz{fill:var(--muted);opaci
 svg .cl{fill:var(--muted);font-size:10px;font-family:inherit}
 svg .axis{stroke:var(--glass-border-soft);stroke-width:1}
 svg .avgl{stroke:var(--warn);stroke-width:1.5;stroke-dasharray:4 3}
+
+svg .pline{fill:none;stroke:#0a84ff;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+svg .pfill{fill:url(#periodGrad);opacity:.35}
+svg .pdot{fill:#0a84ff;stroke:#fff;stroke-width:1.2}
+svg .pzero{stroke:rgba(255,255,255,0.18);stroke-width:1}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))){
  .card,.top,.tabs,.toast{background:rgba(28,28,30,0.94)}
@@ -238,6 +242,21 @@ svg .avgl{stroke:var(--warn);stroke-width:1.5;stroke-dasharray:4 3}
  <div class="big" id="net"></div>
  <div class="muted" style="margin-top:4px">Before-tax profit / loss: <b id="netGross"></b></div>
  <div class="grid" style="margin-top:12px" id="kpis"></div>
+</div>
+
+<div class="card">
+ <div class="row">
+  <h3 style="margin:0">Period performance</h3>
+  <div class="seg" role="group" aria-label="Period">
+   <button type="button" id="per1d" onclick="setPeriod('1d')">1 day</button>
+   <button type="button" id="per1w" class="on" onclick="setPeriod('1w')">1 week</button>
+   <button type="button" id="per1m" onclick="setPeriod('1m')">1 month</button>
+  </div>
+ </div>
+ <p class="muted" id="periodRangeLabel" style="margin-top:8px"></p>
+ <div class="grid" style="margin-top:10px" id="periodKpis"></div>
+ <div id="periodChart" style="margin-top:12px"></div>
+ <p class="note" id="periodNote" style="margin-top:8px"></p>
 </div>
 
 <div class="card">
@@ -858,6 +877,115 @@ function delTxn(id){
  toast('Transaction deleted.','Undo',()=>{state.txns.push(x);persist();populateYears();render()});
 }
 
+
+/* ---------- period performance (1d / 1w / 1m) ---------- */
+let periodMode='1w';
+function setPeriod(mode){
+ periodMode=mode==='1d'||mode==='1m'?mode:'1w';
+ ['1d','1w','1m'].forEach(m=>$('per'+m).classList.toggle('on',periodMode===m));
+ renderPeriod();
+}
+function periodWindow(){
+ const end=new Date(); end.setHours(23,59,59,999);
+ const start=new Date(end);
+ if(periodMode==='1d'){start.setHours(0,0,0,0)}
+ else if(periodMode==='1w'){start.setDate(start.getDate()-6);start.setHours(0,0,0,0)}
+ else{start.setDate(start.getDate()-29);start.setHours(0,0,0,0)}
+ return {start,end};
+}
+function isoDay(d){
+ const x=new Date(d.getTime()-d.getTimezoneOffset()*60000);
+ return x.toISOString().slice(0,10);
+}
+function periodTxns(start,end){
+ const country=state.settings.country||'DE';
+ const a=isoDay(start),b=isoDay(end);
+ return state.txns.filter(x=>{
+  if(txnCountry(x)!==country)return false;
+  const d=x.date;
+  return d>=a&&d<=b;
+ }).sort((x,y)=>x.date.localeCompare(y.date)||String(x.id).localeCompare(String(y.id)));
+}
+function renderPeriod(){
+ if(!$('periodKpis'))return;
+ const basis=state.settings.basis||'net';
+ const {start,end}=periodWindow();
+ const list=periodTxns(start,end);
+ const loc=isIN()?'en-IN':'de-DE';
+ const fmtD=d=>d.toLocaleDateString(loc,{day:'numeric',month:'short'});
+ $('periodRangeLabel').textContent=fmtD(start)+(isoDay(start)!==isoDay(end)?' – '+fmtD(end):' · today');
+
+ // daily buckets
+ const days=[];
+ const cur=new Date(start);cur.setHours(0,0,0,0);
+ const endDay=new Date(end);endDay.setHours(0,0,0,0);
+ while(cur<=endDay){
+  days.push({date:isoDay(cur),label:cur.toLocaleDateString(loc,{weekday:periodMode==='1m'?'narrow':'short',day:periodMode==='1m'?'numeric':undefined}),net:0,gross:0,n:0});
+  cur.setDate(cur.getDate()+1);
+ }
+ const byDay=Object.fromEntries(days.map(d=>[d.date,d]));
+ list.forEach(x=>{
+  const b=byDay[x.date]; if(!b)return;
+  b.n++;
+  if(x.kind==='taxRefund'){b.net+=+x.amount||0}
+  else if(isGain(x.kind)||isLoss(x.kind)){
+   b.net+=val(x,'net');
+   b.gross+=val(x,'gross');
+  }
+ });
+ const series=days.map(d=>d[basis==='gross'?'gross':'net']);
+ const total=series.reduce((a,b)=>a+b,0);
+ const trades=list.filter(x=>isGain(x.kind)||isLoss(x.kind));
+ const wins=trades.filter(x=>val(x,basis)>0);
+ const losses=trades.filter(x=>val(x,basis)<0);
+ const winSum=wins.reduce((a,x)=>a+val(x,basis),0);
+ const lossSum=losses.reduce((a,x)=>a+val(x,basis),0);
+ const best=series.length?Math.max(...series):0;
+ const worst=series.length?Math.min(...series):0;
+ const activeDays=series.filter(v=>Math.abs(v)>=0.005).length;
+ const met=(l,v,k,sub)=>`<div class="metric"><span class="muted">${l}</span><b class="${k||''}">${v}</b>${sub?`<small>${sub}</small>`:''}</div>`;
+ $('periodKpis').innerHTML=
+  met('Profit / loss',money(total),cls(total),basis==='net'?'after tax':'before tax')+
+  met('Trades',String(trades.length),'',wins.length+' wins · '+losses.length+' losses')+
+  met('Avg win',wins.length?money(winSum/wins.length):'—',wins.length?'good':'dim')+
+  met('Avg loss',losses.length?money(lossSum/losses.length):'—',losses.length?'bad':'dim')+
+  met('Best day',activeDays?money(best):'—',activeDays?cls(best):'dim')+
+  met('Weakest day',activeDays?money(worst):'—',activeDays?cls(worst):'dim');
+ $('periodChart').innerHTML=lineChartSVG(days.map(d=>d.label),series,total);
+ $('periodNote').textContent=list.length
+  ?`${list.length} entr${list.length===1?'y':'ies'} in this period · line shows daily ${basis==='net'?'after-tax':'before-tax'} P/L`
+  :'No transactions in this period yet.';
+}
+function lineChartSVG(labels,vals,total){
+ const W=460,H=160,padL=8,padR=8,top=14,bot=28;
+ const n=Math.max(vals.length,1);
+ const max=Math.max(0,...vals),min=Math.min(0,...vals),span=(max-min)||1;
+ const ph=H-top-bot, y0=top+ph*(max/span);
+ const xAt=i=>padL+(n===1? (W-padL-padR)/2 : i*(W-padL-padR)/(n-1));
+ const yAt=v=>top+ph*((max-v)/span);
+ let pts=vals.map((v,i)=>`${xAt(i).toFixed(1)},${yAt(v).toFixed(1)}`).join(' ');
+ let area=`${xAt(0).toFixed(1)},${y0.toFixed(1)} `+pts+` ${xAt(n-1).toFixed(1)},${y0.toFixed(1)}`;
+ // sparse labels
+ const step=n<=8?1:(n<=16?2:Math.ceil(n/8));
+ let labelsSvg='';
+ labels.forEach((lb,i)=>{
+  if(i%step&&i!==n-1)return;
+  labelsSvg+=`<text x="${xAt(i).toFixed(1)}" y="${H-8}" text-anchor="middle" class="cl">${escapeHtml(String(lb||''))}</text>`;
+ });
+ let dots='';
+ vals.forEach((v,i)=>{
+  if(Math.abs(v)<0.005&&n>14)return;
+  dots+=`<circle cx="${xAt(i).toFixed(1)}" cy="${yAt(v).toFixed(1)}" r="3.2" class="pdot"/>`;
+ });
+ return `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Period profit line chart">
+  <defs><linearGradient id="periodGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#0a84ff"/><stop offset="100%" stop-color="#0a84ff" stop-opacity="0"/></linearGradient></defs>
+  <line x1="${padL}" x2="${W-padR}" y1="${y0}" y2="${y0}" class="pzero"/>
+  <polygon points="${area}" class="pfill"/>
+  <polyline points="${pts}" class="pline"/>
+  ${dots}${labelsSvg}
+ </svg>`;
+}
+
 /* ---------- rendering ---------- */
 function render(){
  const year=+$('year').value,R=taxRates(),basis=state.settings.basis,other=basis==='net'?'gross':'net';
@@ -901,6 +1029,7 @@ function render(){
  $('stockCarry').textContent=eur(c.stockCarry);$('otherCarry').textContent=eur(c.otherCarry);
 
  renderMonthly(year,R,basis,other);
+ renderPeriod();
  renderStats(c,basis,R);
  renderHistory();
  $('segNet').classList.toggle('on',basis==='net');$('segGross').classList.toggle('on',basis==='gross');
