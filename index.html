@@ -1,0 +1,1183 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#111827">
+<title>Trade Tracker</title>
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" href="favicon-96x96.png" type="image/png" sizes="96x96">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Tax Tracker">
+<meta name="mobile-web-app-capable" content="yes">
+<style>
+:root{
+ --bg:#f3f4f6;--app:#f8fafc;--card:#fff;--soft:#f8fafc;--line:#e5e7eb;--line2:#eef0f2;
+ --ink:#111827;--muted:#6b7280;--good:#087443;--bad:#b42318;--warn:#9a6700;
+ --inputbg:#fff;--inputline:#d1d5db;--danger-bg:#fee2e2;--danger:#991b1b;--goodbg:#f0fdf4;
+ --shadow:0 2px 8px #00000008;
+}
+@media (prefers-color-scheme:dark){
+ :root{
+  --bg:#020617;--app:#0f172a;--card:#1e293b;--soft:#162032;--line:#334155;--line2:#2b3a52;
+  --ink:#f1f5f9;--muted:#94a3b8;--good:#4ade80;--bad:#f87171;--warn:#fbbf24;
+  --inputbg:#0f172a;--inputline:#475569;--danger-bg:#450a0a;--danger:#fca5a5;--goodbg:#052e1b;
+  --shadow:none;
+ }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;color:var(--ink);font-variant-numeric:tabular-nums}
+button{font-family:inherit;cursor:pointer}
+.app{max-width:520px;margin:auto;min-height:100vh;background:var(--app)}
+.sticky{position:sticky;top:0;z-index:5}
+.top{background:#111827;color:#fff;padding:16px 18px;display:flex;justify-content:space-between;align-items:center;gap:12px}
+.top h1{font-size:21px;margin:0 0 4px}.top p{margin:0;color:#cbd5e1;font-size:13px}
+.top select{width:auto;padding:8px 10px;font-size:15px;font-weight:700;background:#1f2937;color:#fff;border:1px solid #374151}
+.tabs{display:flex;background:var(--card);border-bottom:1px solid var(--line);overflow-x:auto}
+.tab{flex:1 0 auto;padding:13px 10px;border:0;border-bottom:3px solid transparent;background:var(--card);font-weight:700;color:var(--muted);white-space:nowrap;font-size:13px}
+.tab.active{color:var(--ink);border-bottom-color:var(--ink)}
+main{padding:16px}.panel{display:none}.panel.active{display:block}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:13px;box-shadow:var(--shadow)}
+.card h3{margin:0 0 8px;font-size:16px}
+.big{font-size:29px;font-weight:800}.muted{color:var(--muted);font-size:13px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.metric{background:var(--soft);border-radius:12px;padding:12px}
+.metric b{display:block;margin-top:5px;font-size:18px}
+.metric small{display:block;margin-top:3px;font-size:11px;color:var(--muted);font-weight:400}
+label{display:block;font-weight:700;font-size:13px;margin:12px 0 6px}
+label.chk{display:flex;gap:10px;align-items:flex-start;font-weight:600;margin:14px 0 0;line-height:1.4}
+input,select{width:100%;padding:12px;border:1px solid var(--inputline);border-radius:10px;font-size:16px;background:var(--inputbg);color:var(--ink);font-family:inherit}
+input[type=checkbox]{width:auto;margin-top:2px}
+:is(button,input,select):focus-visible{outline:2px solid #3b82f6;outline-offset:2px}
+button.primary{width:100%;border:0;background:var(--ink);color:var(--card);padding:13px;border-radius:11px;font-weight:800;font-size:15px;margin-top:13px}
+button.secondary{border:1px solid var(--inputline);background:var(--card);color:var(--ink);padding:10px 12px;border-radius:10px;font-weight:700}
+button.block{width:100%;margin-top:10px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.row2{display:flex;gap:10px}.row2>div{flex:1;min-width:0}
+.line{display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid var(--line2);font-size:14px}
+.line:last-child{border:0}
+.line.net{font-size:17px;font-weight:800}
+.good{color:var(--good)}.bad{color:var(--bad)}.warn{color:var(--warn)}.dim{color:var(--muted)}
+.txn{padding:12px 0;border-bottom:1px solid var(--line2)}.txn:last-child{border:0}
+.txn .title{font-weight:750}.txn .meta{font-size:12px;color:var(--muted);margin-top:3px}
+.txn .amt{text-align:right}.txn .amt small{display:block;font-size:11px;color:var(--muted);font-weight:400;margin-top:2px}
+.txn .btns{display:flex;gap:6px;justify-content:flex-end;margin-top:8px}
+.empty{text-align:center;padding:28px;color:var(--muted)}
+.smallbtn{border:0;background:var(--soft);color:var(--ink);padding:6px 10px;border-radius:8px;font-size:12px;font-weight:700;border:1px solid var(--line)}
+.smallbtn.del{background:var(--danger-bg);color:var(--danger);border-color:transparent}
+.note{font-size:12px;line-height:1.5;color:var(--muted)}
+.seg{display:inline-flex;background:var(--soft);border:1px solid var(--line);border-radius:10px;padding:2px;flex:none}
+.seg button{border:0;background:transparent;padding:6px 10px;border-radius:8px;font-weight:700;font-size:12px;color:var(--muted)}
+.seg button.on{background:var(--ink);color:var(--card)}
+.bar{height:10px;background:var(--soft);border:1px solid var(--line);border-radius:99px;overflow:hidden;margin:10px 0 8px}
+.bar>i{display:block;height:100%;background:var(--ink);border-radius:99px;transition:width .3s}
+.bar>i.full{background:var(--warn)}
+.mrow{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line2);font-size:14px}
+.mrow:last-child{border:0}
+.mrow.zero{opacity:.5}
+.mrow .r{text-align:right}
+.mrow small{display:block;font-size:11px;color:var(--muted);font-weight:400}
+.chip{font-style:normal;font-size:10px;font-weight:800;padding:2px 6px;border-radius:99px;margin-left:6px;background:var(--soft);border:1px solid var(--line);color:var(--muted)}
+.filters{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0 4px}
+.filters input[type=search]{grid-column:1/-1}
+.filters select,.filters input{padding:10px;font-size:14px}
+.toast{position:fixed;left:50%;bottom:calc(16px + env(safe-area-inset-bottom));transform:translate(-50%,20px);background:#111827;color:#fff;border:1px solid #374151;padding:11px 14px;border-radius:12px;font-size:14px;display:flex;gap:14px;align-items:center;max-width:92%;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:20}
+.toast.show{opacity:1;transform:translate(-50%,0);pointer-events:auto}
+.toast button{border:0;background:transparent;color:#93c5fd;font-weight:800;font-size:14px;padding:0}
+svg .bp{fill:var(--good)}svg .bn{fill:var(--bad)}svg .bz{fill:var(--muted);opacity:.5}
+svg .cl{fill:var(--muted);font-size:10px;font-family:inherit}
+svg .axis{stroke:var(--line);stroke-width:1}
+svg .avgl{stroke:var(--warn);stroke-width:1.5;stroke-dasharray:4 3}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="app">
+<div class="sticky">
+<header class="top">
+ <div><h1 id="appTitle">🇩🇪 DE Trade Tracker</h1><p id="appSubtitle">Capital gains • loss pots • Sparer-Pauschbetrag</p></div>
+ <select id="year" aria-label="Tax year"></select>
+</header>
+<nav class="tabs">
+<button class="tab active" data-tab="dashboard">Overview</button>
+<button class="tab" data-tab="add">Add</button>
+<button class="tab" data-tab="history">History</button>
+<button class="tab" data-tab="positions">Positions</button>
+<button class="tab" data-tab="settings">Settings</button>
+</nav>
+</div>
+<main>
+
+<!-- ============ OVERVIEW ============ -->
+<section id="dashboard" class="panel active">
+<div class="card">
+ <div class="muted">Estimated amount in hand · <span id="yearTitle"></span></div>
+ <div class="big" id="net"></div>
+ <div class="muted" style="margin-top:4px">Before-tax profit / loss: <b id="netGross"></b></div>
+ <div class="grid" style="margin-top:12px" id="kpis"></div>
+</div>
+
+<div class="card">
+ <h3 id="allowTitle">Sparer-Pauschbetrag</h3>
+ <div class="bar"><i id="allowFill"></i></div>
+ <div id="allowText" class="muted"></div>
+</div>
+
+<div class="card">
+ <h3>Tax estimate</h3>
+ <div id="taxLines"></div>
+ <p class="note" id="taxNote"></p>
+</div>
+
+<div class="card" id="lossPotsCard">
+ <h3 id="lossPotsTitle">Verlustverrechnungstöpfe</h3>
+ <div class="line"><span id="stockCarryLbl">Aktienverlusttopf</span><b id="stockCarry"></b></div>
+ <div class="line"><span id="otherCarryLbl">Sonstiger Verlusttopf</span><b id="otherCarry"></b></div>
+ <p class="note" id="lossPotsNote">Two loss pots, tracked on a before-tax basis. Stock losses only offset stock gains; other losses offset any capital gain. This is a personal estimate and does not reproduce every bank's depot-specific tax ledger.</p>
+</div>
+
+<div class="card">
+ <div class="row">
+  <h3 style="margin:0">Monthly profit</h3>
+  <div class="seg" role="group" aria-label="Show amounts">
+   <button id="segNet" onclick="setBasis('net')">After tax</button>
+   <button id="segGross" onclick="setBasis('gross')">Before tax</button>
+  </div>
+ </div>
+ <div class="grid" style="margin-top:12px" id="avgBox"></div>
+ <p class="note" id="avgNote"></p>
+ <div id="chart"></div>
+ <p class="note" style="margin:2px 0 8px">Dashed line = monthly average (months at €0 are ignored).</p>
+ <div id="months"></div>
+</div>
+
+<div class="card">
+ <h3>Trade stats</h3>
+ <p class="muted" id="statsSub" style="margin:-4px 0 10px"></p>
+ <div class="grid" id="statsGrid"></div>
+ <div id="topWrap"></div>
+</div>
+</section>
+
+<!-- ============ ADD / EDIT ============ -->
+<section id="add" class="panel">
+<div class="card">
+ <h3 id="formTitle">Add transaction</h3>
+ <label for="date">Date</label><input id="date" type="date" onchange="syncAmounts()">
+ <label for="desc">Description</label><input id="desc" placeholder="e.g. Palantir sale">
+ <label for="kind">Category</label>
+ <select id="kind" onchange="onKindChange()">
+  <option value="stockGain">Stock sale gain</option>
+  <option value="stockLoss">Stock sale loss</option>
+  <option value="otherGain">Other capital gain (dividend/ETF/etc.)</option>
+  <option value="otherLoss">Other capital loss</option>
+  <option value="taxRefund">Tax refund (not taxed)</option>
+ </select>
+ <div class="row2">
+  <div><label for="amtNet" id="lblNet">After tax (€)</label><input id="amtNet" type="number" inputmode="decimal" step="0.01" min="0" placeholder="0.00" oninput="onAmt('net')"></div>
+  <div id="grossCol"><label for="amtGross">Before tax (€)</label><input id="amtGross" type="number" inputmode="decimal" step="0.01" min="0" placeholder="0.00" oninput="onAmt('gross')"></div>
+ </div>
+ <p class="note" id="rateNote"></p>
+ <label class="chk" id="refundBox" style="display:none"><input type="checkbox" id="addRefund"><span>Also log the estimated tax refund (<b id="refundAmt">€0,00</b>) as a separate entry</span></label>
+ <button class="primary" id="saveBtn" onclick="saveTxn()">Save transaction</button>
+ <button class="secondary block" id="cancelEdit" style="display:none" onclick="cancelEdit()">Cancel edit</button>
+</div>
+</section>
+
+<!-- ============ HISTORY ============ -->
+<section id="history" class="panel">
+<div class="card">
+ <div class="row"><h3 style="margin:0">Transactions</h3><button class="secondary" onclick="exportCSV()">Export CSV</button></div>
+ <div class="filters">
+  <input id="hSearch" type="search" placeholder="Search description…" oninput="renderHistory()" aria-label="Search">
+  <select id="hCountry" onchange="renderHistory()" aria-label="Country">
+   <option value="auto">Current country (settings)</option>
+   <option value="DE">🇩🇪 Germany only</option>
+   <option value="IN">🇮🇳 India only</option>
+   <option value="all">All countries</option>
+  </select>
+  <select id="hKind" onchange="renderHistory()" aria-label="Category">
+   <option value="all">All categories</option>
+  </select>
+  <select id="hMonth" onchange="renderHistory()" aria-label="Month">
+   <option value="all">All months</option>
+   <option value="0">Jan</option><option value="1">Feb</option><option value="2">Mar</option><option value="3">Apr</option>
+   <option value="4">May</option><option value="5">Jun</option><option value="6">Jul</option><option value="7">Aug</option>
+   <option value="8">Sep</option><option value="9">Oct</option><option value="10">Nov</option><option value="11">Dec</option>
+  </select>
+  <label class="chk" style="grid-column:1/-1;margin:2px 0 0"><input type="checkbox" id="hAll" onchange="renderHistory()"><span>Show all years (default: selected year)</span></label>
+ </div>
+ <p class="muted" id="histSummary" style="margin:8px 0 0"></p>
+ <div id="historyList"></div>
+ <p class="note">Amounts follow the After tax / Before tax switch on the Overview. An after-tax loss is the loss minus the tax refund it triggers.</p>
+</div>
+</section>
+
+<!-- ============ CAPITAL GAINS ESTIMATOR ============ -->
+<!-- ============ POSITIONS / AVERAGING ============ -->
+<section id="positions" class="panel">
+<div class="card">
+ <div class="row"><h3 style="margin:0">Saved positions</h3></div>
+ <div id="posList"></div>
+ <p class="note" id="posEmptyNote" style="display:none;margin-top:8px">No saved positions yet. Use the calculator below and click “Save as new”.</p>
+</div>
+
+<div class="card">
+ <h3 id="posFormTitle">Average cost calculator</h3>
+ <p class="muted" id="posLoaded" style="margin-top:-4px;display:none"></p>
+
+ <label for="posName">Name / ticker</label>
+ <input id="posName" placeholder="e.g. Rheinmetall" oninput="calcPos()">
+
+ <div class="row2">
+  <div><label for="posShares">Current shares</label><input id="posShares" type="number" inputmode="decimal" step="any" min="0" placeholder="0" oninput="calcPos()"></div>
+  <div><label for="posAvg">Current avg cost</label><input id="posAvg" type="number" inputmode="decimal" step="0.01" min="0" placeholder="0.00" oninput="calcPos()"></div>
+ </div>
+
+ <div class="row" style="margin-top:8px">
+  <span class="muted" style="font-weight:700;font-size:13px">New buy</span>
+  <div class="seg" role="group" aria-label="What to calculate">
+   <button type="button" id="posModeQty" class="on" onclick="setPosMode('qty')">I know total</button>
+   <button type="button" id="posModeTotal" onclick="setPosMode('total')">I know qty</button>
+  </div>
+ </div>
+ <p class="note" id="posModeNote" style="margin-top:8px">Enter price and total to invest. Quantity is calculated.</p>
+
+ <label for="posBuyPrice">New buy · price</label>
+ <input id="posBuyPrice" type="number" inputmode="decimal" step="0.01" min="0" placeholder="0.00" oninput="onPosBuyInput()">
+
+ <div class="row2">
+  <div><label for="posBuyShares">New buy · shares</label><input id="posBuyShares" type="number" inputmode="decimal" step="any" min="0" placeholder="0" oninput="onPosBuyInput()"></div>
+  <div><label for="posBuyTotal">Total to invest</label><input id="posBuyTotal" type="number" inputmode="decimal" step="0.01" min="0" placeholder="0.00" oninput="onPosBuyInput()"></div>
+ </div>
+
+ <label for="posMarket">Current market price · optional</label>
+ <input id="posMarket" type="number" inputmode="decimal" step="0.01" min="0" placeholder="Leave empty to skip P/L" oninput="calcPos()">
+
+ <div class="card" style="background:var(--soft);box-shadow:none;margin-top:16px;margin-bottom:0">
+  <div class="line"><span>New total shares</span><b id="posNewShares">—</b></div>
+  <div class="line net"><span>New average cost</span><b id="posNewAvg">—</b></div>
+  <div class="line"><span>Cost of this buy</span><b id="posBuyCost">—</b></div>
+  <div class="line"><span>New total invested</span><b id="posNewTotal">—</b></div>
+  <div class="line" id="posPlRow" style="display:none"><span>Unrealized P/L (after)</span><b id="posPl">—</b></div>
+  <div class="line" id="posPlBeforeRow" style="display:none"><span>Unrealized P/L (before)</span><b id="posPlBefore">—</b></div>
+ </div>
+
+ <button class="primary" id="posUpdateBtn" style="display:none" onclick="updatePosition()">Update position</button>
+ <button class="primary" id="posSaveBtn" onclick="saveAsNewPosition()">Save as new</button>
+ <button class="secondary block" onclick="resetPosForm()">Reset calculator</button>
+ <p class="note" id="posNote">Average cost is for your own tracking.</p>
+</div>
+</section>
+<!-- ============ SETTINGS ============ -->
+<section id="settings" class="panel">
+<div class="card">
+ <h3>Country & tax settings</h3>
+ <label for="country">Country</label>
+ <select id="country" onchange="onCountryChange()">
+  <option value="DE">🇩🇪 Germany</option>
+  <option value="IN">🇮🇳 India</option>
+ </select>
+ <div id="deSettings">
+  <label for="allowance">Sparer-Pauschbetrag (€)</label><input id="allowance" type="number" inputmode="decimal" step="1" onchange="saveSettings()">
+  <label for="allowUsed">Allowance already used outside this tracker (€)</label><input id="allowUsed" type="number" inputmode="decimal" step="0.01" onchange="saveSettings()">
+  <label for="church">Church tax</label>
+  <select id="church" onchange="saveSettings()"><option value="0">No church tax</option><option value="8">8%</option><option value="9">9%</option></select>
+  <label for="startStock">Starting stock-loss carryforward (€)</label><input id="startStock" type="number" inputmode="decimal" step="0.01" onchange="saveSettings()">
+  <label for="startOther">Starting other-loss carryforward (€)</label><input id="startOther" type="number" inputmode="decimal" step="0.01" onchange="saveSettings()">
+  <p class="note">Default allowance is €1,000 for an individual. Jointly assessed spouses generally have €2,000. Enter only the portion not already represented in this app. Starting carryforwards apply to the current calendar year.</p>
+ </div>
+ <div id="inSettings" style="display:none">
+  <label for="ltcgExempt">LTCG exemption (₹)</label><input id="ltcgExempt" type="number" inputmode="decimal" step="1" onchange="saveSettings()">
+  <label for="ltcgUsed">LTCG exemption already used outside this tracker (₹)</label><input id="ltcgUsed" type="number" inputmode="decimal" step="0.01" onchange="saveSettings()">
+  <label class="chk"><input type="checkbox" id="inCess" onchange="saveSettings()"><span>Include 4% Health &amp; Education Cess</span></label>
+  <p class="note">Listed equity: STCG 20% (held ≤ 12 months), LTCG 12.5% on gains above the annual exemption (held &gt; 12 months). Cess is 4% on the tax. You choose STCG or LTCG when adding a trade. Estimates only.</p>
+ </div>
+</div>
+
+<div class="card">
+ <h3>Backup</h3>
+ <p class="muted" style="margin-top:-4px">Your data lives only in this browser. Save a backup file now and then.</p>
+ <button class="secondary block" onclick="exportJSON()">Download backup (.json)</button>
+ <button class="secondary block" onclick="document.getElementById('restoreFile').click()">Restore from backup…</button>
+ <input id="restoreFile" type="file" accept="application/json,.json" style="display:none" onchange="importJSON(this)">
+ <button class="secondary block" onclick="clearAll()">Delete all local data</button>
+</div>
+
+<div class="card">
+ <h3>Import trades from file</h3>
+ <p class="muted" style="margin-top:-4px">Upload a CSV exported from this app, or a simple CSV with columns: Date, Description, Category, Amount</p>
+ <button class="primary" style="margin-top:6px" onclick="document.getElementById('importCsvFile').click()">Upload CSV…</button>
+ <input id="importCsvFile" type="file" accept=".csv,text/csv" style="display:none" onchange="importCSV(this)">
+ <p class="note">Categories for Germany: Stock gain, Stock loss, Other gain, Other loss, Tax refund.<br>
+Categories for India: STCG (≤12 mo), LTCG (>12 mo), STCL (short-term loss), LTCL (long-term loss), Tax refund.<br>
+Rows that already exist (same id) are skipped. Amounts are treated as the stored amount for that category.</p>
+</div>
+
+<div class="card"><p class="note" id="modelNote"></p></div>
+</section>
+
+</main>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+const KEY='deTaxTrackerV2';
+const DEFAULTS={country:'DE',allowance:1000,allowUsed:0,church:0,startStock:0,startOther:0,ltcgExempt:125000,ltcgUsed:0,inCess:true,basis:'net'};
+const KINDS_DE={stockGain:'Stock gain',stockLoss:'Stock loss',otherGain:'Other gain',otherLoss:'Other loss',taxRefund:'Tax refund'};
+const KINDS_IN={stcg:'STCG (≤12 mo)',ltcg:'LTCG (>12 mo)',stcl:'STCL (short-term loss)',ltcl:'LTCL (long-term loss)',taxRefund:'Tax refund'};
+const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const $=id=>document.getElementById(id);
+const isIN=()=>(state.settings.country||'DE')==='IN';
+const money=n=>{
+ const c=isIN()?'INR':'EUR',loc=isIN()?'en-IN':'de-DE';
+ return new Intl.NumberFormat(loc,{style:'currency',currency:c,maximumFractionDigits:2}).format(n||0);
+};
+const eur=money; // alias used throughout
+const pctFmt=n=>(n*100).toLocaleString(isIN()?'en-IN':'de-DE',{maximumFractionDigits:3})+' %';
+const r2=v=>Math.round(v*100)/100;
+const kindsMap=()=>isIN()?KINDS_IN:KINDS_DE;
+const isGain=k=>isIN()?(k==='stcg'||k==='ltcg'):(k==='stockGain'||k==='otherGain');
+const isLoss=k=>isIN()?(k==='stcl'||k==='ltcl'):(k==='stockLoss'||k==='otherLoss');
+const label=k=>kindsMap()[k]||k;
+const yearOf=d=>+String(d).slice(0,4);
+const cls=v=>Math.abs(v)<0.005?'dim':(v<0?'bad':'good');
+const today=()=>new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,10);
+function escapeHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;')}
+function newId(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
+
+let _lc={};
+let editingPosId=null;
+let state=loadState();
+function loadState(){
+ let s=null;
+ try{s=JSON.parse(localStorage.getItem(KEY)||'null')}catch(e){}
+ s=s||{};
+ return {
+  txns:Array.isArray(s.txns)?s.txns:[],
+  positions:Array.isArray(s.positions)?s.positions:[],
+  settings:Object.assign({},DEFAULTS,s.settings||{})
+ };
+}
+function persist(){_lc={};try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){toast('Could not save — browser storage is full or blocked.')}}
+
+/* ---------- toast ---------- */
+let toastTimer;
+function toast(msg,actionLabel,action){
+ const el=$('toast');el.innerHTML='';
+ const s=document.createElement('span');s.textContent=msg;el.appendChild(s);
+ if(action){const b=document.createElement('button');b.textContent=actionLabel;b.onclick=()=>{action();hideToast()};el.appendChild(b)}
+ el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(hideToast,action?7000:3500);
+}
+function hideToast(){$('toast').classList.remove('show')}
+
+/* ---------- tax maths ----------
+   25% Abgeltungsteuer, 5.5% Soli on that tax, church tax k (8/9%) on that tax.
+   With church tax the base rate shrinks: 25% / (1 + 25% * k).  k=0 -> 26.375% total. */
+function taxRates(churchPct){
+ if(isIN()){
+  const cess=(state.settings.inCess!==false)?1.04:1;
+  return {stcg:0.20*cess,ltcg:0.125*cess,cess,total:0.20*cess,nf:1-0.20*cess,k:0,cap:0.20,soli:0,church:0};
+ }
+ const k=(churchPct===undefined?(+state.settings.church||0):churchPct)/100;
+ const cap=0.25/(1+0.25*k),soli=cap*0.055,church=cap*k,total=cap+soli+church;
+ return {cap,soli,church,total,nf:1-total,k,stcg:total,ltcg:total};
+}
+/* ---------- chronological ledger ----------
+   Brokers apply the Sparer-Pauschbetrag and loss pots to the FIRST gains of the year, so the first
+   part of your gains carries no tax (after tax = before tax). We replay the year in date order:
+   - shield = open allowance + loss pots that can be used against this gain
+   - gain entered after tax: gross = net if net <= shield, else (net - rate*shield)/(1 - rate)
+   - taxed part of a gain goes into a pool; a later loss offsets that pool and gets the tax back (refund)
+   - a loss that finds no taxed gains yet becomes a pot that shields later gains */
+const orderKey=(x,i)=>x.date+'|'+String(i).padStart(6,'0');
+function ledgerInit(year){
+ const cur=year===new Date().getFullYear();
+ return {room:Math.max(0,(+state.settings.allowance||0)-(+state.settings.allowUsed||0)),
+  potStock:cur?(+state.settings.startStock||0):0,potOther:cur?(+state.settings.startOther||0):0,taxedStock:0,taxedOther:0};
+}
+const shieldFor=(L,kind)=>L.room+L.potOther+(kind==='stockGain'?L.potStock:0);
+const poolFor=(L,kind)=>kind==='stockLoss'?L.taxedStock:L.taxedStock+L.taxedOther;
+const gainGross=(net,S,r)=>net<=S?net:(net-r*S)/(1-r);
+const gainNet=(gross,S,r)=>gross<=S?gross:gross-r*(gross-S);
+const lossAfter=(gross,P,r)=>gross-r*Math.min(gross,P);
+const lossGrossFromAfter=(after,P,r)=>after<=P*(1-r)?after/(1-r):after+r*P;
+function stepGain(L,x,net,R){
+ const S=shieldFor(L,x.kind),g=gainGross(net,S,R.total),absorbed=Math.min(g,S);
+ let need=absorbed;
+ if(x.kind==='stockGain'){const u=Math.min(need,L.potStock);L.potStock-=u;need-=u}
+ let u=Math.min(need,L.potOther);L.potOther-=u;need-=u;
+ u=Math.min(need,L.room);L.room-=u;need-=u;
+ if(x.kind==='stockGain')L.taxedStock+=g-absorbed;else L.taxedOther+=g-absorbed;
+ return {gross:g,taxfree:absorbed};
+}
+function stepLoss(L,x,gross,R){
+ let rest=gross,off=0;
+ if(x.kind==='stockLoss'){off=Math.min(rest,L.taxedStock);L.taxedStock-=off;rest-=off;L.potStock+=rest}
+ else{
+  let o=Math.min(rest,L.taxedOther);L.taxedOther-=o;rest-=o;off+=o;
+  o=Math.min(rest,L.taxedStock);L.taxedStock-=o;rest-=o;off+=o;L.potOther+=rest;
+ }
+ return {refund:off*R.total};
+}
+// limit {date,idx}: only entries before that position; excludeId: skip the entry being edited
+function runLedger(year,limit,excludeId){
+ const R=taxRates(),L=ledgerInit(year),rows={};
+ state.txns.map((x,i)=>({x,i})).filter(o=>yearOf(o.x.date)===year&&o.x.id!==excludeId&&txnCountry(o.x)===(state.settings.country||'DE'))
+  .sort((a,b)=>orderKey(a.x,a.i).localeCompare(orderKey(b.x,b.i)))
+  .forEach(o=>{
+   if(limit&&!(o.x.date<limit.date||(o.x.date===limit.date&&o.i<limit.idx)))return;
+   const a=+o.x.amount||0;
+   if(isGain(o.x.kind))rows[o.x.id]=stepGain(L,o.x,a,R);
+   else if(isLoss(o.x.kind))rows[o.x.id]=stepLoss(L,o.x,a,R);
+  });
+ return {L,rows,R};
+}
+const ledger=year=>_lc[year]||(_lc[year]=runLedger(year));
+// value of one entry on a chosen basis (gains +, losses -).
+// gain: entered after tax.  loss: entered before tax; after tax = loss minus the refund it triggers.
+function val(x,basis){
+ const a=+x.amount||0;
+ if(!isGain(x.kind)&&!isLoss(x.kind))return 0;
+ if(isIN()){
+  // India: amounts are always gross (before CGT). Net = gross - pro-rata estimated tax on gains only.
+  if(isLoss(x.kind))return -a;
+  if(basis==='gross')return a;
+  const R=taxRates();
+  const rate=x.kind==='ltcg'?R.ltcg:R.stcg;
+  // simple: no exemption allocation per trade for display; just rate
+  return a*(1-rate);
+ }
+ const row=ledger(yearOf(x.date)).rows[x.id];
+ if(isGain(x.kind))return basis==='net'?a:(row?row.gross:a);
+ return -(basis==='net'?a-(row?row.refund:0):a);
+}
+function calcYear(year){
+ const R=taxRates(),t=state.txns.filter(x=>yearOf(x.date)===year&&txnCountry(x)===(state.settings.country||'DE'));
+ if(isIN()){
+  let stcg=0,ltcg=0,stcl=0,ltcl=0,refund=0;
+  t.forEach(x=>{
+   const a=+x.amount||0;
+   if(x.kind==='stcg')stcg+=a;
+   else if(x.kind==='ltcg')ltcg+=a;
+   else if(x.kind==='stcl')stcl+=a;
+   else if(x.kind==='ltcl')ltcl+=a;
+   else if(x.kind==='taxRefund')refund+=a;
+  });
+  // STCL offsets STCG first, then LTCG; LTCL offsets LTCG only
+  let stNet=stcg-stcl;
+  let ltNet=ltcg-ltcl;
+  let stCarry=0,ltCarry=0;
+  if(stNet<0){ltNet+=stNet;stCarry=-Math.min(0,ltNet);stNet=0;if(ltNet<0){ltCarry=-ltNet;ltNet=0}}
+  if(ltNet<0){ltCarry=-ltNet;ltNet=0}
+  const exempt=Math.max(0,(+state.settings.ltcgExempt||125000)-(+state.settings.ltcgUsed||0));
+  const ltcgTaxable=Math.max(0,ltNet-exempt);
+  const exemptionUsed=Math.min(exempt,ltNet);
+  const stTax=stNet*R.stcg,ltTax=ltcgTaxable*R.ltcg,totalTax=stTax+ltTax;
+  const grossPL=stcg+ltcg-stcl-ltcl;
+  const net=grossPL-totalTax+refund;
+  return {t,R,net,netGains:stcg+ltcg,grossGains:stcg+ltcg,grossLosses:stcl+ltcl,grossPL,
+   lossUsed:Math.min(stcl,stcg)+Math.min(ltcl+Math.max(0,stcl-stcg),ltcg),
+   stockCarry:stCarry,otherCarry:ltCarry,
+   taxBase:stNet+ltcgTaxable,allowanceUsed:exemptionUsed,taxable:stNet+ltcgTaxable,
+   capTax:stTax,soli:0,church:0,totalTax,
+   stcg,ltcg,stcl,ltcl,stNet,ltNet,ltcgTaxable,stTax,ltTax,exemptionUsed};
+ }
+ // --- Germany ---
+ const lg=ledger(year);
+ let sg=0,sl=0,og=0,ol=0,net=0,netGains=0,grossGains=0,grossLosses=0;
+ t.forEach(x=>{
+  const a=+x.amount||0,g=isGain(x.kind)?(lg.rows[x.id]||{gross:a/R.nf}).gross:0;
+  if(x.kind==='stockGain'){sg+=g;netGains+=a;grossGains+=g;net+=a}
+  else if(x.kind==='otherGain'){og+=g;netGains+=a;grossGains+=g;net+=a}
+  else if(x.kind==='stockLoss'){sl+=a;grossLosses+=a;net-=a}
+  else if(x.kind==='otherLoss'){ol+=a;grossLosses+=a;net-=a}
+  else if(x.kind==='taxRefund'){net+=a}
+ });
+ const cur=year===new Date().getFullYear();
+ let stockPool=(cur?(+state.settings.startStock||0):0)+sl;
+ let otherPool=(cur?(+state.settings.startOther||0):0)+ol;
+ const stockUsed=Math.min(stockPool,sg);stockPool-=stockUsed;sg-=stockUsed;
+ let otherUsed=Math.min(otherPool,og);otherPool-=otherUsed;og-=otherUsed;
+ const onStock=Math.min(otherPool,sg);otherPool-=onStock;sg-=onStock;otherUsed+=onStock;
+ const taxBase=sg+og;
+ const remAllow=Math.max(0,(+state.settings.allowance||0)-(+state.settings.allowUsed||0));
+ const allowanceUsed=Math.min(remAllow,taxBase);
+ const taxable=taxBase-allowanceUsed;
+ const capTax=taxable*R.cap,soli=taxable*R.soli,church=taxable*R.church;
+ return {t,R,net,netGains,grossGains,grossLosses,grossPL:grossGains-grossLosses,
+  lossUsed:stockUsed+otherUsed,stockCarry:stockPool,otherCarry:otherPool,
+  taxBase,allowanceUsed,taxable,capTax,soli,church,totalTax:capTax+soli+church};
+}
+function monthlyData(year,R){
+ const m=Array.from({length:12},()=>({net:0,gross:0,n:0}));
+ const lg=isIN()?{rows:{}}:ledger(year);
+ state.txns.forEach(x=>{
+  if(yearOf(x.date)!==year)return;
+  if(txnCountry(x)!==(state.settings.country||'DE'))return;
+  const i=Math.min(11,Math.max(0,(+String(x.date).slice(5,7)||1)-1)),a=+x.amount||0,o=m[i];
+  o.n++;
+  if(isGain(x.kind)){
+   if(isIN()){const rate=x.kind==='ltcg'?R.ltcg:R.stcg;o.gross+=a;o.net+=a*(1-rate)}
+   else{o.net+=a;o.gross+=(lg.rows[x.id]||{gross:a/R.nf}).gross}
+  }
+  else if(isLoss(x.kind)){o.net-=a;o.gross-=a}
+  else if(x.kind==='taxRefund'){o.net+=a}
+ });
+ return m;
+}
+// average over months that are not zero
+function avgActive(vals){
+ const act=vals.filter(v=>Math.abs(v)>=0.005);
+ return {n:act.length,avg:act.length?act.reduce((a,b)=>a+b,0)/act.length:0};
+}
+
+/* ---------- settings ---------- */
+function saveSettings(){
+ const s=state.settings;
+ s.country=$('country').value||'DE';
+ s.allowance=+$('allowance').value||0;
+ s.allowUsed=+$('allowUsed').value||0;
+ s.church=+$('church').value||0;
+ s.startStock=+$('startStock').value||0;
+ s.startOther=+$('startOther').value||0;
+ s.ltcgExempt=+$('ltcgExempt').value||125000;
+ s.ltcgUsed=+$('ltcgUsed').value||0;
+ s.inCess=!!$('inCess').checked;
+ persist();applyCountryUI();render();syncAmounts();
+}
+function syncSettingsUI(){
+ const s=state.settings;
+ $('country').value=s.country||'DE';
+ $('allowance').value=s.allowance;$('allowUsed').value=s.allowUsed;$('church').value=String(s.church);
+ $('startStock').value=s.startStock;$('startOther').value=s.startOther;
+ if($('ltcgExempt'))$('ltcgExempt').value=s.ltcgExempt??125000;
+ if($('ltcgUsed'))$('ltcgUsed').value=s.ltcgUsed||0;
+ if($('inCess'))$('inCess').checked=s.inCess!==false;
+ applyCountryUI();
+}
+function onCountryChange(){
+ const prev=state.settings.country;
+ state.settings.country=$('country').value||'DE';
+ if(state.settings.country==='IN'&&(state.settings.ltcgExempt==null||state.settings.ltcgExempt===1000))
+  state.settings.ltcgExempt=125000;
+ persist();applyCountryUI();rebuildKindSelect();render();syncAmounts();
+ toast(state.settings.country==='IN'?'Switched to India tax rules.':'Switched to Germany tax rules.');
+}
+function applyCountryUI(){
+ const inMode=isIN();
+ $('deSettings').style.display=inMode?'none':'';
+ $('inSettings').style.display=inMode?'':'none';
+ $('appTitle').textContent=inMode?'🇮🇳 IN Trade Tracker':'🇩🇪 DE Trade Tracker';
+ $('appSubtitle').textContent=inMode?'STCG • LTCG • ₹1.25L exemption':'Capital gains • loss pots • Sparer-Pauschbetrag';
+ $('allowTitle').textContent=inMode?'LTCG exemption':'Sparer-Pauschbetrag';
+ const pots=$('lossPotsCard');
+ if(pots){
+  if(inMode){
+   $('lossPotsTitle').textContent='Loss carryforward';
+   $('stockCarryLbl').textContent='STCL carryforward';
+   $('otherCarryLbl').textContent='LTCL carryforward';
+   $('lossPotsNote').textContent='STCL can offset STCG then LTCG. LTCL can only offset LTCG. Carryforwards are estimates for the next year.';
+  }else{
+   $('lossPotsTitle').textContent='Verlustverrechnungstöpfe';
+   $('stockCarryLbl').textContent='Aktienverlusttopf';
+   $('otherCarryLbl').textContent='Sonstiger Verlusttopf';
+   $('lossPotsNote').textContent='Two loss pots, tracked on a before-tax basis. Stock losses only offset stock gains; other losses offset any capital gain. This is a personal estimate and does not reproduce every bank\'s depot-specific tax ledger.';
+  }
+ }
+ $('posNote').textContent=inMode
+  ?'Average cost is for your own tracking. Indian tax uses FIFO / specific identification for STCG vs LTCG.'
+  :'Average cost is for your own tracking. German brokers usually apply FIFO for tax purposes.';
+ const note=$('modelNote');
+ if(note)note.textContent=inMode
+  ?'Tax model (India, listed equity): STCG 20% + optional 4% cess on gains held ≤ 12 months. LTCG 12.5% + optional 4% cess on gains held > 12 months, after the annual exemption (default ₹1.25 lakh). You choose STCG or LTCG when logging a trade. STCL offsets STCG then LTCG; LTCL offsets LTCG only. Amounts are entered before tax. Estimates only — your ITR and broker statements are what count.'
+  :'Tax model: 25% Abgeltungsteuer plus 5.5% solidarity surcharge on that tax. With church tax (8/9%) the base rate is reduced to 25% ÷ (1 + 25% × church rate), the statutory adjustment. Gains are entered after tax. The year is replayed in date order: the first gains use up the Sparer-Pauschbetrag and any loss pots tax-free (after tax = before tax), and only the rest is grossed up with the combined rate. Losses are entered before tax and refund the tax already paid on earlier gains. Losses are offset before the Sparer-Pauschbetrag. Stock-sale losses only offset stock-sale gains; other capital losses offset any capital gain. Estimates only — your bank\'s figures and your tax return are what count.';
+}
+function rebuildKindSelect(){
+ const sel=$('kind'),cur=sel.value;
+ const map=kindsMap();
+ sel.innerHTML='';
+ Object.keys(map).forEach(k=>{
+  const o=document.createElement('option');o.value=k;o.textContent=map[k];sel.appendChild(o);
+ });
+ if(map[cur])sel.value=cur;else sel.value=Object.keys(map)[0];
+ // history filter too
+ const hk=$('hKind');
+ if(hk){
+  const prev=hk.value;
+  hk.innerHTML='<option value="all">All categories</option>';
+  Object.keys(map).forEach(k=>{
+   const o=document.createElement('option');o.value=k;o.textContent=map[k];hk.appendChild(o);
+  });
+  if(prev==='all'||map[prev])hk.value=prev;else hk.value='all';
+ }
+ onKindChange();
+}
+function setBasis(b){state.settings.basis=b;persist();render()}
+function populateYears(){
+ const sel=$('year'),cur=new Date().getFullYear(),prev=+sel.value||cur;
+ const ys=state.txns.map(x=>yearOf(x.date)).filter(Boolean);
+ const lo=Math.min(cur-4,...ys),hi=Math.max(cur+1,...ys);
+ sel.innerHTML='';
+ for(let y=lo;y<=hi;y++){const o=document.createElement('option');o.value=y;o.textContent=y;sel.appendChild(o)}
+ sel.value=(prev>=lo&&prev<=hi)?prev:cur;
+ sel.onchange=render;
+}
+
+/* ---------- tabs ---------- */
+function goTab(name){
+ if(name!=='add'&&editingId)resetForm();
+ if(name==='positions'){renderPositions();calcPos()}
+ document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===name));
+ document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('active',p.id===name));
+ window.scrollTo(0,0);
+}
+
+/* ---------- add / edit form (after tax <-> before tax) ---------- */
+let src='net',editingId=null;
+function onKindChange(){
+ const k=$('kind').value,refund=k==='taxRefund';
+ if(isIN()){
+  // India: amounts are always before tax (gross). Single amount field.
+  $('grossCol').style.display='none';
+  $('lblNet').textContent=refund?'Refund amount (₹)':(isLoss(k)?'Loss amount (₹)':'Gain amount (₹)');
+  $('rateNote').style.display=refund?'none':'';
+  $('refundBox').style.display='none';
+  const R=taxRates();
+  if(isGain(k))$('rateNote').textContent=k==='ltcg'
+   ?`LTCG taxed at ${pctFmt(R.ltcg)} after the annual exemption. Enter the full gain before tax.`
+   :`STCG taxed at ${pctFmt(R.stcg)}. Enter the full gain before tax.`;
+  else if(isLoss(k))$('rateNote').textContent='Enter the full loss amount. STCL offsets STCG then LTCG; LTCL offsets LTCG only.';
+ }else{
+  $('grossCol').style.display=refund?'none':'';
+  $('lblNet').textContent=refund?'Refund amount (€)':'After tax (€)';
+  $('rateNote').style.display=refund?'none':'';
+  $('refundBox').style.display=(isLoss(k)&&!editingId)?'':'none';
+  syncAmounts();
+ }
+}
+function onAmt(which){src=which;syncAmounts()}
+function formCtx(){
+ const kind=$('kind').value,date=$('date').value||today(),year=yearOf(date);
+ if(isIN())return {kind,R:taxRates(),S:0,P:0};
+ let idx=Infinity;
+ if(editingId){const i=state.txns.findIndex(t=>t.id===editingId);if(i>=0&&state.txns[i].date===date)idx=i}
+ const r=runLedger(year,{date,idx},editingId);
+ return {kind,R:r.R,S:isGain(kind)?shieldFor(r.L,kind):0,P:isLoss(kind)?poolFor(r.L,kind):0};
+}
+function syncAmounts(){
+ const k=$('kind').value,nEl=$('amtNet'),gEl=$('amtGross'),c=formCtx(),r=c.R.total;
+ if(k!=='taxRefund'){
+  if(src==='net'){
+   const v=parseFloat(nEl.value),ok=nEl.value!==''&&isFinite(v);
+   gEl.value=ok?r2(isGain(k)?gainGross(v,c.S,r):lossGrossFromAfter(v,c.P,r)).toFixed(2):'';
+  }else{
+   const v=parseFloat(gEl.value),ok=gEl.value!==''&&isFinite(v);
+   nEl.value=ok?r2(isGain(k)?gainNet(v,c.S,r):lossAfter(v,c.P,r)).toFixed(2):'';
+  }
+ }
+ const rate=pctFmt(r);
+ if(isGain(k))$('rateNote').textContent=c.S>0.005
+  ?`${eur(c.S)} of tax-free room is still open on this date (allowance and loss pots), so that part of your gains carries no tax. The rest is taxed at ${rate}.`
+  :`No tax-free room is left on this date, so the full ${rate} applies. Before tax = after tax ÷ (1 − ${rate}).`;
+ else if(isLoss(k))$('rateNote').textContent=c.P>0.005
+  ?`A loss gets back ${rate} of the tax you already paid this year. ${eur(c.P)} of taxed gains are available to offset here. Your broker shows the before-tax loss.`
+  :`No tax has been paid on gains yet this year, so this loss earns no refund. It goes into the loss pot and shields later gains.`;
+ $('refundAmt').textContent=eur(r*Math.min(parseFloat(gEl.value)||0,c.P));
+}
+function resetForm(){
+ editingId=null;src='net';
+ $('date').value=today();$('desc').value='';$('amtNet').value='';$('amtGross').value='';$('addRefund').checked=false;
+ $('formTitle').textContent='Add transaction';$('saveBtn').textContent='Save transaction';$('cancelEdit').style.display='none';
+ onKindChange();
+}
+function cancelEdit(){resetForm();goTab('history')}
+function saveTxn(){
+ const date=$('date').value,kind=$('kind').value,desc=$('desc').value.trim(),c=formCtx(),r=c.R.total;
+ const nV=parseFloat($('amtNet').value),gV=parseFloat($('amtGross').value);
+ let amount;
+ if(isIN()){
+  amount=r2(nV);
+ }else if(kind==='taxRefund')amount=r2(nV);
+ else if(src==='gross')amount=isGain(kind)?r2(gainNet(gV,c.S,r)):r2(gV);
+ else amount=isGain(kind)?r2(nV):r2(lossGrossFromAfter(nV,c.P,r));
+ if(!date||!isFinite(amount)||amount<=0){toast('Enter a date and an amount above 0.');return}
+ if(editingId){
+  const x=state.txns.find(t=>t.id===editingId);
+  if(x){x.date=date;x.desc=desc;x.kind=kind;x.amount=amount}
+ }else{
+  state.txns.push({id:newId(),date,desc,kind,amount,country:state.settings.country||'DE'});
+  const refund=r2(r*Math.min(amount,c.P));
+  if(isLoss(kind)&&$('addRefund').checked&&refund>0){
+   state.txns.push({id:newId(),date,desc:'Tax refund'+(desc?' – '+desc:''),kind:'taxRefund',amount:refund,country:state.settings.country||'DE'});
+  }
+ }
+ const wasEdit=!!editingId;
+ persist();resetForm();populateYears();$('year').value=yearOf(date);render();
+ goTab(wasEdit?'history':'dashboard');
+ toast(wasEdit?'Transaction updated.':'Transaction saved.');
+}
+function editTxn(id){
+ const x=state.txns.find(t=>t.id===id);if(!x)return;
+ editingId=id;
+ $('date').value=x.date;$('desc').value=x.desc||'';$('kind').value=x.kind;
+ if(isLoss(x.kind)){src='gross';$('amtGross').value=(+x.amount).toFixed(2);$('amtNet').value=''}
+ else{src='net';$('amtNet').value=(+x.amount).toFixed(2);$('amtGross').value=''}
+ $('addRefund').checked=false;
+ $('formTitle').textContent='Edit transaction';$('saveBtn').textContent='Update transaction';$('cancelEdit').style.display='';
+ onKindChange();
+ goTab('add');
+}
+function delTxn(id){
+ const i=state.txns.findIndex(t=>t.id===id);if(i<0)return;
+ const [x]=state.txns.splice(i,1);
+ persist();render();
+ toast('Transaction deleted.','Undo',()=>{state.txns.push(x);persist();populateYears();render()});
+}
+
+/* ---------- rendering ---------- */
+function render(){
+ const year=+$('year').value,R=taxRates(),basis=state.settings.basis,other=basis==='net'?'gross':'net';
+ const c=calcYear(year);
+ $('yearTitle').textContent=year;
+
+ // hero
+ $('net').textContent=eur(c.net);$('net').className='big '+cls(c.net);
+ $('netGross').textContent=eur(c.grossPL);$('netGross').className=cls(c.grossPL);
+ const met=(l,v)=>`<div class="metric"><span class="muted">${l}</span><b>${v}</b></div>`;
+ $('kpis').innerHTML=met('Gains · after tax',eur(c.netGains))+met('Gains · before tax',eur(c.grossGains))+met('Losses booked',eur(c.grossLosses))+met('Losses used',eur(c.lossUsed));
+
+ // allowance / exemption
+ if(isIN()){
+  const A=+state.settings.ltcgExempt||125000,used=Math.min(A,(+state.settings.ltcgUsed||0)+(c.exemptionUsed||0)),pct=A?Math.min(100,used/A*100):0;
+  $('allowFill').style.width=pct+'%';$('allowFill').className=pct>=100?'full':'';
+  $('allowText').innerHTML=`${money(used)} used of ${money(A)} · <b>${money(Math.max(0,A-used))}</b> left`;
+ }else{
+  const A=+state.settings.allowance||0,used=Math.min(A,(+state.settings.allowUsed||0)+c.allowanceUsed),pct=A?Math.min(100,used/A*100):0;
+  $('allowFill').style.width=pct+'%';$('allowFill').className=pct>=100?'full':'';
+  $('allowText').innerHTML=`${money(used)} used of ${money(A)} · <b>${money(Math.max(0,A-used))}</b> left`;
+ }
+
+ // tax estimate
+ const ln=(a,b,k='')=>`<div class="line ${k}"><span>${a}</span><b>${b}</b></div>`;
+ if(isIN()){
+  $('taxLines').innerHTML=
+   ln('STCG (net)',money(c.stNet))+
+   ln('LTCG (net, before exemption)',money(c.ltNet))+
+   ln('LTCG taxable after exemption',money(c.ltcgTaxable))+
+   ln('STCG tax',money(c.stTax))+
+   ln('LTCG tax',money(c.ltTax))+
+   ln('Total tax (est.)',money(c.totalTax),'net');
+  $('taxNote').textContent=`STCG ${pctFmt(R.stcg)} · LTCG ${pctFmt(R.ltcg)}${R.cess>1?' (incl. 4% cess)':''}.`;
+ }else{
+  $('taxLines').innerHTML=ln('Taxable after losses & allowance',money(c.taxable))+ln('Capital gains tax',money(c.capTax))+ln('Solidarity surcharge',money(c.soli))+(R.k>0?ln('Church tax',money(c.church)):'')+ln('Total tax (est.)',money(c.totalTax),'net');
+  $('taxNote').textContent=`Combined rate ${pctFmt(R.total)} on the taxable amount.`;
+ }
+
+ // loss pots
+ $('stockCarry').textContent=eur(c.stockCarry);$('otherCarry').textContent=eur(c.otherCarry);
+
+ renderMonthly(year,R,basis,other);
+ renderStats(c,basis,R);
+ renderHistory();
+ $('segNet').classList.toggle('on',basis==='net');$('segGross').classList.toggle('on',basis==='gross');
+}
+function renderMonthly(year,R,basis,other){
+ const mo=monthlyData(year,R),vals=mo.map(m=>m[basis]),ovals=mo.map(m=>m[other]);
+ const aN=avgActive(mo.map(m=>m.net)),aG=avgActive(mo.map(m=>m.gross)),aS=basis==='net'?aN:aG;
+ const now=new Date(),elapsed=year<now.getFullYear()?12:(year===now.getFullYear()?now.getMonth()+1:0);
+ const zeroPast=vals.slice(0,elapsed).filter(v=>Math.abs(v)<0.005).length;
+ const active=vals.map((v,i)=>Math.abs(v)>=0.005?i:-1).filter(i=>i>=0);
+ let best=-1,worst=-1;
+ if(active.length>1){best=active.reduce((a,i)=>vals[i]>vals[a]?i:a,active[0]);worst=active.reduce((a,i)=>vals[i]<vals[a]?i:a,active[0])}
+ const met=(l,v,k,sub)=>`<div class="metric"><span class="muted">${l}</span><b class="${k}">${v}</b>${sub?`<small>${sub}</small>`:''}</div>`;
+ $('avgBox').innerHTML=
+  met('Monthly avg · after tax',aN.n?eur(aN.avg):'—',cls(aN.avg),aN.n+' active month'+(aN.n===1?'':'s'))+
+  met('Monthly avg · before tax',aG.n?eur(aG.avg):'—',cls(aG.avg),aG.n+' active month'+(aG.n===1?'':'s'))+
+  met('Best month',best>=0?eur(vals[best]):'—',best>=0?cls(vals[best]):'dim',best>=0?MONTHS[best]:'')+
+  met('Weakest month',worst>=0?eur(vals[worst]):'—',worst>=0?cls(vals[worst]):'dim',worst>=0?MONTHS[worst]:'');
+ $('avgNote').textContent=aS.n?`Averages skip months at €0${zeroPast?` (${zeroPast} empty month${zeroPast===1?'':'s'} so far this year)`:''}.`:'No months with activity in this year yet.';
+ $('chart').innerHTML=chartSVG(vals,aS.avg,aS.n);
+ let rows='',total=0;
+ vals.forEach((v,i)=>{
+  const z=Math.abs(v)<0.005;total+=v;
+  const chip=i===best?'<em class="chip">best</em>':(i===worst?'<em class="chip">weakest</em>':'');
+  rows+=`<div class="mrow${z?' zero':''}"><span>${MONTHS[i]}${chip}</span><span class="r">${z?'<span class="dim">—</span>':`<b class="${cls(v)}">${eur(v)}</b><small>${eur(ovals[i])} ${other==='net'?'after':'before'} tax</small>`}</span></div>`;
+ });
+ rows+=`<div class="mrow"><b>Year total</b><b class="${cls(total)}">${eur(total)}</b></div>`;
+ $('months').innerHTML=rows;
+}
+function chartSVG(vals,avg,n){
+ const W=460,H=150,top=12,bot=22,bw=24,cnt=12,gap=(W-cnt*bw)/(cnt+1);
+ const max=Math.max(0,...vals),min=Math.min(0,...vals),span=(max-min)||1,ph=H-top-bot,y0=top+ph*(max/span);
+ let s=`<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Monthly profit chart"><line x1="0" x2="${W}" y1="${y0}" y2="${y0}" class="axis"/>`;
+ vals.forEach((v,i)=>{
+  const x=gap+i*(bw+gap),z=Math.abs(v)<0.005,h=z?0:Math.max(2,Math.abs(v)/span*ph);
+  if(z)s+=`<rect x="${x}" y="${y0-1}" width="${bw}" height="2" rx="1" class="bz"/>`;
+  else s+=`<rect x="${x}" y="${v>0?y0-h:y0}" width="${bw}" height="${h}" rx="3" class="${v>0?'bp':'bn'}"/>`;
+  s+=`<text x="${x+bw/2}" y="${H-7}" text-anchor="middle" class="cl">${MONTHS[i]}</text>`;
+ });
+ if(n>0){const ya=y0-avg/span*ph;s+=`<line x1="0" x2="${W}" y1="${ya}" y2="${ya}" class="avgl"/>`}
+ return s+'</svg>';
+}
+function renderStats(c,basis,R){
+ const tr=c.t.filter(x=>isGain(x.kind)||isLoss(x.kind)).map(x=>({d:(x.desc||'Unnamed').trim()||'Unnamed',v:val(x,basis)}));
+ $('statsSub').textContent=(basis==='net'?'After tax':'Before tax')+' · switch above to change';
+ if(!tr.length){$('statsGrid').innerHTML='<div class="empty" style="grid-column:1/-1">No trades in this year yet.</div>';$('topWrap').innerHTML='';return}
+ const w=tr.filter(x=>x.v>0),l=tr.filter(x=>x.v<0);
+ const sw=w.reduce((a,x)=>a+x.v,0),sl=-l.reduce((a,x)=>a+x.v,0),total=sw-sl;
+ const bestT=tr.reduce((a,x)=>x.v>a.v?x:a,tr[0]),worstT=tr.reduce((a,x)=>x.v<a.v?x:a,tr[0]);
+ const met=(a,b,k,sub)=>`<div class="metric"><span class="muted">${a}</span><b class="${k||''}">${b}</b>${sub?`<small>${escapeHtml(sub)}</small>`:''}</div>`;
+ $('statsGrid').innerHTML=
+  met('Trades',String(tr.length),'',w.length+' wins · '+l.length+' losses')+
+  met('Win rate',(w.length/tr.length*100).toLocaleString('de-DE',{maximumFractionDigits:1})+' %')+
+  met('Avg win',w.length?eur(sw/w.length):'—','good')+
+  met('Avg loss',l.length?eur(-sl/l.length):'—',l.length?'bad':'dim')+
+  met('Profit factor',sl>0?(sw/sl).toLocaleString('de-DE',{maximumFractionDigits:2}):'—','','wins ÷ losses')+
+  met('Avg per trade',eur(total/tr.length),cls(total))+
+  met('Best trade',eur(bestT.v),cls(bestT.v),bestT.d)+
+  met('Worst trade',eur(worstT.v),cls(worstT.v),worstT.d);
+ const g={};
+ tr.forEach(x=>{const k=x.d.toLowerCase();(g[k]=g[k]||{d:x.d,v:0,n:0}).v+=x.v;g[k].n++});
+ const arr=Object.values(g).sort((a,b)=>b.v-a.v);
+ const top=arr.slice(0,5),bottom=arr.slice(-3).filter(x=>x.v<0&&!top.includes(x)).reverse();
+ const row=x=>`<div class="line"><span>${escapeHtml(x.d)} <span class="dim">· ${x.n}×</span></span><b class="${cls(x.v)}">${eur(x.v)}</b></div>`;
+ $('topWrap').innerHTML=`<h3 style="margin:16px 0 4px">Top by name</h3>${top.map(row).join('')}`+(bottom.length?`<h3 style="margin:16px 0 4px">Weakest</h3>${bottom.map(row).join('')}`:'');
+}
+function txnCountry(x){
+ // Infer country from kind if not stored (legacy data)
+ if(x.country==='IN'||x.country==='DE')return x.country;
+ const k=x.kind||'';
+ if(k==='stcg'||k==='ltcg'||k==='stcl'||k==='ltcl')return 'IN';
+ if(k==='stockGain'||k==='stockLoss'||k==='otherGain'||k==='otherLoss')return 'DE';
+ return state.settings.country||'DE';
+}
+function renderHistory(){
+ const el=$('historyList'),R=taxRates(),basis=state.settings.basis,other=basis==='net'?'gross':'net';
+ const q=$('hSearch').value.trim().toLowerCase(),kf=$('hKind').value,mf=$('hMonth').value,all=$('hAll').checked,y=+$('year').value;
+ const hc=$('hCountry')?$('hCountry').value:'auto';
+ const wantCountry=hc==='auto'?(state.settings.country||'DE'):hc;
+ const list=state.txns.filter(x=>{
+  if(!(all||yearOf(x.date)===y))return false;
+  if(q&&!(x.desc||'').toLowerCase().includes(q))return false;
+  if(kf!=='all'&&x.kind!==kf)return false;
+  if(mf!=='all'&&(+String(x.date).slice(5,7)-1)!==+mf)return false;
+  if(wantCountry!=='all'&&txnCountry(x)!==wantCountry)return false;
+  return true;
+ }).sort((a,b)=>b.date.localeCompare(a.date)||String(b.id).localeCompare(String(a.id)));
+ if(!state.txns.length){$('histSummary').textContent='';el.innerHTML='<div class="empty">No transactions yet. Add one, or import your trade log in Settings.</div>';return}
+ if(!list.length){$('histSummary').textContent='';el.innerHTML='<div class="empty">No transactions match these filters.</div>';return}
+ const sum=b=>list.reduce((a,x)=>a+(x.kind==='taxRefund'?(b==='net'?+x.amount:0):val(x,b)),0);
+ $('histSummary').textContent=`${list.length} entr${list.length===1?'y':'ies'} · total ${eur(sum(basis))} ${basis==='net'?'after':'before'} tax`;
+ el.innerHTML=list.map(x=>{
+  const a=+x.amount||0;let main,sub='';
+  if(x.kind==='taxRefund')main=`<b class="good">+${eur(a)}</b>`;
+  else{
+   const v=val(x,basis),o=val(x,other);
+   main=`<b class="${cls(v)}">${v>0?'+':''}${eur(v)}</b>`;
+   sub=`<small>${eur(o)} ${other==='net'?'after':'before'} tax</small>`;
+  }
+  const id=escapeHtml(x.id);
+  return `<div class="txn"><div class="row"><div><div class="title">${escapeHtml(x.desc||'Transaction')}</div><div class="meta">${escapeHtml(x.date)} • ${label(x.kind)} • ${txnCountry(x)==='IN'?'🇮🇳':'🇩🇪'}</div></div><div class="amt">${main}${sub}</div></div><div class="btns"><button class="smallbtn" data-act="edit" data-id="${id}">Edit</button><button class="smallbtn del" data-act="del" data-id="${id}">Delete</button></div></div>`;
+ }).join('');
+}
+document.getElementById('posList').addEventListener('click',e=>{
+ const b=e.target.closest('button[data-pos]');if(!b)return;
+ b.dataset.pos==='del'?delPosition(b.dataset.id):loadPosition(b.dataset.id);
+});
+$('historyList').addEventListener('click',e=>{
+ const b=e.target.closest('button[data-act]');if(!b)return;
+ b.dataset.act==='del'?delTxn(b.dataset.id):editTxn(b.dataset.id);
+});
+
+/* ---------- export / backup ---------- */
+function download(name,type,text){
+ const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type}));a.download=name;
+ document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+}
+function exportCSV(){
+ const R=taxRates();
+ const sorted=[...state.txns].sort((a,b)=>a.date.localeCompare(b.date));
+ const rows=[['Date','Description','Category','Before tax','After tax (losses incl. refund)'],
+  ...sorted.map(x=>x.kind==='taxRefund'?[x.date,x.desc||'',label(x.kind),'',r2(+x.amount)]:[x.date,x.desc||'',label(x.kind),r2(val(x,'gross')),r2(val(x,'net'))])];
+ const csv=rows.map(r=>r.map(v=>`"${String(v).replaceAll('"','""')}"`).join(',')).join('\n');
+ download('german_tax_transactions.csv','text/csv;charset=utf-8','\ufeff'+csv);
+}
+function exportJSON(){
+ download('trade-tracker-backup-'+today()+'.json','application/json',JSON.stringify({app:'deTaxTracker',version:2,exportedAt:new Date().toISOString(),txns:state.txns,positions:state.positions||[],settings:state.settings},null,1));
+}
+function importJSON(input){
+ const f=input.files[0];input.value='';if(!f)return;
+ const rd=new FileReader();
+ rd.onload=()=>{
+  try{
+   const d=JSON.parse(rd.result);
+   const ok=d&&Array.isArray(d.txns)&&d.txns.every(x=>x&&x.id!==undefined&&/^\d{4}-\d{2}-\d{2}$/.test(x.date)&&isFinite(+x.amount));
+   if(!ok)throw new Error('bad file');
+   if(!confirm('Replace everything in the app with this backup ('+d.txns.length+' transactions)?'))return;
+   const positions=Array.isArray(d.positions)?d.positions.map(p=>({
+    id:String(p.id||newId()),name:String(p.name||''),shares:+p.shares||0,avgCost:+p.avgCost||0
+   })).filter(p=>p.name&&p.shares>0):[];
+   state={txns:d.txns.map(x=>({id:String(x.id),date:x.date,desc:String(x.desc||''),kind:x.kind,amount:+x.amount})),positions,settings:Object.assign({},DEFAULTS,d.settings||{})};
+   persist();syncSettingsUI();rebuildKindSelect();populateYears();render();syncAmounts();renderPositions();toast('Backup restored.');
+  }catch(e){toast('That file is not a valid backup.')}
+ };
+ rd.readAsText(f);
+}
+function clearAll(){if(confirm('Delete all transactions, positions and settings?')){localStorage.removeItem(KEY);location.reload()}}
+
+/* ---------- positions / averaging ---------- */
+let posMode='qty'; // 'qty' = calculate shares from total+price; 'total' = calculate total from shares+price
+function setPosMode(mode){
+ posMode=mode==='total'?'total':'qty';
+ $('posModeQty').classList.toggle('on',posMode==='qty');
+ $('posModeTotal').classList.toggle('on',posMode==='total');
+ const shEl=$('posBuyShares'),totEl=$('posBuyTotal');
+ if(posMode==='qty'){
+  shEl.readOnly=true;totEl.readOnly=false;
+  shEl.style.opacity='.7';totEl.style.opacity='';
+  $('posModeNote').textContent='Enter price and total to invest. Quantity is calculated. Price is never calculated.';
+ }else{
+  shEl.readOnly=false;totEl.readOnly=true;
+  shEl.style.opacity='';totEl.style.opacity='.7';
+  $('posModeNote').textContent='Enter quantity and price. Total to invest is calculated. Price is never calculated.';
+ }
+ onPosBuyInput();
+}
+function onPosBuyInput(){
+ const shEl=$('posBuyShares'),prEl=$('posBuyPrice'),totEl=$('posBuyTotal');
+ const pr=parseFloat(prEl.value),sh=parseFloat(shEl.value),tot=parseFloat(totEl.value);
+ const hasPr=prEl.value!==''&&isFinite(pr)&&pr>0;
+ const hasSh=shEl.value!==''&&isFinite(sh)&&sh>0;
+ const hasTot=totEl.value!==''&&isFinite(tot)&&tot>0;
+ if(posMode==='qty'){
+  shEl.value=hasPr&&hasTot?String(r2(tot/pr*1e8)/1e8):'';
+ }else{
+  totEl.value=hasPr&&hasSh?r2(sh*pr).toFixed(2):'';
+ }
+ calcPos();
+}
+function calcPos(){
+ const shares=Math.max(0,parseFloat($('posShares').value)||0);
+ const avg=Math.max(0,parseFloat($('posAvg').value)||0);
+ const buyShares=Math.max(0,parseFloat($('posBuyShares').value)||0);
+ const buyPrice=Math.max(0,parseFloat($('posBuyPrice').value)||0);
+ const market=parseFloat($('posMarket').value);
+ const hasMarket=isFinite(market)&&market>=0&&$('posMarket').value!=='';
+
+ const oldTotal=shares*avg;
+ const buyCost=buyShares*buyPrice;
+ const newShares=shares+buyShares;
+ const newTotal=oldTotal+buyCost;
+ const newAvg=newShares>0?newTotal/newShares:0;
+
+ $('posNewShares').textContent=newShares?newShares.toLocaleString(isIN()?'en-IN':'de-DE',{maximumFractionDigits:6}):'—';
+ $('posNewAvg').textContent=newShares?money(newAvg):'—';
+ $('posBuyCost').textContent=buyShares?money(buyCost):'—';
+ $('posNewTotal').textContent=newShares?money(newTotal):'—';
+
+ if(hasMarket&&newShares>0){
+  const plAfter=(market-newAvg)*newShares;
+  const plBefore=shares>0?(market-avg)*shares:0;
+  $('posPl').textContent=money(plAfter);$('posPl').className=cls(plAfter);
+  $('posPlBefore').textContent=shares>0?money(plBefore):'—';$('posPlBefore').className=shares>0?cls(plBefore):'dim';
+  $('posPlRow').style.display='flex';$('posPlBeforeRow').style.display=shares>0?'flex':'none';
+ }else{
+  $('posPlRow').style.display='none';$('posPlBeforeRow').style.display='none';
+ }
+}
+function resetPosForm(){
+ editingPosId=null;
+ $('posName').value='';$('posShares').value='';$('posAvg').value='';
+ $('posBuyShares').value='';$('posBuyPrice').value='';$('posBuyTotal').value='';$('posMarket').value='';
+ $('posFormTitle').textContent='Average cost calculator';
+ $('posLoaded').style.display='none';
+ $('posUpdateBtn').style.display='none';
+ $('posSaveBtn').style.display='';
+ setPosMode(posMode||'qty');
+}
+function loadPosition(id){
+ const p=state.positions.find(x=>x.id===id);if(!p)return;
+ editingPosId=id;
+ $('posName').value=p.name;
+ $('posShares').value=p.shares;
+ $('posAvg').value=r2(p.avgCost).toFixed(2);
+ $('posBuyShares').value='';$('posBuyPrice').value='';$('posBuyTotal').value='';$('posMarket').value='';
+ $('posFormTitle').textContent='Edit / average up';
+ $('posLoaded').textContent='Loaded: '+p.name+' · '+p.shares.toLocaleString(isIN()?'en-IN':'de-DE')+' shares @ '+money(p.avgCost);
+ $('posLoaded').style.display='block';
+ $('posUpdateBtn').style.display='';
+ $('posSaveBtn').style.display='none';
+ calcPos();
+ window.scrollTo(0,0);
+}
+function getPosFromForm(applyBuy){
+ const name=$('posName').value.trim();
+ let shares=Math.max(0,parseFloat($('posShares').value)||0);
+ let avg=Math.max(0,parseFloat($('posAvg').value)||0);
+ const buyShares=Math.max(0,parseFloat($('posBuyShares').value)||0);
+ const buyPrice=Math.max(0,parseFloat($('posBuyPrice').value)||0);
+ if(applyBuy&&buyShares>0){
+  const newTotal=shares*avg+buyShares*buyPrice;
+  shares=shares+buyShares;
+  avg=shares>0?newTotal/shares:0;
+ }
+ return {name,shares:r2(shares*1e6)/1e6,avgCost:r2(avg)};
+}
+function saveAsNewPosition(){
+ const p=getPosFromForm(true);
+ if(!p.name){toast('Enter a name / ticker.');return}
+ if(p.shares<=0){toast('Shares must be greater than 0.');return}
+ state.positions.push({id:newId(),name:p.name,shares:p.shares,avgCost:p.avgCost});
+ persist();resetPosForm();renderPositions();
+ toast('Position saved.');
+}
+function updatePosition(){
+ if(!editingPosId)return;
+ const p=getPosFromForm(true);
+ if(!p.name){toast('Enter a name / ticker.');return}
+ if(p.shares<=0){toast('Shares must be greater than 0.');return}
+ const x=state.positions.find(t=>t.id===editingPosId);
+ if(x){x.name=p.name;x.shares=p.shares;x.avgCost=p.avgCost}
+ persist();resetPosForm();renderPositions();
+ toast('Position updated.');
+}
+function delPosition(id){
+ const i=state.positions.findIndex(t=>t.id===id);if(i<0)return;
+ const [x]=state.positions.splice(i,1);
+ if(editingPosId===id)resetPosForm();
+ persist();renderPositions();
+ toast('Position deleted.','Undo',()=>{state.positions.push(x);persist();renderPositions()});
+}
+function renderPositions(){
+ const el=$('posList'),list=state.positions||[];
+ if(!list.length){
+  el.innerHTML='';
+  $('posEmptyNote').style.display='block';
+  return;
+ }
+ $('posEmptyNote').style.display='none';
+ el.innerHTML=list.map(p=>{
+  const total=p.shares*p.avgCost;
+  const id=escapeHtml(p.id);
+  return `<div class="txn"><div class="row"><div><div class="title">${escapeHtml(p.name)}</div><div class="meta">${p.shares.toLocaleString(isIN()?'en-IN':'de-DE',{maximumFractionDigits:6})} shares · avg ${money(p.avgCost)}</div></div><div class="amt"><b>${money(total)}</b><small>invested</small></div></div><div class="btns"><button class="smallbtn" data-pos="load" data-id="${id}">Load</button><button class="smallbtn del" data-pos="del" data-id="${id}">Delete</button></div></div>`;
+ }).join('');
+}
+
+
+
+/* ---------- seed import ---------- */
+
+function parseCSVLine(line){
+ const out=[];let cur='',q=false;
+ for(let i=0;i<line.length;i++){
+  const c=line[i];
+  if(q){if(c==='"'&&line[i+1]==='"'){cur+='"';i++}else if(c==='"')q=false;else cur+=c}
+  else{if(c==='"')q=true;else if(c===','){out.push(cur);cur=''}else cur+=c}
+ }
+ out.push(cur);return out;
+}
+function normalizeKind(raw){
+ const s=String(raw||'').trim().toLowerCase();
+ const map={
+  'stock gain':'stockGain','stockgain':'stockGain','stock sale gain':'stockGain',
+  'stock loss':'stockLoss','stockloss':'stockLoss','stock sale loss':'stockLoss',
+  'other gain':'otherGain','othergain':'otherGain','other capital gain':'otherGain',
+  'other loss':'otherLoss','otherloss':'otherLoss','other capital loss':'otherLoss',
+  'tax refund':'taxRefund','taxrefund':'taxRefund','refund':'taxRefund',
+  'stcg':'stcg','stcg (≤12 mo)':'stcg','stcg (<=12 mo)':'stcg','short-term capital gain':'stcg','short term capital gain':'stcg',
+  'ltcg':'ltcg','ltcg (>12 mo)':'ltcg','long-term capital gain':'ltcg','long term capital gain':'ltcg',
+  'stcl':'stcl','stcl (short-term loss)':'stcl','short-term capital loss':'stcl','short term capital loss':'stcl',
+  'ltcl':'ltcl','ltcl (long-term loss)':'ltcl','long-term capital loss':'ltcl','long term capital loss':'ltcl'
+ };
+ return map[s]||null;
+}
+function parseNum(v){
+ let s=String(v||'').trim();
+ if(!s)return NaN;
+ // German 1.234,56 or plain 1234.56
+ if(/^-?\d{1,3}(\.\d{3})+(,\d+)?$/.test(s)||/^-?\d+,\d+$/.test(s))s=s.replace(/\./g,'').replace(',','.');
+ else s=s.replace(/[^0-9.\-]/g,'');
+ return parseFloat(s);
+}
+function importCSV(input){
+ const f=input.files[0];input.value='';if(!f)return;
+ const rd=new FileReader();
+ rd.onload=()=>{
+  try{
+   let text=rd.result.replace(/^\ufeff/,'');
+   const lines=text.split(/\r?\n/).filter(l=>l.trim());
+   if(lines.length<2){toast('CSV has no data rows.');return}
+   const header=parseCSVLine(lines[0]).map(h=>h.trim().toLowerCase());
+   const iDate=header.findIndex(h=>h==='date');
+   const iDesc=header.findIndex(h=>h==='description'||h==='desc');
+   const iKind=header.findIndex(h=>h==='category'||h==='kind');
+   const iAmt=header.findIndex(h=>h==='amount');
+   const iBefore=header.findIndex(h=>h==='before tax');
+   const iAfter=header.findIndex(h=>h.includes('after tax'));
+   if(iDate<0||iKind<0||(iAmt<0&&iBefore<0&&iAfter<0)){
+    toast('CSV needs Date, Category and Amount columns.');return;
+   }
+   const existingKeys=new Set(state.txns.map(x=>[x.date,x.kind,x.desc||'',r2(+x.amount)].join('|')));
+   let added=0,skipped=0;
+   for(let li=1;li<lines.length;li++){
+    const cols=parseCSVLine(lines[li]);
+    if(cols.every(c=>!String(c||'').trim()))continue;
+    const date=(cols[iDate]||'').trim().slice(0,10);
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(date)){skipped++;continue}
+    const kind=normalizeKind(cols[iKind]);
+    if(!kind){skipped++;continue}
+    // German model stores: gains AFTER tax, losses BEFORE tax, refunds as the refund amount.
+    // This matches the app's own CSV export columns.
+    let raw;
+    const deGain=kind==='stockGain'||kind==='otherGain';
+    const deLoss=kind==='stockLoss'||kind==='otherLoss';
+    const inGain=kind==='stcg'||kind==='ltcg';
+    const inLoss=kind==='stcl'||kind==='ltcl';
+    if(kind==='taxRefund')raw=iAfter>=0?cols[iAfter]:(iAmt>=0?cols[iAmt]:cols[iBefore]);
+    else if(deLoss)raw=iBefore>=0?cols[iBefore]:(iAmt>=0?cols[iAmt]:cols[iAfter]);
+    else if(deGain)raw=iAfter>=0?cols[iAfter]:(iAmt>=0?cols[iAmt]:cols[iBefore]);
+    else if(inGain||inLoss)raw=iBefore>=0?cols[iBefore]:(iAmt>=0?cols[iAmt]:cols[iAfter]);
+    else raw=iAmt>=0?cols[iAmt]:(iAfter>=0?cols[iAfter]:cols[iBefore]);
+    let amount=parseNum(raw);
+    if(!isFinite(amount)||amount===0){skipped++;continue}
+    amount=Math.abs(amount);
+    const desc=iDesc>=0?String(cols[iDesc]||'').trim():'';
+    const country=(kind==='stcg'||kind==='ltcg'||kind==='stcl'||kind==='ltcl')?'IN':'DE';
+    const key=[date,kind,desc,r2(amount)].join('|');
+    if(existingKeys.has(key)){skipped++;continue}
+    state.txns.push({id:newId(),date,desc,kind,amount,country});
+    existingKeys.add(key);added++;
+   }
+   if(!added){toast(skipped?'No new rows imported ('+skipped+' skipped).':'No rows imported.');return}
+   persist();populateYears();render();
+   toast(added+' transaction'+(added===1?'':'s')+' imported'+(skipped?' ('+skipped+' skipped)':'')+'.');
+  }catch(e){console.error(e);toast('Could not read that CSV file.')}
+ };
+ rd.readAsText(f);
+}
+
+
+/* ---------- init ---------- */
+document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>goTab(b.dataset.tab));
+$('modelNote').textContent='Tax model: 25% Abgeltungsteuer plus 5.5% solidarity surcharge on that tax. With church tax (8/9%) the base rate is reduced to 25% ÷ (1 + 25% × church rate), the statutory adjustment. Gains are entered after tax. The year is replayed in date order: the first gains use up the Sparer-Pauschbetrag and any loss pots tax-free (after tax = before tax), and only the rest is grossed up with the combined rate. Losses are entered before tax and refund the tax already paid on earlier gains. Losses are offset before the Sparer-Pauschbetrag. Stock-sale losses only offset stock-sale gains; other capital losses offset any capital gain. Estimates only — your bank\'s figures and your tax return are what count.';
+populateYears();
+syncSettingsUI();
+rebuildKindSelect();
+resetForm();
+render();
+renderPositions();
+setPosMode('qty');
+
+if('serviceWorker' in navigator){
+ window.addEventListener('load',()=>{
+  navigator.serviceWorker.register('sw.js').catch(()=>{});
+ });
+}
+</script>
+</body>
+</html>
