@@ -3,7 +3,7 @@
   "short_name": "Tax Tracker",
   "description": "Track trades and estimate German capital-gains tax, loss pots and Sparer-Pauschbetrag.",
   "lang": "en",
-  "start_url": "./index.html",
+  "start_url": "./index-1.html",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
