@@ -1,0 +1,3343 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<title>Trade Tracker</title>
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" href="favicon-96x96.png" type="image/png" sizes="96x96">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&display=swap">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Tax Tracker">
+<meta name="mobile-web-app-capable" content="yes">
+<style>
+:root{
+ --bg:#000000;
+ --ink:#f5f5f7;
+ --muted:rgba(235,235,245,0.55);
+ --good:#30d158;
+ --bad:#ff453a;
+ --warn:#ffd60a;
+ --danger-bg:rgba(255,69,58,0.18);
+ --danger:#ff6961;
+ --goodbg:rgba(48,209,88,0.14);
+ --glass-bg:rgba(255,255,255,0.08);
+ --glass-bg-2:rgba(255,255,255,0.05);
+ --glass-border:rgba(255,255,255,0.12);
+ --glass-border-soft:rgba(255,255,255,0.10);
+ --glass-highlight:rgba(255,255,255,0.14);
+ --inputbg:rgba(118,118,128,0.18);
+ --inputline:rgba(255,255,255,0.14);
+ --blur:blur(40px) saturate(180%);
+ --radius:24px;
+ --radius-sm:16px;
+ --shadow:0 10px 40px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.12);
+ --top-bg:rgba(22,22,24,0.55);
+ --tabs-bg:rgba(22,22,24,0.45);
+ --toast-bg:rgba(30,30,32,0.72);
+ --fallback-bg:rgba(28,28,30,0.94);
+ --suggest-bg:#0a0a0a;
+ --suggest-hover:#1c1c1e;
+ --suggest-border:#3a3a3c;
+ --suggest-sep:#2c2c2e;
+ --track-bg:rgba(255,255,255,0.08);
+ --pzero:rgba(255,255,255,0.22);
+ --pgrid:rgba(255,255,255,0.08);
+ --primary-bg:rgba(255,255,255,0.92);
+ --primary-ink:#000;
+ --glow1:rgba(10,132,255,0.12);
+ --glow2:rgba(191,90,242,0.18);
+ --glow3:rgba(48,209,88,0.10);
+}
+[data-theme="light"]{
+ --bg:#f2f2f7;
+ --ink:#1c1c1e;
+ --muted:rgba(60,60,67,0.6);
+ --good:#2e9e4f;
+ --bad:#d70015;
+ --warn:#a05a00;
+ --danger-bg:rgba(255,59,48,0.10);
+ --danger:#d70015;
+ --goodbg:rgba(46,158,79,0.12);
+ --glass-bg:rgba(255,255,255,0.65);
+ --glass-bg-2:rgba(255,255,255,0.5);
+ --glass-border:rgba(0,0,0,0.08);
+ --glass-border-soft:rgba(0,0,0,0.06);
+ --glass-highlight:rgba(255,255,255,0.7);
+ --inputbg:rgba(118,118,128,0.10);
+ --inputline:rgba(0,0,0,0.12);
+ --shadow:0 10px 40px rgba(0,0,0,0.10), inset 0 1px 0 rgba(255,255,255,0.6);
+ --top-bg:rgba(250,250,252,0.65);
+ --tabs-bg:rgba(250,250,252,0.55);
+ --toast-bg:rgba(250,250,252,0.85);
+ --fallback-bg:rgba(250,250,252,0.96);
+ --suggest-bg:#ffffff;
+ --suggest-hover:#f2f2f7;
+ --suggest-border:rgba(0,0,0,0.10);
+ --suggest-sep:rgba(0,0,0,0.06);
+ --track-bg:rgba(0,0,0,0.06);
+ --pzero:rgba(0,0,0,0.18);
+ --pgrid:rgba(0,0,0,0.06);
+ --primary-bg:#007aff;
+ --primary-ink:#ffffff;
+ --glow1:rgba(10,132,255,0.10);
+ --glow2:rgba(191,90,242,0.10);
+ --glow3:rgba(46,158,79,0.08);
+}
+*{box-sizing:border-box}
+html,body{background:var(--bg);min-height:100%}
+html{
+ scroll-behavior:smooth;
+ -webkit-text-size-adjust:100%;
+}
+body{
+ scroll-behavior:smooth;
+ overscroll-behavior-y:contain;
+}
+body{
+ margin:0;
+ font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display",Inter,system-ui,"Segoe UI",Roboto,Arial,sans-serif;
+ color:var(--ink);
+ font-variant-numeric:tabular-nums;
+ -webkit-font-smoothing:antialiased;
+ background:
+  radial-gradient(ellipse 90% 55% at 15% -5%, var(--glow1), transparent 55%),
+  radial-gradient(ellipse 70% 45% at 95% 5%, var(--glow2), transparent 50%),
+  radial-gradient(ellipse 80% 50% at 50% 110%, var(--glow3), transparent 55%),
+  var(--bg);
+ background-attachment:fixed;
+}
+button{font-family:inherit;cursor:pointer}
+.app{max-width:520px;margin:auto;min-height:100vh;background:transparent}
+.sticky{position:sticky;top:0;z-index:5}
+
+/* Apple-style frosted bars */
+.top{
+ background:var(--top-bg);
+ backdrop-filter:var(--blur);
+ -webkit-backdrop-filter:var(--blur);
+ color:var(--ink);
+ padding:16px 18px;
+ display:flex;justify-content:space-between;align-items:center;gap:12px;
+ border-bottom:1px solid var(--glass-border-soft);
+ box-shadow:inset 0 1px 0 rgba(255,255,255,0.04);
+}
+.top h1{font-size:21px;margin:0 0 4px;font-weight:700;letter-spacing:-0.02em}
+.top p{margin:0;color:var(--muted);font-size:13px}
+.top select{
+ width:auto;padding:8px 12px;font-size:15px;font-weight:600;
+ background:rgba(255,255,255,0.10);color:var(--ink);
+ border:1px solid var(--glass-border-soft);
+ border-radius:999px;
+ backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+}
+/* Fixed bottom tab bar (mobile-app style) */
+.tabs{
+ position:fixed;
+ left:50%;
+ transform:translateX(-50%);
+ bottom:0;
+ width:100%;
+ max-width:520px;
+ z-index:30;
+ display:flex;
+ background:var(--tabs-bg);
+ backdrop-filter:var(--blur);
+ -webkit-backdrop-filter:var(--blur);
+ border-top:1px solid var(--glass-border-soft);
+ border-bottom:0;
+ overflow-x:auto;
+ padding:4px 4px calc(6px + env(safe-area-inset-bottom));
+ box-shadow:0 -8px 32px rgba(0,0,0,0.18);
+}
+.tab{
+ flex:1 1 0;min-width:0;padding:10px 4px 8px;border:0;border-top:2px solid transparent;border-bottom:0;
+ background:transparent;font-weight:600;color:var(--muted);white-space:nowrap;font-size:11px;
+ display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+ line-height:1.15;text-align:center;
+}
+.tab .tab-ico{
+ font-family:'Material Symbols Outlined';
+ font-weight:normal;font-style:normal;
+ font-size:22px;line-height:1;display:block;
+ font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;
+ -webkit-font-smoothing:antialiased;
+ user-select:none;
+}
+.tab.active .tab-ico{
+ font-variation-settings:'FILL' 1,'wght' 500,'GRAD' 0,'opsz' 24;
+}
+.tab.active{color:var(--ink);border-top-color:rgba(255,255,255,0.9)}
+[data-theme="light"] .tab.active{border-top-color:rgba(0,0,0,0.55)}
+main{padding:16px 14px calc(88px + env(safe-area-inset-bottom))}
+.panel{display:none}.panel.active{display:block}
+
+/* Liquid glass cards */
+.card{
+ position:relative;
+ background:linear-gradient(180deg, rgba(255,255,255,0.07), rgba(255,255,255,0.03));
+ backdrop-filter:var(--blur);
+ -webkit-backdrop-filter:var(--blur);
+ border:1px solid var(--glass-border);
+ border-radius:var(--radius);
+ padding:18px;
+ margin-bottom:14px;
+ box-shadow:0 10px 40px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.06);
+ overflow:hidden;
+}
+.card::before{
+ content:"";
+ position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+ background:linear-gradient(135deg, rgba(255,255,255,0.06), transparent 38%, transparent 62%, rgba(255,255,255,0.02));
+ opacity:.55;
+}
+.card > *{position:relative;z-index:1}
+.card h3{margin:0 0 8px;font-size:16px;font-weight:650;letter-spacing:-0.01em}
+.big{font-size:30px;font-weight:700;letter-spacing:-0.03em}
+.muted{color:var(--muted);font-size:13px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.metric{
+ background:rgba(255,255,255,0.06);
+ border:1px solid var(--glass-border-soft);
+ border-radius:var(--radius-sm);
+ padding:12px 13px;
+ box-shadow:inset 0 1px 0 rgba(255,255,255,0.04);
+}
+.metric b{display:block;margin-top:5px;font-size:18px;font-weight:650}
+.metric small{display:block;margin-top:3px;font-size:11px;color:var(--muted);font-weight:400}
+label{display:block;font-weight:600;font-size:13px;margin:12px 0 6px;color:rgba(235,235,245,0.7)}
+label.chk{display:flex;gap:10px;align-items:flex-start;font-weight:600;margin:14px 0 0;line-height:1.4;color:var(--ink)}
+input,select{
+ width:100%;padding:12px 14px;
+ border:1px solid var(--inputline);
+ border-radius:var(--radius-sm);
+ font-size:16px;
+ background:var(--inputbg);
+ color:var(--ink);
+ font-family:inherit;
+ backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+ box-shadow:inset 0 1px 0 rgba(255,255,255,0.06);
+}
+input::placeholder{color:rgba(235,235,245,0.35)}
+input[type=checkbox]{width:auto;margin-top:2px}
+:is(button,input,select):focus-visible{outline:2px solid rgba(10,132,255,0.85);outline-offset:2px}
+button.primary{
+ width:100%;border:0;
+ background:var(--primary-bg);
+ color:var(--primary-ink);
+ padding:14px;border-radius:999px;font-weight:650;font-size:15px;margin-top:13px;
+ box-shadow:0 8px 24px rgba(0,0,0,0.25), inset 0 1px 0 var(--glass-highlight);
+}
+button.secondary{
+ border:1px solid var(--glass-border);
+ background:rgba(255,255,255,0.08);
+ color:var(--ink);
+ padding:10px 14px;border-radius:999px;font-weight:600;
+ backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+ box-shadow:inset 0 1px 0 rgba(255,255,255,0.10);
+}
+button.block{width:100%;margin-top:10px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.row2{display:flex;gap:10px}.row2>div{flex:1;min-width:0}
+.line{display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid var(--glass-border-soft);font-size:14px}
+.line:last-child{border:0}
+.line.net{font-size:17px;font-weight:700}
+.good{color:var(--good)}.bad{color:var(--bad)}.warn{color:var(--warn)}.dim{color:var(--muted)}
+.rolling{
+ display:inline-block;
+ animation:rollPulse .72s ease-out;
+}
+@keyframes rollPulse{
+ 0%{filter:blur(.6px);opacity:.72;transform:translateY(2px)}
+ 40%{filter:blur(0);opacity:1;transform:translateY(0)}
+ 100%{filter:blur(0);opacity:1;transform:none}
+}
+@media (prefers-reduced-motion:reduce){
+ .rolling{animation:none!important;filter:none!important}
+}
+.txn{padding:12px 0;border-bottom:1px solid var(--glass-border-soft)}.txn:last-child{border:0}
+.txn .title{font-weight:650}.txn .meta{font-size:12px;color:var(--muted);margin-top:3px}
+.txn .amt{text-align:right}.txn .amt small{display:block;font-size:11px;color:var(--muted);font-weight:400;margin-top:2px}
+.txn .btns{display:flex;gap:6px;justify-content:flex-end;margin-top:8px}
+.empty{text-align:center;padding:28px;color:var(--muted)}
+.smallbtn{
+ border:1px solid var(--glass-border-soft);background:rgba(255,255,255,0.08);color:var(--ink);
+ padding:6px 12px;border-radius:999px;font-size:12px;font-weight:600;
+}
+.smallbtn.del{background:var(--danger-bg);color:var(--danger);border-color:transparent}
+.note{font-size:12px;line-height:1.5;color:var(--muted)}
+.seg{
+ display:inline-flex;background:rgba(118,118,128,0.18);border:1px solid var(--glass-border-soft);
+ border-radius:999px;padding:2px;flex:none;
+}
+.seg button{border:0;background:transparent;padding:6px 12px;border-radius:999px;font-weight:600;font-size:12px;color:var(--muted)}
+.seg button.on{background:var(--primary-bg);color:var(--primary-ink);box-shadow:0 2px 8px rgba(0,0,0,0.2)}
+/* M3-style single-select segmented control */
+.basis-bar{
+ display:inline-flex;align-items:stretch;margin:0 0 12px;padding:0;
+ border:1px solid var(--glass-border);border-radius:999px;overflow:hidden;
+ background:transparent;min-height:40px;
+}
+.basis-bar .basis-btn{
+ border:0;background:transparent;padding:0 16px;min-height:40px;
+ font-size:13px;font-weight:500;letter-spacing:0.01em;
+ color:var(--muted);cursor:pointer;line-height:1.2;
+ display:inline-flex;align-items:center;justify-content:center;
+ -webkit-tap-highlight-color:transparent;
+ transition:background .15s ease,color .15s ease;
+}
+.basis-bar .basis-btn.on{
+ background:var(--primary-bg);color:var(--primary-ink);font-weight:600;
+}
+.basis-bar .basis-btn:not(.on):hover{color:var(--ink);background:rgba(127,127,127,0.12)}
+.basis-bar .basis-btn:focus-visible{outline:2px solid var(--primary);outline-offset:-2px}
+/* Week-of-month selector with P/L + gauge */
+.week-seg{
+ display:flex;gap:6px;width:100%;justify-content:space-between;
+}
+.week-btn{
+ flex:1 1 0;min-width:0;padding:8px 4px 7px;border:1px solid var(--glass-border-soft);
+ background:rgba(255,255,255,0.06);border-radius:14px;font-weight:650;color:var(--muted);
+ display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+ line-height:1.15;text-align:center;cursor:pointer;
+ transition:border-color .15s ease, background .15s ease, color .15s ease, box-shadow .15s ease;
+ -webkit-tap-highlight-color:transparent;
+}
+.week-btn .wm-ord{font-size:11px;font-weight:700;letter-spacing:-0.01em}
+.week-btn .wm-amt{font-size:10px;font-weight:700;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.week-btn .wm-gauge{
+ width:100%;height:4px;border-radius:99px;background:var(--track-bg);
+ border:1px solid var(--glass-border-soft);overflow:hidden;margin-top:1px;
+}
+.week-btn .wm-gauge>i{
+ display:block;height:100%;width:0%;border-radius:99px;
+ background:linear-gradient(90deg,#0a84ff,#bf5af2);
+ transition:width .35s ease, background .2s ease;
+}
+.week-btn .wm-gauge>i.above{background:linear-gradient(90deg,var(--chart-profit,#30d158),var(--chart-profit,#34c759))}
+.week-btn .wm-gauge>i.below{background:linear-gradient(90deg,#ff9f0a,var(--chart-loss,#ff453a))}
+.week-btn .wm-gauge>i.empty{background:transparent;width:0!important}
+.week-btn .wm-gauge>i.loss{background:linear-gradient(90deg,#ff6961,var(--chart-loss,#ff453a))}
+.week-btn.on{
+ color:var(--ink);border-color:rgba(255,255,255,0.28);
+ background:rgba(255,255,255,0.14);
+ box-shadow:0 4px 14px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.12);
+}
+[data-theme="light"] .week-btn{background:rgba(0,0,0,0.04)}
+[data-theme="light"] .week-btn.on{
+ border-color:rgba(0,0,0,0.18);background:rgba(0,0,0,0.06);
+ box-shadow:0 2px 8px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.5);
+}
+.week-btn.zero .wm-amt{opacity:.55}
+.week-avg-hint{font-size:11px;color:var(--muted);margin-top:6px;line-height:1.35}
+.bar{height:8px;background:var(--track-bg);border:1px solid var(--glass-border-soft);border-radius:99px;overflow:hidden;margin:10px 0 8px}
+.bar>i{display:block;height:100%;background:linear-gradient(90deg,#0a84ff,#bf5af2);border-radius:99px;transition:width .3s}
+.bar>i.full{background:linear-gradient(90deg,#ffd60a,#ff453a)}
+.mrow{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--glass-border-soft);font-size:14px}
+.mrow:last-child{border:0}
+.mrow.zero{opacity:.5}
+.mrow .r{text-align:right}
+.mrow small{display:block;font-size:11px;color:var(--muted);font-weight:400}
+.chip{font-style:normal;font-size:10px;font-weight:700;padding:2px 8px;border-radius:99px;margin-left:6px;background:rgba(255,255,255,0.08);border:1px solid var(--glass-border-soft);color:var(--muted)}
+.filters{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0 4px}
+.filters input[type=search]{grid-column:1/-1}
+.filters select,.filters input{padding:10px 12px;font-size:14px}
+.toast{
+ position:fixed;left:50%;bottom:calc(72px + env(safe-area-inset-bottom));
+ transform:translate(-50%,20px);
+ background:var(--toast-bg);color:var(--ink);border:1px solid var(--glass-border);
+ backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);
+ padding:12px 16px;border-radius:18px;font-size:14px;display:flex;gap:14px;align-items:center;
+ max-width:92%;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:40;
+ box-shadow:0 12px 40px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.12);
+}
+.toast.show{opacity:1;transform:translate(-50%,0);pointer-events:auto}
+.toast button{border:0;background:transparent;color:#64d2ff;font-weight:700;font-size:14px;padding:0}
+svg .bp{fill:var(--chart-profit,#0a84ff)}svg .bn{fill:var(--chart-loss,#ff453a)}svg .bz{fill:var(--muted);opacity:.5}
+svg .cl{fill:var(--muted);font-size:10px;font-family:inherit}
+svg .axis{stroke:var(--glass-border-soft);stroke-width:1}
+svg .avgl{stroke:var(--warn);stroke-width:1.5;stroke-dasharray:4 3}
+
+svg .pline{fill:none;stroke:var(--chart-profit,#0a84ff);stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+svg .pfill{fill:url(#periodGrad);opacity:.35}
+svg .pdot{fill:var(--chart-profit,#0a84ff);stroke:#fff;stroke-width:1.2}
+svg .pzero{stroke:var(--pzero);stroke-width:1}
+svg .pgrid{stroke:var(--pgrid);stroke-width:1}
+.chart-color-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:6px}
+.chart-swatch{
+ width:32px;height:32px;border-radius:999px;border:2px solid transparent;padding:0;cursor:pointer;
+ box-shadow:inset 0 0 0 1px rgba(255,255,255,0.18);
+}
+.chart-swatch.on{border-color:var(--ink);box-shadow:0 0 0 2px var(--primary-bg), inset 0 0 0 1px rgba(255,255,255,0.18)}
+.chart-swatch.locked{cursor:default;opacity:.95;position:relative}
+.chart-swatch.locked::after{content:'🔒';position:absolute;right:-2px;bottom:-2px;font-size:10px;line-height:1}
+#chartProfitCustom{width:42px;height:32px;padding:0;border:1px solid var(--inputline);border-radius:10px;background:transparent;cursor:pointer}
+.suggest{
+ position:absolute;left:0;right:0;top:calc(100% + 4px);z-index:50;
+ background:var(--suggest-bg) !important;
+ opacity:1 !important;
+ -webkit-backdrop-filter:none !important;
+ backdrop-filter:none !important;
+ border:1px solid var(--suggest-border);
+ border-radius:14px;
+ max-height:220px;
+ overflow:auto;
+ box-shadow:0 20px 50px rgba(0,0,0,0.9);
+ isolation:isolate;
+}
+.suggest button{
+ display:block;width:100%;text-align:left;border:0;
+ background:var(--suggest-bg) !important;
+ color:var(--ink);
+ padding:12px 14px;font-size:14px;font-weight:600;
+ border-bottom:1px solid var(--suggest-sep);
+}
+.suggest button:last-child{border:0}
+.suggest button:hover,.suggest button.active{background:var(--suggest-hover) !important;color:var(--ink)}
+.suggest small{display:block;font-weight:400;color:var(--muted);font-size:11px;margin-top:2px}
+/* Modern selects: custom chevron, no native appearance */
+select{
+ -webkit-appearance:none;appearance:none;
+ padding-right:38px;
+ background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'><path d='M2.5 4.5L6 8l3.5-3.5' fill='none' stroke='%23f5f5f7' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+ background-repeat:no-repeat;
+ background-position:right 14px center;
+ background-size:12px 12px;
+ cursor:pointer;
+ transition:border-color .15s ease, box-shadow .15s ease;
+}
+[data-theme="light"] select{
+ background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'><path d='M2.5 4.5L6 8l3.5-3.5' fill='none' stroke='%231c1c1e' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+}
+select:hover{border-color:var(--glass-highlight)}
+select:focus-visible{border-color:rgba(10,132,255,0.85)}
+select option{background:var(--suggest-bg);color:var(--ink);font-size:15px}
+.top select{padding-right:34px}
+/* Header theme toggle */
+#themeToggle{
+ width:38px;height:38px;padding:0;border-radius:999px;font-size:16px;line-height:1;
+ display:flex;align-items:center;justify-content:center;flex:none;
+}
+
+/* Smooth scrolling and playful tab transitions */
+@keyframes tabBounce{
+ 0%{transform:scale(1)}
+ 35%{transform:scale(1.06) translateY(-1px)}
+ 65%{transform:scale(.98) translateY(1px)}
+ 100%{transform:scale(1)}
+}
+@keyframes panelBounceIn{
+ 0%{opacity:0;transform:translateY(8px) scale(.985)}
+ 55%{opacity:1;transform:translateY(-2px) scale(1.003)}
+ 100%{opacity:1;transform:translateY(0) scale(1)}
+}
+.tab{
+ transition:color .18s ease, border-color .18s ease, transform .18s ease;
+ -webkit-tap-highlight-color:transparent;
+}
+.tab.tab-bounce{animation:tabBounce .42s cubic-bezier(.2,.8,.2,1)}
+.panel.active{
+ animation:panelBounceIn .38s cubic-bezier(.2,.8,.2,1);
+}
+main{
+ scroll-behavior:smooth;
+ -webkit-overflow-scrolling:touch;
+}
+
+/* Keep the tax-year selector clean in light mode: no dark/native-looking edge lines. */
+[data-theme="light"] .top select,
+[data-theme="light"] #year{
+ background-color:rgba(255,255,255,.88);
+ border:1px solid rgba(0,0,0,.07);
+ box-shadow:0 1px 2px rgba(0,0,0,.04);
+ outline:none;
+ color:var(--ink);
+}
+/* Android/WebView can tile the inline-SVG chevron in the compact header year selector.
+   Use two CSS gradients instead: they render as one stable chevron with no repeated lines. */
+[data-theme="light"] #year{
+ background-image:
+   linear-gradient(45deg, transparent 48%, currentColor 49%, currentColor 62%, transparent 63%),
+   linear-gradient(135deg, transparent 48%, currentColor 49%, currentColor 62%, transparent 63%);
+ background-repeat:no-repeat;
+ background-size:7px 7px, 7px 7px;
+ background-position:calc(100% - 15px) 50%, calc(100% - 10px) 50%;
+ padding-right:31px;
+}
+[data-theme="light"] .top select:not(#year){
+ background-image:none;
+}
+[data-theme="light"] .top select:focus,
+[data-theme="light"] #year:focus{
+ outline:none;
+ border-color:rgba(0,122,255,.28);
+ box-shadow:0 0 0 3px rgba(0,122,255,.08);
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))){
+ .card,.top,.tabs,.toast{background:var(--fallback-bg)}
+}
+
+/* ---------- hero amount (no emoji animations) ---------- */
+.hero-amount-wrap{
+ position:relative;
+ min-height:48px;
+ display:flex;
+ align-items:center;
+}
+
+.month-total-box{
+ margin-top:10px;padding:12px 14px;border-radius:var(--radius-sm);
+ background:rgba(255,255,255,0.06);border:1px solid var(--glass-border-soft);
+ display:flex;justify-content:space-between;align-items:center;gap:12px;
+}
+.month-total-box .mt-label{font-size:13px;font-weight:600;color:var(--muted)}
+.month-total-box .mt-label small{display:block;font-weight:400;font-size:11px;margin-top:2px}
+.month-total-box .mt-val{font-size:20px;font-weight:750;letter-spacing:-0.02em;text-align:right}
+[data-theme="light"] .month-total-box{background:rgba(0,0,0,0.03)}
+
+/* ---------- trade result guidance (no emoji particles) ---------- */
+.trade-feedback{position:fixed;left:50%;bottom:calc(72px + env(safe-area-inset-bottom));z-index:9999;transform:translate(-50%,18px) scale(.94);width:min(92vw,430px);padding:14px 16px;border-radius:20px;background:var(--glass-bg);border:1px solid var(--glass-border);box-shadow:0 18px 50px rgba(0,0,0,.22);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);opacity:0;pointer-events:none}
+.trade-feedback.show{animation:tradeFeedbackIn .48s cubic-bezier(.2,.85,.25,1) forwards}
+.trade-feedback.profit{border-color:rgba(52,199,89,.38)}
+.trade-feedback.loss{border-color:rgba(255,69,58,.38)}
+.trade-feedback .tf-title{font-weight:800;font-size:16px}
+.trade-feedback .tf-amount{font-size:22px;font-weight:850;margin-top:2px}
+.trade-feedback .tf-tip{font-size:13px;line-height:1.4;margin-top:7px;color:var(--muted)}
+.trade-feedback .tf-tip b{color:var(--ink)}
+@keyframes tradeFeedbackIn{0%{opacity:0;transform:translate(-50%,22px) scale(.9)}65%{opacity:1;transform:translate(-50%,-3px) scale(1.025)}100%{opacity:1;transform:translate(-50%,0) scale(1)}}
+@media (prefers-reduced-motion:reduce){.trade-feedback{animation:none!important;opacity:1;transform:translate(-50%,0)}}
+
+</style>
+</head>
+<body>
+<div class="app">
+<div class="sticky">
+<header class="top">
+ <div><h1 id="appTitle">🇩🇪 DE Trade Tracker</h1><p id="appSubtitle">Capital gains • loss pots • Sparer-Pauschbetrag</p></div>
+ <div style="display:flex;align-items:center;gap:8px;flex:none">
+  <button type="button" id="themeToggle" class="secondary" onclick="toggleTheme()" aria-label="Toggle dark mode" title="Toggle dark / light mode">🌙</button>
+  <select id="year" aria-label="Tax year"></select>
+ </div>
+</header>
+</div>
+<main>
+
+<!-- ============ OVERVIEW ============ -->
+<section id="dashboard" class="panel active">
+<div class="basis-bar" role="group" aria-label="Show amounts">
+ <button type="button" id="segNet" class="basis-btn" onclick="setBasis('net')">After tax</button>
+ <button type="button" id="segGross" class="basis-btn" onclick="setBasis('gross')">Before tax</button>
+</div>
+<div class="card" data-ov-card="hero">
+ <div class="muted">Estimated amount in hand · <span id="yearTitle"></span></div>
+ <div class="hero-amount-wrap" id="heroAmountStage" aria-label="Estimated amount in hand">
+  <div class="big" id="net"></div>
+ </div>
+ <div class="muted" style="margin-top:4px">Before-tax profit / loss: <b id="netGross"></b></div>
+ <div class="grid" style="margin-top:12px" id="kpis"></div>
+</div>
+
+<div class="card" data-ov-card="period">
+ <div class="row">
+  <h3 style="margin:0">Period performance</h3>
+  <button type="button" class="secondary" style="padding:6px 12px;font-size:12px" onclick="exportPeriodCSV()">Export CSV</button>
+ </div>
+ <div style="margin-top:10px">
+  <label style="margin-top:0">Custom range</label>
+  <div class="row2">
+   <div>
+    <label for="customFrom" style="margin-top:0">From</label>
+    <input id="customFrom" type="date" onchange="renderCustomRange()">
+   </div>
+   <div>
+    <label for="customTo" style="margin-top:0">To</label>
+    <input id="customTo" type="date" onchange="renderCustomRange()">
+   </div>
+  </div>
+  <div class="month-total-box" id="customRangeBox" style="margin-top:10px">
+   <div class="mt-label">Range total</div>
+   <div class="mt-val" id="customRangeVal">—</div>
+  </div>
+ </div>
+ <div class="row2" id="periodMonthRow" style="margin-top:12px">
+  <div>
+   <label for="periodMonth" style="margin-top:0">Month</label>
+   <select id="periodMonth" onchange="onPeriodMonthChange()"></select>
+  </div>
+  <div>
+   <label style="margin-top:0">Year</label>
+   <input id="periodYearLabel" disabled style="opacity:.75">
+  </div>
+ </div>
+ <div style="margin-top:12px">
+  <label style="margin-top:0">Week of month</label>
+  <div class="week-seg" role="group" aria-label="Week of month">
+   <button type="button" class="week-btn" id="wm1" onclick="setWeekOfMonth(1)">
+    <span class="wm-ord">1st</span>
+    <span class="wm-amt" id="wm1Amt">—</span>
+    <span class="wm-gauge" aria-hidden="true"><i id="wm1Gauge"></i></span>
+   </button>
+   <button type="button" class="week-btn" id="wm2" onclick="setWeekOfMonth(2)">
+    <span class="wm-ord">2nd</span>
+    <span class="wm-amt" id="wm2Amt">—</span>
+    <span class="wm-gauge" aria-hidden="true"><i id="wm2Gauge"></i></span>
+   </button>
+   <button type="button" class="week-btn" id="wm3" onclick="setWeekOfMonth(3)">
+    <span class="wm-ord">3rd</span>
+    <span class="wm-amt" id="wm3Amt">—</span>
+    <span class="wm-gauge" aria-hidden="true"><i id="wm3Gauge"></i></span>
+   </button>
+   <button type="button" class="week-btn" id="wm4" onclick="setWeekOfMonth(4)">
+    <span class="wm-ord">4th</span>
+    <span class="wm-amt" id="wm4Amt">—</span>
+    <span class="wm-gauge" aria-hidden="true"><i id="wm4Gauge"></i></span>
+   </button>
+   <button type="button" class="week-btn" id="wm5" onclick="setWeekOfMonth(5)">
+    <span class="wm-ord">5th</span>
+    <span class="wm-amt" id="wm5Amt">—</span>
+    <span class="wm-gauge" aria-hidden="true"><i id="wm5Gauge"></i></span>
+   </button>
+  </div>
+  <div class="month-total-box" id="monthTotalBox">
+   <div class="mt-label">Month total</div>
+   <div class="mt-val" id="monthTotalVal">—</div>
+  </div>
+ </div>
+ <p class="muted" id="periodRangeLabel" style="margin-top:8px"></p>
+ <div class="grid" style="margin-top:10px" id="periodKpis"></div>
+ <div id="weekBreakdown" style="margin-top:8px"></div>
+</div>
+
+<div class="card" data-ov-card="allowance">
+ <h3 id="allowTitle">Sparer-Pauschbetrag</h3>
+ <div class="bar"><i id="allowFill"></i></div>
+ <div id="allowText" class="muted"></div>
+</div>
+
+<div class="card" data-ov-card="tax">
+ <h3>Tax estimate</h3>
+ <div id="taxLines"></div>
+ <p class="note" id="taxNote"></p>
+</div>
+
+<div class="card" data-ov-card="lossPots" id="lossPotsCard">
+ <h3 id="lossPotsTitle">Verlustverrechnungstöpfe</h3>
+ <div class="line"><span id="stockCarryLbl">Aktienverlusttopf</span><b id="stockCarry"></b></div>
+ <div class="line"><span id="otherCarryLbl">Sonstiger Verlusttopf</span><b id="otherCarry"></b></div>
+ <p class="note" id="lossPotsNote">Two loss pots, tracked on a before-tax basis. Stock losses only offset stock gains; other losses offset any capital gain. This is a personal estimate and does not reproduce every bank's depot-specific tax ledger.</p>
+</div>
+
+<div class="card" data-ov-card="monthly">
+ <h3 style="margin:0">Monthly profit</h3>
+ <div class="grid" style="margin-top:12px" id="avgBox"></div>
+ <p class="note" id="avgNote"></p>
+ <div id="chart"></div>
+ <p class="note" style="margin:2px 0 8px">Dashed line = monthly average (months at €0 are ignored).</p>
+ <div id="months"></div>
+</div>
+
+<div class="card" data-ov-card="stats">
+ <h3>Trade stats</h3>
+ <p class="muted" id="statsSub" style="margin:-4px 0 10px"></p>
+ <div class="grid" id="statsGrid"></div>
+ <div id="topWrap"></div>
+</div>
+
+</section>
+
+<!-- ============ ADD / EDIT ============ -->
+<section id="add" class="panel">
+<div class="card">
+ <h3 id="formTitle">Add trade</h3>
+ <label for="date">Date</label><input id="date" type="date" onchange="syncAmounts()">
+ <label for="desc">Description</label>
+ <div style="position:relative;z-index:20">
+  <input id="desc" placeholder="e.g. Palantir" autocomplete="off" oninput="onDescInput()" onfocus="onDescInput()" onkeydown="onDescKey(event)">
+  <div id="descSuggest" class="suggest" style="display:none"></div>
+ </div>
+ <label for="emotion">Emotion during trade</label>
+ <select id="emotion">
+  <option value="">— Not set —</option>
+  <option value="calm">😌 Calm / planned</option>
+  <option value="confident">😎 Confident</option>
+  <option value="excited">🤩 Excited</option>
+  <option value="fomo">😰 FOMO</option>
+  <option value="fear">😨 Fear / hesitant</option>
+  <option value="revenge">😤 Revenge trade</option>
+  <option value="neutral">😐 Neutral</option>
+  <option value="bored">😑 Bored / restless</option>
+ </select>
+ <label for="kind">Category</label>
+ <select id="kind" onchange="onKindChange()">
+  <option value="stockGain">Stock sale gain</option>
+  <option value="stockLoss">Stock sale loss</option>
+  <option value="otherGain">Other capital gain (dividend/ETF/etc.)</option>
+  <option value="otherLoss">Other capital loss</option>
+  <option value="taxRefund">Tax refund (not taxed)</option>
+ </select>
+ <div class="row2">
+  <div><label for="amtNet" id="lblNet">After tax (€)</label><input id="amtNet" type="number" inputmode="decimal" step="0.01" min="0" placeholder="0.00" oninput="onAmt('net')"></div>
+  <div id="grossCol"><label for="amtGross">Before tax (€)</label><input id="amtGross" type="number" inputmode="decimal" step="0.01" min="0" placeholder="0.00" oninput="onAmt('gross')"></div>
+ </div>
+ <p class="note" id="rateNote"></p>
+ <label class="chk" id="refundBox" style="display:none"><input type="checkbox" id="addRefund"><span>Also log the estimated tax refund (<b id="refundAmt">€0,00</b>) as a separate entry</span></label>
+ <button class="primary" id="saveBtn" onclick="saveTxn()">Save transaction</button>
+ <button class="secondary block" id="cancelEdit" style="display:none" onclick="cancelEdit()">Cancel edit</button>
+</div>
+</section>
+
+<!-- ============ WATCHLIST ============ -->
+<section id="watchlist" class="panel">
+<div class="card">
+ <div class="row">
+  <h3 style="margin:0">Watchlist</h3>
+  <span class="muted" id="wlCount"></span>
+ </div>
+ <p class="note" style="margin-top:6px">Names from your trades appear automatically. You can also add symbols manually.</p>
+ <input id="wlSearch" type="search" placeholder="Search watchlist…" oninput="renderWatchlist()" style="margin-top:8px">
+</div>
+<div class="card">
+ <h3>Add manually</h3>
+ <div class="row2">
+  <div><label for="wlName" style="margin-top:0">Name / ticker</label><input id="wlName" placeholder="e.g. Rheinmetall"></div>
+  <div><label for="wlNote" style="margin-top:0">Note · optional</label><input id="wlNote" placeholder="Optional"></div>
+ </div>
+ <button class="primary" onclick="addWatchManual()">Add to watchlist</button>
+</div>
+<div class="card">
+ <div id="wlList"></div>
+</div>
+</section>
+
+<!-- ============ HISTORY ============ -->
+<section id="history" class="panel">
+<div class="card">
+ <div class="row"><h3 style="margin:0">Transactions</h3><button class="secondary" onclick="exportCSV()">Export CSV</button></div>
+ <div class="filters">
+  <input id="hSearch" type="search" placeholder="Search description…" oninput="renderHistory()" aria-label="Search">
+  <select id="hCountry" onchange="renderHistory()" aria-label="Country">
+   <option value="auto">Current country (settings)</option>
+   <option value="US">🇺🇸 United States only</option>
+   <option value="CN">🇨🇳 China only</option>
+   <option value="DE">🇩🇪 Germany only</option>
+   <option value="JP">🇯🇵 Japan only</option>
+   <option value="IN">🇮🇳 India only</option>
+   <option value="GB">🇬🇧 United Kingdom only</option>
+   <option value="FR">🇫🇷 France only</option>
+   <option value="all">All countries</option>
+  </select>
+  <select id="hKind" onchange="renderHistory()" aria-label="Category">
+   <option value="all">All categories</option>
+  </select>
+  <select id="hEmotion" onchange="renderHistory()" aria-label="Emotion">
+   <option value="all">All emotions</option>
+   <option value="calm">Calm / planned</option>
+   <option value="confident">Confident</option>
+   <option value="excited">Excited</option>
+   <option value="fomo">FOMO</option>
+   <option value="fear">Fear / hesitant</option>
+   <option value="revenge">Revenge trade</option>
+   <option value="neutral">Neutral</option>
+   <option value="bored">Bored / restless</option>
+   <option value="unset">Not set</option>
+  </select>
+  <select id="hMonth" onchange="renderHistory()" aria-label="Month">
+   <option value="all">All months</option>
+   <option value="0">Jan</option><option value="1">Feb</option><option value="2">Mar</option><option value="3">Apr</option>
+   <option value="4">May</option><option value="5">Jun</option><option value="6">Jul</option><option value="7">Aug</option>
+   <option value="8">Sep</option><option value="9">Oct</option><option value="10">Nov</option><option value="11">Dec</option>
+  </select>
+  <label class="chk" style="grid-column:1/-1;margin:2px 0 0"><input type="checkbox" id="hAll" onchange="renderHistory()"><span>Show all years (default: selected year)</span></label>
+ </div>
+ <p class="muted" id="histSummary" style="margin:8px 0 0"></p>
+ <div id="historyList"></div>
+ <p class="note">Amounts follow the After tax / Before tax switch on the Overview. An after-tax loss is the loss minus the tax refund it triggers.</p>
+</div>
+</section>
+
+<!-- ============ CAPITAL GAINS ESTIMATOR ============ -->
+<!-- ============ POSITIONS / AVERAGING ============ -->
+<section id="positions" class="panel">
+<div class="card">
+ <div class="row"><h3 style="margin:0">Saved positions</h3></div>
+ <div id="posList"></div>
+ <p class="note" id="posEmptyNote" style="display:none;margin-top:8px">No saved positions yet. Use the calculator below and click “Save as new”.</p>
+</div>
+
+<div class="card">
+ <h3 id="posFormTitle">Average cost calculator</h3>
+ <p class="muted" id="posLoaded" style="margin-top:-4px;display:none"></p>
+
+ <label for="posName">Name / ticker</label>
+ <input id="posName" placeholder="e.g. Rheinmetall" oninput="calcPos()">
+
+ <div class="row2">
+  <div><label for="posShares">Current shares</label><input id="posShares" type="number" inputmode="decimal" step="any" min="0" placeholder="0" oninput="calcPos()"></div>
+  <div><label for="posAvg">Current avg cost</label><input id="posAvg" type="number" inputmode="decimal" step="0.01" min="0" placeholder="0.00" oninput="calcPos()"></div>
+ </div>
+
+ <div class="row" style="margin-top:8px">
+  <span class="muted" style="font-weight:700;font-size:13px">New buy</span>
+  <div class="seg" role="group" aria-label="What to calculate">
+   <button type="button" id="posModeQty" class="on" onclick="setPosMode('qty')">I know total</button>
+   <button type="button" id="posModeTotal" onclick="setPosMode('total')">I know qty</button>
+  </div>
+ </div>
+ <p class="note" id="posModeNote" style="margin-top:8px">Enter price and total to invest. Quantity is calculated.</p>
+
+ <label for="posBuyPrice">New buy · price</label>
+ <input id="posBuyPrice" type="number" inputmode="decimal" step="0.01" min="0" placeholder="0.00" oninput="onPosBuyInput()">
+
+ <div class="row2">
+  <div><label for="posBuyShares">New buy · shares</label><input id="posBuyShares" type="number" inputmode="decimal" step="any" min="0" placeholder="0" oninput="onPosBuyInput()"></div>
+  <div><label for="posBuyTotal">Total to invest</label><input id="posBuyTotal" type="number" inputmode="decimal" step="0.01" min="0" placeholder="0.00" oninput="onPosBuyInput()"></div>
+ </div>
+
+ <label for="posMarket">Current market price · optional</label>
+ <input id="posMarket" type="number" inputmode="decimal" step="0.01" min="0" placeholder="Leave empty to skip P/L" oninput="calcPos()">
+
+ <div class="card" style="background:var(--soft);box-shadow:none;margin-top:16px;margin-bottom:0">
+  <div class="line"><span>New total shares</span><b id="posNewShares">—</b></div>
+  <div class="line net"><span>New average cost</span><b id="posNewAvg">—</b></div>
+  <div class="line"><span>Cost of this buy</span><b id="posBuyCost">—</b></div>
+  <div class="line"><span>New total invested</span><b id="posNewTotal">—</b></div>
+  <div class="line" id="posPlRow" style="display:none"><span>Unrealized P/L (after)</span><b id="posPl">—</b></div>
+  <div class="line" id="posPlBeforeRow" style="display:none"><span>Unrealized P/L (before)</span><b id="posPlBefore">—</b></div>
+ </div>
+
+ <button class="primary" id="posUpdateBtn" style="display:none" onclick="updatePosition()">Update position</button>
+ <button class="primary" id="posSaveBtn" onclick="saveAsNewPosition()">Save as new</button>
+ <button class="secondary block" onclick="resetPosForm()">Reset calculator</button>
+ <p class="note" id="posNote">Average cost is for your own tracking.</p>
+</div>
+</section>
+<!-- ============ FX / CURRENCY ============ -->
+<section id="fx" class="panel">
+<div class="card">
+ <div class="row">
+  <h3 style="margin:0">Currency converter</h3>
+  <button type="button" class="secondary" style="padding:6px 12px;font-size:12px" onclick="refreshFxRates(true)">Refresh</button>
+ </div>
+ <p class="muted" id="fxStatus" style="margin:6px 0 0">Loading live rates…</p>
+ <div class="row2" style="margin-top:10px">
+  <div>
+   <label for="fxAmount" style="margin-top:0">Amount</label>
+   <input id="fxAmount" type="number" inputmode="decimal" step="any" min="0" value="100" oninput="convertFx()">
+  </div>
+  <div style="display:flex;align-items:end;padding-bottom:2px">
+   <button type="button" class="secondary block" style="margin-top:0" onclick="swapFx()" title="Swap currencies">⇄ Swap</button>
+  </div>
+ </div>
+ <div class="row2" style="margin-top:4px">
+  <div>
+   <label for="fxFrom" style="margin-top:0">From</label>
+   <select id="fxFrom" onchange="onFxCurrencyChange()"></select>
+  </div>
+  <div>
+   <label for="fxTo" style="margin-top:0">To</label>
+   <select id="fxTo" onchange="onFxCurrencyChange()"></select>
+  </div>
+ </div>
+ <div class="line net" style="margin-top:12px;border-bottom:0;padding-bottom:0">
+  <span>Converted</span><b id="fxResult">—</b>
+ </div>
+ <p class="note" id="fxRateNote" style="margin-top:6px">Live rates via Frankfurter (ECB) with a public fallback API — no key needed. Refresh pulls the latest. Best opened over http(s); some browsers block fetches from file:// pages.</p>
+</div>
+</section>
+<!-- ============ SETTINGS ============ -->
+<section id="settings" class="panel">
+<div class="card">
+ <h3>Country & tax settings</h3>
+ <label for="theme">Appearance</label>
+ <select id="theme" onchange="onThemeChange()">
+  <option value="dark">🌙 Dark mode</option>
+  <option value="light">☀️ Light mode</option>
+ </select>
+ <label style="margin-top:14px">Chart &amp; number colors</label>
+ <p class="note" style="margin:4px 0 8px">Pastel profit colors (Material-inspired). Swatches stay soft; text/chart use a theme-aware tone that meets WCAG AA contrast (≥4.5:1). Loss stays red (#FF453A).</p>
+ <label style="margin-top:0">Pastel profit</label>
+ <div class="chart-color-row" id="chartProfitSwatches">
+  <button type="button" class="chart-swatch" data-color="#81C784" style="background:#81C784" title="Mint · #81C784 / light #1B5E20" aria-label="Mint #81C784" onclick="setChartProfitColor('#81C784')"></button>
+  <button type="button" class="chart-swatch" data-color="#64B5F6" style="background:#64B5F6" title="Sky · #64B5F6 / light #0D47A1" aria-label="Sky #64B5F6" onclick="setChartProfitColor('#64B5F6')"></button>
+  <button type="button" class="chart-swatch" data-color="#BA68C8" style="background:#BA68C8" title="Lavender · #BA68C8 / light #6A1B9A" aria-label="Lavender #BA68C8" onclick="setChartProfitColor('#BA68C8')"></button>
+  <button type="button" class="chart-swatch" data-color="#4DD0E1" style="background:#4DD0E1" title="Aqua · #4DD0E1 / light #006064" aria-label="Aqua #4DD0E1" onclick="setChartProfitColor('#4DD0E1')"></button>
+  <button type="button" class="chart-swatch" data-color="#FFD54F" style="background:#FFD54F" title="Butter · #FFD54F / light #8D6E00" aria-label="Butter #FFD54F" onclick="setChartProfitColor('#FFD54F')"></button>
+  <button type="button" class="chart-swatch" data-color="#FFB74D" style="background:#FFB74D" title="Peach · #FFB74D / light #BF360C" aria-label="Peach #FFB74D" onclick="setChartProfitColor('#FFB74D')"></button>
+  <button type="button" class="chart-swatch" data-color="#F48FB1" style="background:#F48FB1" title="Rose · #F48FB1 / light #AD1457" aria-label="Rose #F48FB1" onclick="setChartProfitColor('#F48FB1')"></button>
+  <button type="button" class="chart-swatch" data-color="#AED581" style="background:#AED581" title="Sage · #AED581 / light #33691E" aria-label="Sage #AED581" onclick="setChartProfitColor('#AED581')"></button>
+  <button type="button" class="chart-swatch" data-color="#90CAF9" style="background:#90CAF9" title="Cloud blue · #90CAF9 / light #1565C0" aria-label="Cloud blue #90CAF9" onclick="setChartProfitColor('#90CAF9')"></button>
+  <button type="button" class="chart-swatch" data-color="#CE93D8" style="background:#CE93D8" title="Lilac · #CE93D8 / light #6A1B9A" aria-label="Lilac #CE93D8" onclick="setChartProfitColor('#CE93D8')"></button>
+  <input type="color" id="chartProfitCustom" value="#81C784" title="Custom profit color" oninput="setChartProfitColor(this.value)" onchange="setChartProfitColor(this.value)">
+ </div>
+ <p class="note" id="profitContrastNote" style="margin:6px 0 0"></p>
+ <div style="margin-top:10px">
+  <label style="margin-top:0">Loss color</label>
+  <div class="chart-color-row">
+   <button type="button" class="chart-swatch locked" style="background:#FF453A" title="Loss #FF453A" disabled aria-label="Loss always red #FF453A"></button>
+   <span class="muted" style="font-size:12px">Always red · #FF453A</span>
+  </div>
+ </div>
+ <label for="country">Country</label>
+ <select id="country" onchange="onCountryChange()">
+  <option value="US">🇺🇸 United States</option>
+  <option value="CN">🇨🇳 China</option>
+  <option value="DE">🇩🇪 Germany</option>
+  <option value="JP">🇯🇵 Japan</option>
+  <option value="IN">🇮🇳 India</option>
+  <option value="GB">🇬🇧 United Kingdom</option>
+  <option value="FR">🇫🇷 France</option>
+ </select>
+ <div id="deSettings">
+  <label for="allowance">Sparer-Pauschbetrag (€)</label><input id="allowance" type="number" inputmode="decimal" step="1" onchange="saveSettings()">
+  <label for="allowUsed">Allowance already used outside this tracker (€)</label><input id="allowUsed" type="number" inputmode="decimal" step="0.01" onchange="saveSettings()">
+  <label for="church">Church tax</label>
+  <select id="church" onchange="saveSettings()"><option value="0">No church tax</option><option value="8">8%</option><option value="9">9%</option></select>
+  <label for="startStock">Starting stock-loss carryforward (€)</label><input id="startStock" type="number" inputmode="decimal" step="0.01" onchange="saveSettings()">
+  <label for="startOther">Starting other-loss carryforward (€)</label><input id="startOther" type="number" inputmode="decimal" step="0.01" onchange="saveSettings()">
+  <p class="note">Default allowance is €1,000 for an individual. Jointly assessed spouses generally have €2,000. Enter only the portion not already represented in this app. Starting carryforwards apply to the current calendar year.</p>
+ </div>
+ <div id="inSettings" style="display:none">
+  <label for="ltcgExempt">LTCG exemption (₹)</label><input id="ltcgExempt" type="number" inputmode="decimal" step="1" onchange="saveSettings()">
+  <label for="ltcgUsed">LTCG exemption already used outside this tracker (₹)</label><input id="ltcgUsed" type="number" inputmode="decimal" step="0.01" onchange="saveSettings()">
+  <label class="chk"><input type="checkbox" id="inCess" onchange="saveSettings()"><span>Include 4% Health &amp; Education Cess</span></label>
+  <p class="note">Listed equity: STCG 20% (held ≤ 12 months), LTCG 12.5% on gains above the annual exemption (held &gt; 12 months). Cess is 4% on the tax. You choose STCG or LTCG when adding a trade. Estimates only.</p>
+ </div>
+ <div id="usSettings" style="display:none">
+  <label for="usMarginal">Marginal ordinary rate for ST gains (%)</label>
+  <input id="usMarginal" type="number" inputmode="decimal" step="0.5" onchange="saveSettings()">
+  <label for="usLtRate">LT gains rate (%)</label>
+  <select id="usLtRate" onchange="saveSettings()">
+   <option value="0">0%</option>
+   <option value="15">15%</option>
+   <option value="20">20%</option>
+  </select>
+  <label for="usFiling">Filing status (sets the LT 0% bracket)</label>
+  <select id="usFiling" onchange="saveSettings()">
+   <option value="single">Single — $47,025</option>
+   <option value="mfj">Married filing jointly — $94,050</option>
+  </select>
+  <label class="chk"><input type="checkbox" id="usNiit" onchange="saveSettings()"><span>Add 3.8% NIIT (applies above $200k / $250k MAGI)</span></label>
+  <p class="note">US (2025): ST gains at your marginal rate; LT gains 0% up to the bracket, then 15%/20%. Netting: ST↔ST, LT↔LT, then net ST offsets net LT. Wash-sale rule and the $3,000/yr offset against ordinary income are not modeled.</p>
+ </div>
+ <div id="gbSettings" style="display:none">
+  <label for="ukBand">CGT rate band (shares)</label>
+  <select id="ukBand" onchange="saveSettings()">
+   <option value="18">Basic rate — 18%</option>
+   <option value="24">Higher rate — 24%</option>
+  </select>
+  <label for="ukAEA">Annual exempt amount (£)</label>
+  <input id="ukAEA" type="number" inputmode="decimal" step="1" onchange="saveSettings()">
+  <p class="note">UK (2024/25+): gains above the AEA (£3,000) taxed at 18%/24% on shares. Losses offset gains and carry forward; the AEA cannot be carried over.</p>
+ </div>
+ <div id="frSettings" style="display:none">
+  <p class="note">France: securities gains are taxed at the flat PFU of 30% (12.8% income tax + 17.2% social contributions). The progressive-scale opt-in, holding-period allowances (50%/65%) and the PEA wrapper are not modeled.</p>
+ </div>
+ <div id="jpSettings" style="display:none">
+  <p class="note">Japan: listed-share gains taxed separately at 20.315% (15% national + 5% local + 0.315% reconstruction surtax). No exemption, no offset against salary. Losses carry forward up to 3 years if you file a final return.</p>
+ </div>
+ <div id="cnSettings" style="display:none">
+  <p class="note">China: gains on listed A-shares are currently exempt from individual income tax, so the estimate is 0%. Dividends are 20% with relief for holdings over 1 year (not modeled).</p>
+ </div>
+</div>
+
+<div class="card">
+ <h3>Backup</h3>
+ <p class="muted" style="margin-top:-4px">Your data lives only in this browser. Save a backup file now and then.</p>
+ <button class="secondary block" onclick="exportJSON()">Download backup (.json)</button>
+ <button class="secondary block" onclick="document.getElementById('restoreFile').click()">Restore from backup…</button>
+ <input id="restoreFile" type="file" accept="application/json,.json" style="display:none" onchange="importJSON(this)">
+ <button class="secondary block" onclick="clearAll()">Delete all local data</button>
+</div>
+
+<div class="card">
+ <h3>Import trades from file</h3>
+ <p class="muted" style="margin-top:-4px">Upload a CSV from this app or from major brokers. Format is auto-detected.</p>
+ <button class="primary" style="margin-top:6px" onclick="document.getElementById('importCsvFile').click()">Upload CSV…</button>
+ <input id="importCsvFile" type="file" accept=".csv,text/csv,.txt" style="display:none" onchange="importCSV(this)">
+ <p class="note" id="importHelpNote">
+ <b>Supported sources</b><br>
+ • This app’s own CSV export<br>
+ • <b>Trade Republic</b> transaction export (FIFO realized P/L from buys+sells)<br>
+ • Simple: Date, Description, Category, Amount<br>
+ <span id="importBrokersByCountry"></span>
+ Rows that already exist (same date + category + description + amount) are skipped. Broker CSVs often list buys/sells without realized P/L — only rows with a clear gain, loss, dividend, interest, or tax amount are imported.
+ </p>
+</div>
+
+<div class="card"><p class="note" id="modelNote"></p></div>
+</section>
+
+</main>
+<nav class="tabs" role="tablist" aria-label="Main">
+<button class="tab active" data-tab="dashboard" role="tab" aria-selected="true"><span class="tab-ico material-symbols-outlined" aria-hidden="true">dashboard</span>Overview</button>
+<button class="tab" data-tab="add" role="tab"><span class="tab-ico material-symbols-outlined" aria-hidden="true">add_circle</span>Add</button>
+<button class="tab" data-tab="watchlist" role="tab"><span class="tab-ico material-symbols-outlined" aria-hidden="true">visibility</span>Watch</button>
+<button class="tab" data-tab="history" role="tab"><span class="tab-ico material-symbols-outlined" aria-hidden="true">history</span>History</button>
+<button class="tab" data-tab="positions" role="tab"><span class="tab-ico material-symbols-outlined" aria-hidden="true">show_chart</span>Avg</button>
+<button class="tab" data-tab="fx" role="tab"><span class="tab-ico material-symbols-outlined" aria-hidden="true">currency_exchange</span>FX</button>
+<button class="tab" data-tab="settings" role="tab"><span class="tab-ico material-symbols-outlined" aria-hidden="true">settings</span>Settings</button>
+</nav>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<div id="tradeFeedback" class="trade-feedback" role="status" aria-live="polite"></div>
+
+<script>
+const KEY='deTaxTrackerV2';
+const DEFAULTS={country:'DE',theme:'dark',chartProfit:'#81C784',chartLoss:'#ff453a',allowance:1000,allowUsed:0,church:0,startStock:0,startOther:0,ltcgExempt:125000,ltcgUsed:0,inCess:true,usMarginal:22,usLtRate:15,usFiling:'single',usNiit:false,ukBand:18,ukAEA:3000,basis:'net',overviewOrder:null};
+const FX_CURRENCIES=['EUR','USD','GBP','JPY','INR','CNY','CHF','CAD','AUD','HKD','SGD','KRW','SEK','NOK','DKK','PLN','BRL','MXN','TRY','ZAR'];
+const CHART_LOSS_FIXED='#ff453a';
+const KINDS_DE={stockGain:'Stock gain',stockLoss:'Stock loss',otherGain:'Other gain',otherLoss:'Other loss',taxRefund:'Tax refund'};
+const KINDS_IN={stcg:'STCG (≤12 mo)',ltcg:'LTCG (>12 mo)',stcl:'STCL (short-term loss)',ltcl:'LTCL (long-term loss)',taxRefund:'Tax refund'};
+const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const $=id=>document.getElementById(id);
+/* Top 7 countries by nominal GDP — each with its own tax model (nothing generalized) */
+const COUNTRIES={
+ DE:{flag:'🇩🇪',name:'Germany',currency:'EUR',locale:'de-DE',sub:'Capital gains • loss pots • Sparer-Pauschbetrag'},
+ US:{flag:'🇺🇸',name:'United States',currency:'USD',locale:'en-US',sub:'ST vs LT • 0/15/20% • NIIT'},
+ CN:{flag:'🇨🇳',name:'China',currency:'CNY',locale:'zh-CN',sub:'Listed A-share gains exempt'},
+ JP:{flag:'🇯🇵',name:'Japan',currency:'JPY',locale:'ja-JP',sub:'Listed shares • 20.315%'},
+ IN:{flag:'🇮🇳',name:'India',currency:'INR',locale:'en-IN',sub:'STCG • LTCG • ₹1.25L exemption'},
+ GB:{flag:'🇬🇧',name:'United Kingdom',currency:'GBP',locale:'en-GB',sub:'CGT • £3,000 AEA • 18/24%'},
+ FR:{flag:'🇫🇷',name:'France',currency:'EUR',locale:'fr-FR',sub:'PFU flat tax 30%'}
+};
+const US_KINDS={shortGain:'ST gain (≤1 yr)',longGain:'LT gain (>1 yr)',shortLoss:'ST loss',longLoss:'LT loss',taxRefund:'Tax refund'};
+const SIMPLE_KINDS={gain:'Capital gain',loss:'Capital loss',taxRefund:'Tax refund'};
+const ALL_KINDS=Object.assign({},SIMPLE_KINDS,US_KINDS,KINDS_DE,KINDS_IN);
+const GENERIC_KINDS=new Set(['shortGain','longGain','shortLoss','longLoss','gain','loss']);
+const country=()=>state.settings.country||'DE';
+const P=()=>COUNTRIES[country()]||COUNTRIES.DE;
+const isIN=()=>country()==='IN';
+const isGross=()=>country()!=='DE'; // every non-DE model enters amounts before tax
+const money=n=>{
+ const p=P();
+ return new Intl.NumberFormat(p.locale,{style:'currency',currency:p.currency,maximumFractionDigits:2}).format(n||0);
+};
+const eur=money; // alias used throughout
+const pctFmt=n=>(n*100).toLocaleString(P().locale,{maximumFractionDigits:3})+' %';
+const pct2=f=>(f*100).toLocaleString('en-US',{maximumFractionDigits:2})+'%';
+const r2=v=>Math.round(v*100)/100;
+const kindsMap=()=>{
+ const c=country();
+ if(c==='DE')return KINDS_DE;
+ if(c==='IN')return KINDS_IN;
+ if(c==='US')return US_KINDS;
+ return SIMPLE_KINDS;
+};
+const isGain=k=>['stockGain','otherGain','stcg','ltcg','shortGain','longGain','gain'].includes(k);
+const isLoss=k=>['stockLoss','otherLoss','stcl','ltcl','shortLoss','longLoss','loss'].includes(k);
+const label=k=>kindsMap()[k]||ALL_KINDS[k]||k;
+const EMOTIONS={calm:'😌 Calm',confident:'😎 Confident',excited:'🤩 Excited',fomo:'😰 FOMO',fear:'😨 Fear',revenge:'😤 Revenge',neutral:'😐 Neutral',bored:'😑 Bored'};
+const emotionLabel=e=>EMOTIONS[e]||'';
+
+const yearOf=d=>+String(d).slice(0,4);
+const cls=v=>Math.abs(v)<0.005?'dim':(v<0?'bad':'good');
+const today=()=>new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,10);
+function escapeHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;')}
+function newId(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
+
+function normalizeWatchlist(w){
+ w=w||{};
+ return {
+  manual:Array.isArray(w.manual)?w.manual.map(x=>({id:String(x.id||newId()),name:String(x.name||'').trim(),note:String(x.note||''),added:x.added||today()})).filter(x=>x.name):[],
+  hidden:Array.isArray(w.hidden)?w.hidden.map(s=>String(s).toLowerCase()):[]
+ };
+}
+let _lc={};
+let editingPosId=null;
+let state=loadState();
+if(!state.watchlist)state.watchlist=normalizeWatchlist(null);
+
+function loadState(){
+ let s=null;
+ try{s=JSON.parse(localStorage.getItem(KEY)||'null')}catch(e){}
+ s=s||{};
+ return {
+  txns:Array.isArray(s.txns)?s.txns:[],
+  positions:Array.isArray(s.positions)?s.positions:[],
+  watchlist:normalizeWatchlist(s.watchlist),
+  settings:Object.assign({},DEFAULTS,s.settings||{})
+ };
+}
+function persist(){_lc={};try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){toast('Could not save — browser storage is full or blocked.')}}
+
+/* ---------- toast ---------- */
+let toastTimer;
+function toast(msg,actionLabel,action){
+ const el=$('toast');el.innerHTML='';
+ const s=document.createElement('span');s.textContent=msg;el.appendChild(s);
+ if(action){const b=document.createElement('button');b.textContent=actionLabel;b.onclick=()=>{action();hideToast()};el.appendChild(b)}
+ el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(hideToast,action?7000:3500);
+}
+function hideToast(){$('toast').classList.remove('show')}
+
+/* ---------- tax maths ----------
+   25% Abgeltungsteuer, 5.5% Soli on that tax, church tax k (8/9%) on that tax.
+   With church tax the base rate shrinks: 25% / (1 + 25% * k).  k=0 -> 26.375% total. */
+function taxRates(churchPct){
+ if(isGross()&&country()!=='IN'){
+  return {cap:0.2,soli:0,church:0,total:0.2,nf:0.8,k:0,stcg:0.2,ltcg:0.2,cess:1};
+ }
+ if(isIN()){
+  const cess=(state.settings.inCess!==false)?1.04:1;
+  return {stcg:0.20*cess,ltcg:0.125*cess,cess,total:0.20*cess,nf:1-0.20*cess,k:0,cap:0.20,soli:0,church:0};
+ }
+ const k=(churchPct===undefined?(+state.settings.church||0):churchPct)/100;
+ const cap=0.25/(1+0.25*k),soli=cap*0.055,church=cap*k,total=cap+soli+church;
+ return {cap,soli,church,total,nf:1-total,k,stcg:total,ltcg:total};
+}
+/* ---------- chronological ledger ----------
+   Brokers apply the Sparer-Pauschbetrag and loss pots to the FIRST gains of the year, so the first
+   part of your gains carries no tax (after tax = before tax). We replay the year in date order:
+   - shield = open allowance + loss pots that can be used against this gain
+   - gain entered after tax: gross = net if net <= shield, else (net - rate*shield)/(1 - rate)
+   - taxed part of a gain goes into a pool; a later loss offsets that pool and gets the tax back (refund)
+   - a loss that finds no taxed gains yet becomes a pot that shields later gains */
+const orderKey=(x,i)=>x.date+'|'+String(i).padStart(6,'0');
+function ledgerInit(year){
+ const cur=year===new Date().getFullYear();
+ return {room:Math.max(0,(+state.settings.allowance||0)-(+state.settings.allowUsed||0)),
+  potStock:cur?(+state.settings.startStock||0):0,potOther:cur?(+state.settings.startOther||0):0,taxedStock:0,taxedOther:0};
+}
+const shieldFor=(L,kind)=>L.room+L.potOther+(kind==='stockGain'?L.potStock:0);
+const poolFor=(L,kind)=>kind==='stockLoss'?L.taxedStock:L.taxedStock+L.taxedOther;
+const gainGross=(net,S,r)=>net<=S?net:(net-r*S)/(1-r);
+const gainNet=(gross,S,r)=>gross<=S?gross:gross-r*(gross-S);
+const lossAfter=(gross,P,r)=>gross-r*Math.min(gross,P);
+const lossGrossFromAfter=(after,P,r)=>after<=P*(1-r)?after/(1-r):after+r*P;
+function stepGain(L,x,net,R){
+ const S=shieldFor(L,x.kind),g=gainGross(net,S,R.total),absorbed=Math.min(g,S);
+ let need=absorbed;
+ if(x.kind==='stockGain'){const u=Math.min(need,L.potStock);L.potStock-=u;need-=u}
+ let u=Math.min(need,L.potOther);L.potOther-=u;need-=u;
+ u=Math.min(need,L.room);L.room-=u;need-=u;
+ if(x.kind==='stockGain')L.taxedStock+=g-absorbed;else L.taxedOther+=g-absorbed;
+ return {gross:g,taxfree:absorbed};
+}
+function stepLoss(L,x,gross,R){
+ let rest=gross,off=0;
+ if(x.kind==='stockLoss'){off=Math.min(rest,L.taxedStock);L.taxedStock-=off;rest-=off;L.potStock+=rest}
+ else{
+  let o=Math.min(rest,L.taxedOther);L.taxedOther-=o;rest-=o;off+=o;
+  o=Math.min(rest,L.taxedStock);L.taxedStock-=o;rest-=o;off+=o;L.potOther+=rest;
+ }
+ return {refund:off*R.total};
+}
+// limit {date,idx}: only entries before that position; excludeId: skip the entry being edited
+function runLedger(year,limit,excludeId){
+ const R=taxRates(),L=ledgerInit(year),rows={};
+ state.txns.map((x,i)=>({x,i})).filter(o=>yearOf(o.x.date)===year&&o.x.id!==excludeId&&txnCountry(o.x)===(state.settings.country||'DE'))
+  .sort((a,b)=>orderKey(a.x,a.i).localeCompare(orderKey(b.x,b.i)))
+  .forEach(o=>{
+   if(limit&&!(o.x.date<limit.date||(o.x.date===limit.date&&o.i<limit.idx)))return;
+   const a=+o.x.amount||0;
+   if(isGain(o.x.kind))rows[o.x.id]=stepGain(L,o.x,a,R);
+   else if(isLoss(o.x.kind))rows[o.x.id]=stepLoss(L,o.x,a,R);
+  });
+ return {L,rows,R};
+}
+const ledger=year=>_lc[year]||(_lc[year]=runLedger(year));
+// value of one entry on a chosen basis (gains +, losses -).
+// gain: entered after tax.  loss: entered before tax; after tax = loss minus the refund it triggers.
+function val(x,basis){
+ const a=+x.amount||0;
+ if(!isGain(x.kind)&&!isLoss(x.kind))return 0;
+ if(txnCountry(x)!=='DE'){
+  // Gross-entry countries: net = gross − estimated tax on gains (year-level exemptions land in the summary).
+  if(isLoss(x.kind))return -a;
+  if(basis==='gross')return a;
+  return a*(1-rateForKind(x.kind,txnCountry(x)));
+ }
+ const row=ledger(yearOf(x.date)).rows[x.id];
+ if(isGain(x.kind))return basis==='net'?a:(row?row.gross:a);
+ return -(basis==='net'?a-(row?row.refund:0):a);
+}
+/* Per-kind estimated tax rate (per-trade display; year-level exemptions handled in genericCalc) */
+function rateForKind(kind,code){
+ code=code||country();
+ if(code==='US')return kind==='shortGain'?(+state.settings.usMarginal||22)/100:(+state.settings.usLtRate||15)/100;
+ if(code==='JP')return 0.20315;
+ if(code==='GB')return (+state.settings.ukBand||18)/100;
+ if(code==='FR')return 0.30;
+ if(code==='CN')return 0;
+ if(code==='IN')return kind==='ltcg'?taxRates().ltcg:taxRates().stcg;
+ return taxRates().total;
+}
+function usThreshold(){return state.settings.usFiling==='mfj'?94050:47025}
+/* Correct per-country capital-gains math for US / CN / JP / GB / FR (amounts entered before tax) */
+function genericCalc(year){
+ const code=country(),st=state.settings,R=taxRates(),m=money;
+ const t=state.txns.filter(x=>yearOf(x.date)===year&&txnCountry(x)===code);
+ let shortGain=0,longGain=0,gain=0,shortLoss=0,longLoss=0,loss=0,refund=0;
+ t.forEach(x=>{
+  const a=+x.amount||0;
+  if(x.kind==='taxRefund'){refund+=a;return}
+  if(isLoss(x.kind)){loss+=a;if(x.kind==='shortLoss')shortLoss+=a;if(x.kind==='longLoss')longLoss+=a;return}
+  gain+=a;if(x.kind==='shortGain')shortGain+=a;if(x.kind==='longGain')longGain+=a;
+ });
+ const grossGains=gain,grossLosses=loss,grossPL=gain-loss,lossUsed=Math.min(gain,loss);
+ let allowance=0,allowanceUsed=0,taxable=0,totalTax=0,lines=[],note='';
+ if(code==='US'){
+  // 2025: ST at marginal rate; LT 0% ≤ $47,025 single / $94,050 MFJ, then 15% or 20%.
+  const marg=(+st.usMarginal||22)/100,lt=(+st.usLtRate||15)/100,thr=usThreshold();
+  let nst=shortGain-shortLoss,nlt=longGain-longLoss;      // ST nets ST, LT nets LT
+  if(nst<0){nlt+=nst;nst=0}                                // net ST loss offsets LT
+  if(nlt<0){nst+=nlt;nlt=0}                                // net LT loss offsets ST
+  nst=Math.max(0,nst);nlt=Math.max(0,nlt);
+  allowance=thr;allowanceUsed=Math.min(nlt,thr);
+  taxable=nst+Math.max(0,nlt-thr);
+  const stTax=nst*marg,ltTax=Math.max(0,nlt-thr)*lt;
+  const niitTax=st.usNiit?taxable*0.038:0;
+  totalTax=stTax+ltTax+niitTax;
+  lines=[['Net ST gain (≤1 yr)',m(nst)],['Net LT gain (>1 yr)',m(nlt)],['LT taxed at 0% (bracket)',m(-allowanceUsed)],['ST tax @ '+pct2(marg),m(stTax)],['LT tax @ '+pct2(lt),m(ltTax)]];
+  if(st.usNiit)lines.push(['NIIT @ 3.8%',m(niitTax)]);
+  note=`US estimate (2025): ST at your marginal ${pct2(marg)}, LT 0% up to ${m(thr)} then ${pct2(lt)}. Netting ST↔ST, LT↔LT, then net ST vs net LT. NIIT${st.usNiit?' included':' not included'}; wash sales not modeled.`;
+ }else if(code==='GB'){
+  // 2024/25+: £3,000 AEA, 18% basic / 24% higher on shares. Losses offset gains, carry forward; AEA use-it-or-lose-it.
+  const band=(+st.ukBand||18)/100,A=+st.ukAEA||3000;
+  const netGain=Math.max(0,gain-loss);
+  allowance=A;allowanceUsed=Math.min(netGain,A);
+  taxable=Math.max(0,netGain-A);
+  totalTax=taxable*band;
+  lines=[['Net gains',m(netGain)],['Annual exempt amount',m(-allowanceUsed)],['CGT @ '+pct2(band),m(totalTax)]];
+  note=`UK estimate (2024/25+): gains above the ${m(A)} AEA taxed at ${pct2(band)} on shares. Losses offset gains and carry forward; the AEA cannot be carried over.`;
+ }else if(code==='JP'){
+  // Separate taxation on listed shares: 15% income + 5% local + 0.315% reconstruction = 20.315%. No exemption.
+  taxable=Math.max(0,gain-loss);
+  totalTax=taxable*0.20315;
+  lines=[['Net gains',m(taxable)],['Tax @ 20.315% (15+5+0.315)',m(totalTax)]];
+  note='Japan estimate: listed shares taxed separately at 20.315%. No offset against salary; losses carry forward up to 3 years if you file.';
+ }else if(code==='FR'){
+  // PFU: 12.8% income tax + 17.2% social contributions = 30% flat.
+  taxable=Math.max(0,gain-loss);
+  totalTax=taxable*0.30;
+  lines=[['Net gains',m(taxable)],['PFU flat tax @ 30% (12.8+17.2)',m(totalTax)]];
+  note='France estimate: PFU 30% on securities gains. Progressive-scale opt-in, holding allowances and PEA not modeled.';
+ }else if(code==='CN'){
+  // Gains on listed A-shares exempt from individual income tax (extended policy) → 0%.
+  taxable=0;totalTax=0;
+  lines=[['Net gains (exempt)',m(Math.max(0,gain-loss))],['Tax @ 0%',m(0)]];
+  note='China: gains on listed A-shares are currently exempt from individual income tax — estimate is 0%. (Dividends: 20%, not modeled.)';
+ }
+ lines.push(['Total tax (est.)',m(totalTax)]);
+ const net=grossPL-totalTax+refund;
+ return {t,R,net,netGains:grossGains,grossGains,grossLosses,grossPL,lossUsed,
+  stockCarry:0,otherCarry:0,taxBase:grossPL,allowanceUsed,taxable,totalTax,lines,note,allowance};
+}
+function calcYear(year){
+ const _c=state.settings.country||'DE';
+ if(_c!=='DE'&&_c!=='IN')return genericCalc(year);
+ const R=taxRates(),t=state.txns.filter(x=>yearOf(x.date)===year&&txnCountry(x)===(state.settings.country||'DE'));
+ if(isIN()){
+  let stcg=0,ltcg=0,stcl=0,ltcl=0,refund=0;
+  t.forEach(x=>{
+   const a=+x.amount||0;
+   if(x.kind==='stcg')stcg+=a;
+   else if(x.kind==='ltcg')ltcg+=a;
+   else if(x.kind==='stcl')stcl+=a;
+   else if(x.kind==='ltcl')ltcl+=a;
+   else if(x.kind==='taxRefund')refund+=a;
+  });
+  // STCL offsets STCG first, then LTCG; LTCL offsets LTCG only
+  let stNet=stcg-stcl;
+  let ltNet=ltcg-ltcl;
+  let stCarry=0,ltCarry=0;
+  if(stNet<0){ltNet+=stNet;stCarry=-Math.min(0,ltNet);stNet=0;if(ltNet<0){ltCarry=-ltNet;ltNet=0}}
+  if(ltNet<0){ltCarry=-ltNet;ltNet=0}
+  const exempt=Math.max(0,(+state.settings.ltcgExempt||125000)-(+state.settings.ltcgUsed||0));
+  const ltcgTaxable=Math.max(0,ltNet-exempt);
+  const exemptionUsed=Math.min(exempt,ltNet);
+  const stTax=stNet*R.stcg,ltTax=ltcgTaxable*R.ltcg,totalTax=stTax+ltTax;
+  const grossPL=stcg+ltcg-stcl-ltcl;
+  const net=grossPL-totalTax+refund;
+  return {t,R,net,netGains:stcg+ltcg,grossGains:stcg+ltcg,grossLosses:stcl+ltcl,grossPL,
+   lossUsed:Math.min(stcl,stcg)+Math.min(ltcl+Math.max(0,stcl-stcg),ltcg),
+   stockCarry:stCarry,otherCarry:ltCarry,
+   taxBase:stNet+ltcgTaxable,allowanceUsed:exemptionUsed,taxable:stNet+ltcgTaxable,
+   capTax:stTax,soli:0,church:0,totalTax,
+   stcg,ltcg,stcl,ltcl,stNet,ltNet,ltcgTaxable,stTax,ltTax,exemptionUsed};
+ }
+ // --- Germany ---
+ const lg=ledger(year);
+ let sg=0,sl=0,og=0,ol=0,net=0,netGains=0,grossGains=0,grossLosses=0;
+ t.forEach(x=>{
+  const a=+x.amount||0,g=isGain(x.kind)?(lg.rows[x.id]||{gross:a/R.nf}).gross:0;
+  if(x.kind==='stockGain'){sg+=g;netGains+=a;grossGains+=g;net+=a}
+  else if(x.kind==='otherGain'){og+=g;netGains+=a;grossGains+=g;net+=a}
+  else if(x.kind==='stockLoss'){sl+=a;grossLosses+=a;net-=a}
+  else if(x.kind==='otherLoss'){ol+=a;grossLosses+=a;net-=a}
+  else if(x.kind==='taxRefund'){net+=a}
+ });
+ const cur=year===new Date().getFullYear();
+ let stockPool=(cur?(+state.settings.startStock||0):0)+sl;
+ let otherPool=(cur?(+state.settings.startOther||0):0)+ol;
+ const stockUsed=Math.min(stockPool,sg);stockPool-=stockUsed;sg-=stockUsed;
+ let otherUsed=Math.min(otherPool,og);otherPool-=otherUsed;og-=otherUsed;
+ const onStock=Math.min(otherPool,sg);otherPool-=onStock;sg-=onStock;otherUsed+=onStock;
+ const taxBase=sg+og;
+ const remAllow=Math.max(0,(+state.settings.allowance||0)-(+state.settings.allowUsed||0));
+ const allowanceUsed=Math.min(remAllow,taxBase);
+ const taxable=taxBase-allowanceUsed;
+ const capTax=taxable*R.cap,soli=taxable*R.soli,church=taxable*R.church;
+ return {t,R,net,netGains,grossGains,grossLosses,grossPL:grossGains-grossLosses,
+  lossUsed:stockUsed+otherUsed,stockCarry:stockPool,otherCarry:otherPool,
+  taxBase,allowanceUsed,taxable,capTax,soli,church,totalTax:capTax+soli+church};
+}
+function monthlyData(year,R){
+ const m=Array.from({length:12},()=>({net:0,gross:0,n:0}));
+ const lg=isGross()?{rows:{}}:ledger(year);
+ state.txns.forEach(x=>{
+  if(yearOf(x.date)!==year)return;
+  if(txnCountry(x)!==(state.settings.country||'DE'))return;
+  const i=Math.min(11,Math.max(0,(+String(x.date).slice(5,7)||1)-1)),a=+x.amount||0,o=m[i];
+  o.n++;
+  if(isGain(x.kind)){
+   if(isGross()){const rate=rateForKind(x.kind);o.gross+=a;o.net+=a*(1-rate)}
+   else{o.net+=a;o.gross+=(lg.rows[x.id]||{gross:a/R.nf}).gross}
+  }
+  else if(isLoss(x.kind)){o.net-=a;o.gross-=a}
+  else if(x.kind==='taxRefund'){o.net+=a}
+ });
+ return m;
+}
+// average over months that are not zero
+function avgActive(vals){
+ const act=vals.filter(v=>Math.abs(v)>=0.005);
+ return {n:act.length,avg:act.length?act.reduce((a,b)=>a+b,0)/act.length:0};
+}
+
+function entryNoteGain(k){
+ const code=country();
+ if(code==='IN'){const R=taxRates();return k==='ltcg'
+  ?`LTCG taxed at ${pctFmt(R.ltcg)} after the annual exemption. Enter the full gain before tax.`
+  :`STCG taxed at ${pctFmt(R.stcg)}. Enter the full gain before tax.`}
+ if(code==='US')return k==='shortGain'
+  ?`Short-term gains are taxed at your marginal rate (${pct2((+state.settings.usMarginal||22)/100)}). Enter the full gain before tax.`
+  :`Long-term gains: 0% up to ${money(usThreshold())}, then ${pct2((+state.settings.usLtRate||15)/100)}. Enter the full gain before tax.`;
+ if(code==='CN')return 'Gains on listed A-shares are currently exempt from individual income tax — the tax estimate is 0%. Enter the full gain.';
+ if(code==='JP')return 'Gains on listed shares are taxed at a flat 20.315%. Enter the full gain before tax.';
+ if(code==='GB')return `Gains above the annual exempt amount (${money(+state.settings.ukAEA||3000)}) are taxed at ${pct2((+state.settings.ukBand||18)/100)}. Enter the full gain before tax.`;
+ if(code==='FR')return 'Securities gains are taxed at the flat PFU of 30% (12.8% income tax + 17.2% social contributions). Enter the full gain before tax.';
+ return '';
+}
+function entryNoteLoss(k){
+ const code=country();
+ if(code==='IN')return 'Enter the full loss amount. STCL offsets STCG then LTCG; LTCL offsets LTCG only.';
+ if(code==='US')return 'Enter the full loss. Losses offset gains of the same holding period first, then the other type; excess carries forward.';
+ if(code==='JP')return 'Enter the full loss. Losses offset gains in the same year; with a tax filing they carry forward up to 3 years.';
+ if(code==='GB')return 'Enter the full loss. Losses reduce taxable gains and unused losses carry forward.';
+ if(code==='FR')return 'Enter the full loss. Losses offset gains of the same year.';
+ if(code==='CN')return 'Enter the full loss. (A-share gains are exempt, so losses mainly matter against dividends.)';
+ return '';
+}
+
+/* ---------- settings ---------- */
+function saveSettings(){
+ const s=state.settings;
+ s.country=$('country').value||'DE';
+ s.allowance=+$('allowance').value||0;
+ s.allowUsed=+$('allowUsed').value||0;
+ s.church=+$('church').value||0;
+ s.startStock=+$('startStock').value||0;
+ s.startOther=+$('startOther').value||0;
+ s.ltcgExempt=+$('ltcgExempt').value||125000;
+ s.ltcgUsed=+$('ltcgUsed').value||0;
+ s.inCess=!!$('inCess').checked;
+ if($('usMarginal'))s.usMarginal=+$('usMarginal').value||22;
+ if($('usLtRate'))s.usLtRate=+$('usLtRate').value||15;
+ if($('usFiling'))s.usFiling=$('usFiling').value||'single';
+ if($('usNiit'))s.usNiit=!!$('usNiit').checked;
+ if($('ukBand'))s.ukBand=+$('ukBand').value||18;
+ if($('ukAEA'))s.ukAEA=+$('ukAEA').value||3000;
+ persist();applyCountryUI();render();syncAmounts();}
+function applyTheme(){
+ const t=(state.settings.theme==='light')?'light':'dark';
+ document.documentElement.dataset.theme=t;
+ const b=$('themeToggle');if(b)b.textContent=t==='dark'?'🌙':'☀️';
+ if($('theme'))$('theme').value=t;
+ const m=document.querySelector('meta[name="theme-color"]');
+ if(m)m.content=t==='dark'?'#000000':'#f2f2f7';
+ applyChartColors();
+}
+/* Material-inspired pastel keys: swatch (pastel) + theme-aware text/chart tones.
+   Light variants chosen for WCAG AA ≥4.5:1 on white / #f2f2f7.
+   Dark variants ≥4.5:1 on black / #1c1c1e. */
+const PASTEL_PALETTE={
+ '#81C784':{name:'Mint',dark:'#81C784',light:'#1B5E20'},
+ '#64B5F6':{name:'Sky',dark:'#64B5F6',light:'#0D47A1'},
+ '#BA68C8':{name:'Lavender',dark:'#BA68C8',light:'#6A1B9A'},
+ '#4DD0E1':{name:'Aqua',dark:'#4DD0E1',light:'#006064'},
+ '#FFD54F':{name:'Butter',dark:'#FFD54F',light:'#8D6E00'},
+ '#FFB74D':{name:'Peach',dark:'#FFB74D',light:'#BF360C'},
+ '#F48FB1':{name:'Rose',dark:'#F48FB1',light:'#AD1457'},
+ '#AED581':{name:'Sage',dark:'#AED581',light:'#33691E'},
+ '#90CAF9':{name:'Cloud blue',dark:'#90CAF9',light:'#1565C0'},
+ '#CE93D8':{name:'Lilac',dark:'#CE93D8',light:'#6A1B9A'}
+};
+function chartProfitColor(){
+ const c=String(state.settings.chartProfit||DEFAULTS.chartProfit||'#81C784').trim().toUpperCase();
+ const norm=/^#[0-9A-F]{6}$/.test(c)?c:'#81C784';
+ // normalize key lookup
+ const key=Object.keys(PASTEL_PALETTE).find(k=>k.toUpperCase()===norm)||norm;
+ return key;
+}
+function resolveProfitColor(base){
+ const theme=(state.settings.theme==='light')?'light':'dark';
+ const entry=PASTEL_PALETTE[base]||PASTEL_PALETTE[base.toUpperCase()]||Object.entries(PASTEL_PALETTE).find(([k])=>k.toUpperCase()===String(base).toUpperCase())?.[1];
+ if(entry)return theme==='light'?entry.light:entry.dark;
+ // custom hex: use as-is (user responsibility); still apply
+ return base;
+}
+function relativeLuminance(hex){
+ const m=String(hex||'').match(/^#([0-9a-fA-F]{6})$/);
+ if(!m)return 0;
+ const n=parseInt(m[1],16);
+ let r=((n>>16)&255)/255,g=((n>>8)&255)/255,b=(n&255)/255;
+ const f=c=>c<=0.03928?c/12.92:Math.pow((c+0.055)/1.055,2.4);
+ r=f(r);g=f(g);b=f(b);
+ return 0.2126*r+0.7152*g+0.0722*b;
+}
+function contrastRatio(a,b){
+ const L1=relativeLuminance(a),L2=relativeLuminance(b);
+ const hi=Math.max(L1,L2),lo=Math.min(L1,L2);
+ return (hi+0.05)/(lo+0.05);
+}
+function applyChartColors(){
+ const base=chartProfitColor();
+ const profit=resolveProfitColor(base);
+ // Loss is intentionally fixed — never user-configurable
+ const loss=CHART_LOSS_FIXED;
+ state.settings.chartLoss=loss;
+ const root=document.documentElement;
+ const theme=state.settings.theme==='light'?'light':'dark';
+ const surface=theme==='light'?'#FFFFFF':'#000000';
+ root.style.setProperty('--chart-profit',profit);
+ root.style.setProperty('--chart-loss',loss);
+ // Positive numbers (`.good`) follow the profit color; negative (`.bad`) stay red
+ root.style.setProperty('--good',profit);
+ root.style.setProperty('--bad',loss);
+ root.style.setProperty('--goodbg',hexToRgba(profit,0.14));
+ // Optional M3-aligned semantic aliases
+ root.style.setProperty('--md-sys-color-primary',profit);
+ root.style.setProperty('--md-sys-color-error',loss);
+ if($('chartProfitCustom'))$('chartProfitCustom').value=base;
+ document.querySelectorAll('#chartProfitSwatches .chart-swatch[data-color]').forEach(btn=>{
+  const dc=(btn.getAttribute('data-color')||'').toUpperCase();
+  btn.classList.toggle('on',dc===base.toUpperCase());
+ });
+ const note=$('profitContrastNote');
+ if(note){
+  const ratio=contrastRatio(profit,surface);
+  const entry=Object.entries(PASTEL_PALETTE).find(([k])=>k.toUpperCase()===base.toUpperCase());
+  const label=entry?entry[1].name:base;
+  const aa=ratio>=4.5?'AA pass':'below AA';
+  note.textContent=`${label}: active ${profit} on ${theme} · contrast ${ratio.toFixed(2)}:1 (${aa})`;
+ }
+}
+function hexToRgba(hex,a){
+ const m=String(hex||'').match(/^#([0-9a-fA-F]{6})$/);
+ if(!m)return `rgba(48,209,88,${a})`;
+ const n=parseInt(m[1],16);
+ const r=(n>>16)&255,g=(n>>8)&255,b=n&255;
+ return `rgba(${r},${g},${b},${a})`;
+}
+function setChartProfitColor(color){
+ const c=String(color||'').trim();
+ if(!/^#[0-9a-fA-F]{6}$/.test(c))return;
+ // store canonical swatch key if in palette
+ const key=Object.keys(PASTEL_PALETTE).find(k=>k.toUpperCase()===c.toUpperCase())||c;
+ state.settings.chartProfit=key;
+ state.settings.chartLoss=CHART_LOSS_FIXED;
+ persist();
+ applyChartColors();
+ render();
+ toast('Profit color updated (theme-aware). Losses stay red.');
+}
+function syncSettingsUI(){
+ const s=state.settings;
+ $('country').value=s.country||'DE';
+ $('allowance').value=s.allowance;$('allowUsed').value=s.allowUsed;$('church').value=String(s.church);
+ $('startStock').value=s.startStock;$('startOther').value=s.startOther;
+ if($('ltcgExempt'))$('ltcgExempt').value=s.ltcgExempt??125000;
+ if($('ltcgUsed'))$('ltcgUsed').value=s.ltcgUsed||0;
+ if($('inCess'))$('inCess').checked=s.inCess!==false;
+ if($('usMarginal'))$('usMarginal').value=s.usMarginal??22;
+ if($('usLtRate'))$('usLtRate').value=String(s.usLtRate??15);
+ if($('usFiling'))$('usFiling').value=s.usFiling||'single';
+ if($('usNiit'))$('usNiit').checked=!!s.usNiit;
+ if($('ukBand'))$('ukBand').value=String(s.ukBand??18);
+ if($('ukAEA'))$('ukAEA').value=s.ukAEA??3000;
+ if($('theme'))$('theme').value=(s.theme==='light')?'light':'dark';
+ applyCountryUI();
+ applyChartColors();
+}
+function onThemeChange(){state.settings.theme=$('theme').value==='light'?'light':'dark';persist();applyTheme()}
+function toggleTheme(){state.settings.theme=(state.settings.theme==='dark')?'light':'dark';persist();applyTheme();toast(state.settings.theme==='dark'?'Dark mode on.':'Light mode on.')}
+function onCountryChange(){
+ const prev=state.settings.country;
+ state.settings.country=$('country').value||'DE';
+ if(state.settings.country==='IN'&&(state.settings.ltcgExempt==null||state.settings.ltcgExempt===1000))
+  state.settings.ltcgExempt=125000;
+ persist();applyCountryUI();rebuildKindSelect();render();syncAmounts();
+ if(typeof updateImportHelp==='function')updateImportHelp();
+ toast('Switched to '+P().name+' tax rules.');
+}
+function applyCountryUI(){
+ const code=country(),prof=P();
+ const map={de:'deSettings',in:'inSettings',us:'usSettings',gb:'gbSettings',fr:'frSettings',jp:'jpSettings',cn:'cnSettings'};
+ Object.values(map).forEach(id=>{const el=$(id);if(el)el.style.display='none'});
+ const sel=$(map[code.toLowerCase()]);if(sel)sel.style.display='';
+ $('appTitle').textContent=prof.flag+' '+prof.name+' Trade Tracker';
+ $('appSubtitle').textContent=prof.sub;
+ const allowNames={DE:'Sparer-Pauschbetrag',IN:'LTCG exemption',US:'LT 0% bracket',GB:'Annual exempt amount',FR:'Annual exemption',JP:'Annual exemption',CN:'Exemption'};
+ $('allowTitle').textContent=allowNames[code]||'Annual exemption';
+ const pots=$('lossPotsCard');
+ if(pots){
+  pots.style.display=(code==='DE'||code==='IN')?'':'none';
+  if(code==='IN'){
+   $('lossPotsTitle').textContent='Loss carryforward';
+   $('stockCarryLbl').textContent='STCL carryforward';
+   $('otherCarryLbl').textContent='LTCL carryforward';
+   $('lossPotsNote').textContent='STCL can offset STCG then LTCG. LTCL can only offset LTCG. Carryforwards are estimates for the next year.';
+  }else if(code==='DE'){
+   $('lossPotsTitle').textContent='Verlustverrechnungstöpfe';
+   $('stockCarryLbl').textContent='Aktienverlusttopf';
+   $('otherCarryLbl').textContent='Sonstiger Verlusttopf';
+   $('lossPotsNote').textContent='Two loss pots, tracked on a before-tax basis. Stock losses only offset stock gains; other losses offset any capital gain. This is a personal estimate and does not reproduce every bank\'s depot-specific tax ledger.';
+  }
+ }
+ $('posNote').textContent=code==='IN'
+  ?'Average cost is for your own tracking. Indian tax uses FIFO / specific identification for STCG vs LTCG.'
+  :code==='DE'
+  ?'Average cost is for your own tracking. German brokers usually apply FIFO for tax purposes.'
+  :'Average cost is for your own tracking. Tax lots (holding period) decide ST vs LT where applicable — the US wash-sale rule is not modeled.';
+ const MODEL_NOTES={
+  DE:'Tax model: 25% Abgeltungsteuer plus 5.5% solidarity surcharge on that tax. With church tax (8/9%) the base rate is reduced to 25% ÷ (1 + 25% × church rate), the statutory adjustment. Gains are entered after tax. The year is replayed in date order: the first gains use up the Sparer-Pauschbetrag and any loss pots tax-free (after tax = before tax), and only the rest is grossed up with the combined rate. Losses are entered before tax and refund the tax already paid on earlier gains. Losses are offset before the Sparer-Pauschbetrag. Stock-sale losses only offset stock-sale gains; other capital losses offset any capital gain. Estimates only — your bank\'s figures and your tax return are what count.',
+  IN:'Tax model (India, listed equity): STCG 20% + optional 4% cess on gains held ≤ 12 months. LTCG 12.5% + optional 4% cess on gains held > 12 months, after the annual exemption (default ₹1.25 lakh). You choose STCG or LTCG when logging a trade. STCL offsets STCG then LTCG; LTCL offsets LTCG only. Amounts are entered before tax. Estimates only — your ITR and broker statements are what count.',
+  US:'Tax model (US, 2025): short-term gains taxed at your marginal ordinary rate (setting, default 22%). Long-term gains 0% up to $47,025 (single) / $94,050 (MFJ), then 15% or 20% (setting). Netting: ST losses offset ST gains, LT losses offset LT gains, then net ST offsets net LT; excess capital losses carry forward (the $3,000/yr offset against ordinary income is not modeled). Optional 3.8% NIIT above $200k/$250k MAGI. Wash-sale rule not modeled. Amounts entered before tax. Estimates only.',
+  CN:'Tax model (China): gains on listed A-shares are currently exempt from individual income tax (policy extended), so the estimate is 0%. Dividends are 20% with relief for holdings > 1 year (not modeled). Amounts entered before tax. Estimates only.',
+  JP:'Tax model (Japan): gains on listed shares are taxed separately from salary at 20.315% (15% income tax + 5% local inhabitant tax + 0.315% reconstruction surtax). No exemption and no offset against salary. Losses offset gains in the same year and carry forward up to 3 years if you file a final return. Amounts entered before tax. Estimates only.',
+  GB:'Tax model (UK, 2024/25+): capital gains above the annual exempt amount (£3,000) are taxed at 18% (basic) or 24% (higher) for shares. Losses offset gains and carry forward; the AEA is use-it-or-lose-it. Amounts entered before tax. Estimates only.',
+  FR:'Tax model (France): securities gains are taxed at the flat PFU of 30% (12.8% income tax + 17.2% social contributions). The progressive-scale opt-in, holding-period allowances and the PEA wrapper are not modeled. Amounts entered before tax. Estimates only.'
+ };
+ const note=$('modelNote');
+ if(note)note.textContent=MODEL_NOTES[code]||MODEL_NOTES.DE;
+}
+function rebuildKindSelect(){
+ const sel=$('kind'),cur=sel.value;
+ const map=kindsMap();
+ sel.innerHTML='';
+ Object.keys(map).forEach(k=>{
+  const o=document.createElement('option');o.value=k;o.textContent=map[k];sel.appendChild(o);
+ });
+ if(map[cur])sel.value=cur;else sel.value=Object.keys(map)[0];
+ // history filter too
+ const hk=$('hKind');
+ if(hk){
+  const prev=hk.value;
+  hk.innerHTML='<option value="all">All categories</option>';
+  Object.keys(ALL_KINDS).forEach(k=>{
+   const o=document.createElement('option');o.value=k;o.textContent=ALL_KINDS[k];hk.appendChild(o);
+  });
+  if(prev==='all'||ALL_KINDS[prev])hk.value=prev;else hk.value='all';
+ }
+ onKindChange();
+}
+function setBasis(b){state.settings.basis=b;persist();render()}
+function populateYears(){
+ const sel=$('year'),cur=new Date().getFullYear(),prev=+sel.value||cur;
+ const ys=state.txns.map(x=>yearOf(x.date)).filter(Boolean);
+ const lo=Math.min(cur-4,...(ys.length?ys:[cur])); const hi=Math.max(2030,cur,...(ys.length?ys:[cur]));
+ sel.innerHTML='';
+ for(let y=lo;y<=hi;y++){const o=document.createElement('option');o.value=y;o.textContent=y;sel.appendChild(o)}
+ sel.value=(prev>=lo&&prev<=hi)?prev:cur;
+ sel.onchange=render;
+}
+
+/* ---------- tabs ---------- */
+function goTab(name){
+ if(name!=='add'&&editingId)resetForm();
+ if(name==='positions'){renderPositions();calcPos()}
+ if(name==='watchlist')renderWatchlist();
+ if(name==='fx'){fillFxSelects();refreshFxRates(false)}
+
+ const tabs=document.querySelectorAll('.tab');
+ tabs.forEach(b=>{
+  b.classList.remove('tab-bounce');
+  const on=b.dataset.tab===name;
+  b.classList.toggle('active',on);
+  b.setAttribute('aria-selected',on?'true':'false');
+ });
+ document.querySelectorAll('.panel').forEach(p=>{
+  p.classList.toggle('active',p.id===name);
+ });
+
+ const activeTab=document.querySelector('.tab.active');
+ if(activeTab){
+  // Restart the bounce animation even when the same tab is selected twice.
+  requestAnimationFrame(()=>{
+   activeTab.classList.remove('tab-bounce');
+   void activeTab.offsetWidth;
+   activeTab.classList.add('tab-bounce');
+  });
+ }
+
+ // Avoid the abrupt jump to the top while still keeping tab changes fast.
+ requestAnimationFrame(()=>{
+  window.scrollTo({top:0,left:0,behavior:'smooth'});
+ });
+}
+
+/* ---------- add / edit form (after tax <-> before tax) ---------- */
+let src='net',editingId=null;
+function onKindChange(){
+ const k=$('kind').value,refund=k==='taxRefund';
+ if(isGross()){
+  // Non-DE countries: amounts are always before tax (gross). Single amount field.
+  $('grossCol').style.display='none';
+  const cur=P().currency;
+  $('lblNet').textContent=refund?('Refund amount ('+cur+')'):(isLoss(k)?'Loss amount ('+cur+')':'Gain amount ('+cur+')');
+  $('rateNote').style.display=refund?'none':'';
+  $('refundBox').style.display='none';
+  if(isGain(k))$('rateNote').textContent=entryNoteGain(k);
+  else if(isLoss(k))$('rateNote').textContent=entryNoteLoss(k);
+ }else{
+  $('grossCol').style.display=refund?'none':'';
+  $('lblNet').textContent=refund?'Refund amount (€)':'After tax (€)';
+  $('rateNote').style.display=refund?'none':'';
+  $('refundBox').style.display=(isLoss(k)&&!editingId)?'':'none';
+  syncAmounts();
+ }
+}
+function onAmt(which){src=which;syncAmounts()}
+function formCtx(){
+ const kind=$('kind').value,date=$('date').value||today(),year=yearOf(date);
+ if(isGross())return {kind,R:taxRates(),S:0,P:0};
+ let idx=Infinity;
+ if(editingId){const i=state.txns.findIndex(t=>t.id===editingId);if(i>=0&&state.txns[i].date===date)idx=i}
+ const r=runLedger(year,{date,idx},editingId);
+ return {kind,R:r.R,S:isGain(kind)?shieldFor(r.L,kind):0,P:isLoss(kind)?poolFor(r.L,kind):0};
+}
+function syncAmounts(){
+ const k=$('kind').value,nEl=$('amtNet'),gEl=$('amtGross'),c=formCtx(),r=c.R.total;
+ if(k!=='taxRefund'){
+  if(src==='net'){
+   const v=parseFloat(nEl.value),ok=nEl.value!==''&&isFinite(v);
+   gEl.value=ok?r2(isGain(k)?gainGross(v,c.S,r):lossGrossFromAfter(v,c.P,r)).toFixed(2):'';
+  }else{
+   const v=parseFloat(gEl.value),ok=gEl.value!==''&&isFinite(v);
+   nEl.value=ok?r2(isGain(k)?gainNet(v,c.S,r):lossAfter(v,c.P,r)).toFixed(2):'';
+  }
+ }
+ const rate=pctFmt(r);
+ if(!isGross()){
+ if(isGain(k))$('rateNote').textContent=c.S>0.005
+  ?`${eur(c.S)} of tax-free room is still open on this date (allowance and loss pots), so that part of your gains carries no tax. The rest is taxed at ${rate}.`
+  :`No tax-free room is left on this date, so the full ${rate} applies. Before tax = after tax ÷ (1 − ${rate}).`;
+ else if(isLoss(k))$('rateNote').textContent=c.P>0.005
+  ?`A loss gets back ${rate} of the tax you already paid this year. ${eur(c.P)} of taxed gains are available to offset here. Your broker shows the before-tax loss.`
+  :`No tax has been paid on gains yet this year, so this loss earns no refund. It goes into the loss pot and shields later gains.`;
+ }
+ $('refundAmt').textContent=eur(r*Math.min(parseFloat(gEl.value)||0,c.P));
+}
+function resetForm(){
+ editingId=null;src='net';
+ $('date').value=today();$('desc').value='';if($('emotion'))$('emotion').value='';$('amtNet').value='';$('amtGross').value='';$('addRefund').checked=false;
+ $('formTitle').textContent='Add trade';$('saveBtn').textContent='Save trade';$('cancelEdit').style.display='none';
+ onKindChange();
+}
+function cancelEdit(){resetForm();goTab('history')}
+
+function showTradeFeedback(kind,amount,wasEdit){
+ const el=$('tradeFeedback');
+ if(!el)return;
+ const profit=isGain(kind), loss=isLoss(kind);
+ if(!profit&&!loss)return;
+ const a=eur(amount);
+ const title=profit?(wasEdit?'Profit trade updated':'Profit added'):(wasEdit?'Loss trade updated':'Loss added');
+ const tip=profit
+  ?'<b>Recommendation:</b> Consider locking in your trading rule: define the next target/stop before entering another trade, and avoid chasing a fast move just because this trade was profitable.'
+  :'<b>Recommendation:</b> Review the trade thesis and your entry/exit rule. If the setup is no longer valid, avoid revenge trading; record the lesson and keep the next position size consistent with your risk plan.';
+ el.className='trade-feedback '+(profit?'profit':'loss');
+ el.innerHTML='<div class="tf-title">'+title+'</div>'
+  +'<div class="tf-amount">'+a+'</div>'
+  +'<div class="tf-tip">'+tip+'</div>';
+ el.classList.remove('show');void el.offsetWidth;el.classList.add('show');
+ clearTimeout(window._tradeFeedbackTimer);window._tradeFeedbackTimer=setTimeout(()=>el.classList.remove('show'),5200);
+}
+
+function saveTxn(){
+ const date=$('date').value,kind=$('kind').value,desc=$('desc').value.trim(),c=formCtx(),r=c.R.total;
+ const nV=parseFloat($('amtNet').value),gV=parseFloat($('amtGross').value);
+ let amount;
+ if(isGross()){
+  amount=r2(nV);
+ }else if(kind==='taxRefund')amount=r2(nV);
+ else if(src==='gross')amount=isGain(kind)?r2(gainNet(gV,c.S,r)):r2(gV);
+ else amount=isGain(kind)?r2(nV):r2(lossGrossFromAfter(nV,c.P,r));
+ if(!date||!isFinite(amount)||amount<=0){toast('Enter a date and an amount above 0.');return}
+ if(editingId){
+  const x=state.txns.find(t=>t.id===editingId);
+  if(x){x.date=date;x.desc=desc;x.kind=kind;x.amount=amount;x.emotion=($('emotion').value||'');if(!x.country)x.country=state.settings.country||'DE'}
+ }else{
+  state.txns.push({id:newId(),date,desc,kind,amount,emotion:($('emotion').value||''),country:state.settings.country||'DE'});
+  const refund=r2(r*Math.min(amount,c.P));
+  if(isLoss(kind)&&$('addRefund').checked&&refund>0){
+   state.txns.push({id:newId(),date,desc:'Tax refund'+(desc?' – '+desc:''),kind:'taxRefund',amount:refund,emotion:'',country:state.settings.country||'DE'});
+  }
+ }
+ const wasEdit=!!editingId;
+ const resultKind=kind,resultAmount=amount;
+ persist();resetForm();populateYears();$('year').value=yearOf(date);render();
+ goTab(wasEdit?'history':'dashboard');
+ showTradeFeedback(resultKind,resultAmount,wasEdit);
+ toast(wasEdit?'Transaction updated.':'Transaction saved.');
+}
+function editTxn(id){
+ const x=state.txns.find(t=>t.id===id);if(!x)return;
+ editingId=id;
+ $('date').value=x.date;$('desc').value=x.desc||'';if($('emotion'))$('emotion').value=x.emotion||'';$('kind').value=x.kind;
+ if(isLoss(x.kind)&&!isGross()){src='gross';$('amtGross').value=(+x.amount).toFixed(2);$('amtNet').value=''}
+ else if(isLoss(x.kind)){src='net';$('amtNet').value=(+x.amount).toFixed(2);$('amtGross').value=''}
+ else{src='net';$('amtNet').value=(+x.amount).toFixed(2);$('amtGross').value=''}
+ $('addRefund').checked=false;
+ $('formTitle').textContent='Edit trade';$('saveBtn').textContent='Update trade';$('cancelEdit').style.display='';
+ onKindChange();
+ goTab('add');
+}
+function delTxn(id){
+ const i=state.txns.findIndex(t=>t.id===id);if(i<0)return;
+ const [x]=state.txns.splice(i,1);
+ persist();render();
+ toast('Transaction deleted.','Undo',()=>{state.txns.push(x);persist();populateYears();render()});
+}
+
+
+/* ---------- period performance ---------- */
+let periodMode='wm';
+let weekOfMonth=1;
+function setWeekOfMonth(w){
+ weekOfMonth=Math.min(5,Math.max(1,+w||1));
+ periodMode='wm';
+ [1,2,3,4,5].forEach(i=>{const el=$('wm'+i);if(el)el.classList.toggle('on',weekOfMonth===i)});
+ fillPeriodMonthSelect();
+ renderPeriod();
+}
+function onPeriodMonthChange(){
+ periodMode='wm';
+ fillPeriodMonthSelect();
+ renderPeriod();
+}
+function compactMoney(n){
+ // Shorter labels for the week buttons (fit 5 columns)
+ const p=P();
+ const abs=Math.abs(n||0);
+ const sign=n<0?'-':(n>0?'+':'');
+ if(abs>=1000){
+  const k=abs/1000;
+  const s=k>=10?k.toFixed(0):k.toFixed(1);
+  return sign+s+'k';
+ }
+ return sign+new Intl.NumberFormat(p.locale,{maximumFractionDigits:0,minimumFractionDigits:0}).format(abs);
+}
+function updateWeekButtons(){
+ const basis=state.settings.basis||'net';
+ const y=+$('year').value||new Date().getFullYear();
+ // Month selector sits above week buttons and drives the week totals
+ let monthRef;
+ if($('periodMonth')&&$('periodMonth').value!=='')monthRef=+$('periodMonth').value;
+ else if(y===new Date().getFullYear())monthRef=new Date().getMonth();
+ else monthRef=0;
+ if($('periodMonth')&&($('periodMonth').value===''||$('periodMonth').value==null)){
+  fillPeriodMonthSelect();
+  monthRef=+$('periodMonth').value;
+ }
+ const weeks=monthWeekBreakdown(y,monthRef,basis);
+ const active=weeks.filter(w=>w.start&&(Math.abs(w.total)>=0.005||w.n>0));
+ const avg=active.length?active.reduce((s,w)=>s+w.total,0)/active.length:0;
+ const ordinal=['','1st','2nd','3rd','4th','5th'];
+ weeks.forEach(w=>{
+  const btn=$('wm'+w.w);
+  const amtEl=$('wm'+w.w+'Amt');
+  const gaugeEl=$('wm'+w.w+'Gauge');
+  if(!btn||!amtEl||!gaugeEl)return;
+  btn.classList.toggle('on',periodMode==='wm'&&weekOfMonth===w.w);
+  if(!w.start){
+   amtEl.textContent='—';
+   amtEl.className='wm-amt dim';
+   btn.classList.add('zero');
+   gaugeEl.className='';
+   gaugeEl.style.width='0%';
+   _rollCache['wm'+w.w]=0;
+   return;
+  }
+  const z=Math.abs(w.total)<0.005;
+  btn.classList.toggle('zero',z);
+  rollNumber(amtEl,w.total,{key:'wm'+w.w,format:v=>z&&!w.n?'—':compactMoney(v),className:'wm-amt '+(z?'dim':cls(w.total)),duration:650});
+  // Gauge vs weekly average: 100% = avg filled. Loss weeks use red partial fill by magnitude vs |avg|.
+  let pct=0, gCls='';
+  if(active.length&&Math.abs(avg)>=0.005){
+   if(w.total>=0&&avg>0){
+    pct=Math.min(100,Math.round((w.total/avg)*100));
+    gCls=w.total>=avg?'above':(pct>=50?'':'below');
+   }else if(w.total<0&&avg>0){
+    // loss week while average is profit → empty / loss marker
+    pct=Math.min(100,Math.round((Math.abs(w.total)/Math.abs(avg))*100));
+    gCls='loss';
+   }else if(w.total<0&&avg<0){
+    // both negative: "filled" means less loss than average (closer to zero is better)
+    const better=Math.abs(w.total)<=Math.abs(avg);
+    pct=Math.min(100,Math.round((Math.abs(avg)/Math.max(Math.abs(w.total),0.01))*100));
+    gCls=better?'above':'below';
+   }else if(w.total>0&&avg<0){
+    pct=100;gCls='above';
+   }
+  }else if(!z){
+   // no average yet — show a modest fill so the gauge isn't blank when there is activity
+   pct=w.total>0?60:(w.total<0?40:0);
+   gCls=w.total>0?'above':(w.total<0?'loss':'empty');
+  }else{
+   gCls='empty';pct=0;
+  }
+  gaugeEl.className=gCls||'';
+  gaugeEl.style.width=pct+'%';
+  btn.title=ordinal[w.w]+' week · '+(w.start?w.start.slice(8)+'–'+w.end.slice(8):'n/a')
+   +' · '+money(w.total)+(w.n?' · '+w.n+' trade'+(w.n===1?'':'s'):'')
+   +(active.length&&Math.abs(avg)>=0.005?' · avg '+money(avg):'');
+ });
+ // Full calendar-month total (all days), shown under week-of-month
+ const mStart=new Date(y,monthRef,1,0,0,0,0);
+ const mEnd=new Date(y,monthRef+1,0,23,59,59,999);
+ const mList=periodTxns(mStart,mEnd);
+ const mTotal=sumPeriod(mList,basis);
+ const mTrades=mList.filter(x=>isGain(x.kind)||isLoss(x.kind)).length;
+ const mv=$('monthTotalVal');
+ if(mv){
+  rollNumber(mv,mTotal,{key:'monthTotalVal',format:money,className:'mt-val '+cls(mTotal),duration:750});
+ }
+}
+function initCustomRangeDefaults(){
+ const from=$('customFrom'),to=$('customTo');
+ if(!from||!to)return;
+ if(!from.value){
+  const d=new Date();d.setDate(1);
+  from.value=isoDay(d);
+ }
+ if(!to.value)to.value=today();
+}
+function renderCustomRange(){
+ initCustomRangeDefaults();
+ const fromEl=$('customFrom'),toEl=$('customTo');
+ if(!fromEl||!toEl)return;
+ let a=fromEl.value,b=toEl.value;
+ if(!a||!b)return;
+ if(a>b){const t=a;a=b;b=t;fromEl.value=a;toEl.value=b}
+ const basis=state.settings.basis||'net';
+ const start=new Date(a+'T00:00:00');
+ const end=new Date(b+'T23:59:59.999');
+ const list=periodTxns(start,end);
+ const total=sumPeriod(list,basis);
+ const mv=$('customRangeVal');
+ if(mv){
+  rollNumber(mv,total,{key:'customRangeVal',format:money,className:'mt-val '+cls(total),duration:700});
+ }
+}
+function fillPeriodMonthSelect(){
+ const sel=$('periodMonth'); if(!sel)return;
+ const y=+$('year').value||new Date().getFullYear();
+ const prev=sel.value!==''&&sel.value!=null?+sel.value:(new Date().getFullYear()===y?new Date().getMonth():0);
+ sel.innerHTML=MONTHS.map((n,i)=>`<option value="${i}">${n}</option>`).join('');
+ sel.value=String(Math.min(11,Math.max(0,prev)));
+ if($('periodYearLabel'))$('periodYearLabel').value=String(y);
+}
+/* Work weeks = Monday–Friday only.
+   Week 1: from the 1st (if Mon–Fri) or the first Monday, until that week's Friday.
+   If the month starts Sat/Sun, week 1 begins on the first Monday.
+   Later weeks are full Mon–Fri blocks still inside the month (last week may end early). */
+function getMonthWorkWeeks(year,month){
+ const last=new Date(year,month+1,0).getDate();
+ const weeks=[];
+ let day=1;
+ const firstDow=new Date(year,month,1).getDay(); // 0=Sun … 6=Sat
+ if(firstDow===0)day=2;          // Sun → first Mon
+ else if(firstDow===6)day=3;     // Sat → first Mon
+ // else day 1 is Mon–Fri → week 1 starts on the 1st and runs to that Friday
+ while(day<=last){
+  const dow=new Date(year,month,day).getDay();
+  if(dow===0||dow===6){day++;continue}
+  const monOffset=(dow+6)%7; // Mon=0 … Fri=4
+  let fri=day+(4-monOffset);
+  if(fri>last)fri=last;
+  while(fri>day){
+   const fd=new Date(year,month,fri).getDay();
+   if(fd!==0&&fd!==6)break;
+   fri--;
+  }
+  if(day<=fri){
+   weeks.push({
+    w:weeks.length+1,
+    startDay:day,
+    endDay:fri,
+    start:new Date(year,month,day,0,0,0,0),
+    end:new Date(year,month,fri,23,59,59,999)
+   });
+  }
+  // jump to next Monday after this Friday
+  let next=fri+1;
+  while(next<=last&&new Date(year,month,next).getDay()!==1)next++;
+  day=next;
+ }
+ return weeks;
+}
+function periodWindow(offsetPeriods){
+ // offsetPeriods: 0 = current, 1 = previous equal-length window
+ const off=offsetPeriods||0;
+ if(periodMode==='wm'){
+  const y=+$('year').value||new Date().getFullYear();
+  let m=$('periodMonth')?+$('periodMonth').value:new Date().getMonth();
+  let w=weekOfMonth;
+  if(off){
+   w-=off;
+   while(w<1){
+    m-=1;if(m<0){m=11;/* year stays tax-year UI; still use y */}
+    const prevWeeks=getMonthWorkWeeks(y,m);
+    w+=Math.max(prevWeeks.length,1);
+   }
+  }
+  const weeks=getMonthWorkWeeks(y,m);
+  const hit=weeks.find(x=>x.w===w);
+  if(!hit){
+   const lastDay=new Date(y,m+1,0).getDate();
+   const s=new Date(y,m,lastDay); s.setHours(0,0,0,0);
+   const e=new Date(y,m,lastDay); e.setHours(23,59,59,999);
+   return {start:s,end:e,emptyWeek:true};
+  }
+  return {start:hit.start,end:hit.end};
+ }
+ let spanDays=30;
+ if(periodMode==='1d')spanDays=1;
+ else if(periodMode==='1w')spanDays=7;
+ else if(periodMode==='1m')spanDays=30;
+ else if(periodMode==='3m')spanDays=90;
+ else if(periodMode==='6m')spanDays=180;
+ else if(periodMode==='1y')spanDays=365;
+ const end=new Date();
+ end.setHours(23,59,59,999);
+ if(off) end.setDate(end.getDate()-spanDays*off);
+ const start=new Date(end.getFullYear(), end.getMonth(), end.getDate()-(spanDays-1));
+ start.setHours(0,0,0,0);
+ return {start,end,spanDays};
+}
+function isoDay(d){
+ const x=new Date(d.getTime()-d.getTimezoneOffset()*60000);
+ return x.toISOString().slice(0,10);
+}
+function periodTxns(start,end){
+ const country=state.settings.country||'DE';
+ const a=isoDay(start),b=isoDay(end);
+ return state.txns.filter(x=>{
+  if(typeof txnCountry==='function'&&txnCountry(x)!==country)return false;
+  const d=x.date;
+  return d>=a&&d<=b;
+ }).sort((x,y)=>x.date.localeCompare(y.date)||String(x.id).localeCompare(String(y.id)));
+}
+function sumPeriod(list,basis){
+ let total=0;
+ list.forEach(x=>{
+  if(x.kind==='taxRefund'){if(basis==='net')total+=+x.amount||0}
+  else if(isGain(x.kind)||isLoss(x.kind))total+=val(x,basis);
+ });
+ return total;
+}
+function monthWeekBreakdown(year,month,basis){
+ const weeks=getMonthWorkWeeks(year,month);
+ const rows=[];
+ for(let w=1;w<=5;w++){
+  const hit=weeks.find(x=>x.w===w);
+  if(!hit){rows.push({w,start:null,end:null,total:0,n:0});continue}
+  const list=periodTxns(hit.start,hit.end);
+  let total=0,n=0;
+  list.forEach(x=>{
+   if(x.kind==='taxRefund'){if(basis==='net')total+=+x.amount||0}
+   else if(isGain(x.kind)||isLoss(x.kind)){total+=val(x,basis);n++}
+  });
+  rows.push({w,start:isoDay(hit.start),end:isoDay(hit.end),total,n});
+ }
+ return rows;
+}
+function renderPeriod(){
+ if(!$('periodKpis'))return;
+ const basis=state.settings.basis||'net';
+ const {start,end,emptyWeek}=periodWindow(0);
+ const list=emptyWeek?[]:periodTxns(start,end);
+ const prevWin=periodWindow(1);
+ const prevList=prevWin.emptyWeek?[]:periodTxns(prevWin.start,prevWin.end);
+ const prevTotal=sumPeriod(prevList,basis);
+ const loc=isIN()?'en-IN':'de-DE';
+ const fmtD=d=>d.toLocaleDateString(loc,{day:'numeric',month:'short',year:'numeric'});
+ const ordinal=['','1st','2nd','3rd','4th','5th'];
+ if(periodMode==='wm'){
+  $('periodRangeLabel').textContent=emptyWeek
+   ?`${ordinal[weekOfMonth]} week · no days in this month`
+   :`${ordinal[weekOfMonth]} week · ${fmtD(start)} – ${fmtD(end)}`;
+ }else{
+  $('periodRangeLabel').textContent=fmtD(start)+(isoDay(start)!==isoDay(end)?' – '+fmtD(end):' · today');
+ }
+
+ const days=[];
+ const cur=new Date(start);cur.setHours(0,0,0,0);
+ const endDay=new Date(end);endDay.setHours(0,0,0,0);
+ while(cur<=endDay){
+  days.push({date:isoDay(cur),label:cur.toLocaleDateString(loc,{day:'numeric',month:'short'}),shortLabel:String(cur.getDate()),net:0,gross:0,n:0,items:[]});
+  cur.setDate(cur.getDate()+1);
+ }
+ const byDay=Object.fromEntries(days.map(d=>[d.date,d]));
+ list.forEach(x=>{
+  const b=byDay[x.date]; if(!b)return;
+  b.n++; b.items.push(x);
+  if(x.kind==='taxRefund'){b.net+=+x.amount||0}
+  else if(isGain(x.kind)||isLoss(x.kind)){b.net+=val(x,'net');b.gross+=val(x,'gross')}
+ });
+ const daily=days.map(d=>d[basis==='gross'?'gross':'net']);
+ const total=daily.reduce((a,b)=>a+b,0);
+ const trades=list.filter(x=>isGain(x.kind)||isLoss(x.kind));
+ const wins=trades.filter(x=>val(x,basis)>0);
+ const losses=trades.filter(x=>val(x,basis)<0);
+ const winSum=wins.reduce((a,x)=>a+val(x,basis),0);
+ const lossSum=losses.reduce((a,x)=>a+val(x,basis),0);
+ const best=daily.length?Math.max(...daily):0;
+ const worst=daily.length?Math.min(...daily):0;
+ const activeDays=daily.filter(v=>Math.abs(v)>=0.005).length;
+ const winRate=trades.length?(wins.length/trades.length*100):0;
+ let bestTrade=null,worstTrade=null;
+ trades.forEach(x=>{
+  const v=val(x,basis);
+  if(!bestTrade||v>bestTrade.v)bestTrade={x,v};
+  if(!worstTrade||v<worstTrade.v)worstTrade={x,v};
+ });
+ // vs previous period — always show % when previous total exists
+ let vsTxt='—', vsCls='dim', vsSub='previous period';
+ const diff=total-prevTotal;
+ if(Math.abs(prevTotal)<0.005){
+  // cannot form a meaningful % when prior period is ~0
+  vsTxt='n/a';
+  vsCls=Math.abs(total)<0.005?'dim':cls(total);
+  vsSub=Math.abs(total)<0.005?'no activity either side':'prior period was 0';
+ }else{
+  const pct=diff/Math.abs(prevTotal)*100;
+  const sign=pct>0?'+':(pct<0?'':'');
+  vsTxt=sign+pct.toFixed(1)+'%';
+  vsCls=cls(diff);
+  vsSub='prior '+money(prevTotal);
+ }
+ ensurePeriodKpiShell();
+ rollNumber($('pkPl'),total,{key:'pkPl',format:money,className:cls(total),duration:850});
+ setMetricSub('pkPlSub',basis==='net'?'after tax':'before tax');
+ // vs previous is text (%), not a pure money roll
+ if($('pkVs')){$('pkVs').textContent=vsTxt;$('pkVs').className=vsCls}
+ setMetricSub('pkVsSub',vsSub);
+ rollNumber($('pkTrades'),trades.length,{key:'pkTrades',format:v=>String(Math.round(v)),className:''});
+ setMetricSub('pkTradesSub',wins.length+' wins · '+losses.length+' losses');
+ if(trades.length){
+  rollNumber($('pkWinRate'),winRate,{key:'pkWinRate',format:v=>v.toLocaleString(loc,{maximumFractionDigits:1})+' %',className:winRate>=50?'good':winRate>0?'warn':'bad'});
+ }else if($('pkWinRate')){$('pkWinRate').textContent='—';$('pkWinRate').className='dim';_rollCache.pkWinRate=0}
+ setMetricSub('pkWinRateSub','');
+ if(wins.length)rollNumber($('pkAvgWin'),winSum/wins.length,{key:'pkAvgWin',format:money,className:'good'});
+ else if($('pkAvgWin')){$('pkAvgWin').textContent='—';$('pkAvgWin').className='dim'}
+ setMetricSub('pkAvgWinSub','');
+ if(losses.length)rollNumber($('pkAvgLoss'),lossSum/losses.length,{key:'pkAvgLoss',format:money,className:'bad'});
+ else if($('pkAvgLoss')){$('pkAvgLoss').textContent='—';$('pkAvgLoss').className='dim'}
+ setMetricSub('pkAvgLossSub','');
+ if(activeDays){
+  rollNumber($('pkBestDay'),best,{key:'pkBestDay',format:money,className:cls(best)});
+  rollNumber($('pkWeakDay'),worst,{key:'pkWeakDay',format:money,className:cls(worst)});
+ }else{
+  if($('pkBestDay')){$('pkBestDay').textContent='—';$('pkBestDay').className='dim'}
+  if($('pkWeakDay')){$('pkWeakDay').textContent='—';$('pkWeakDay').className='dim'}
+ }
+ setMetricSub('pkBestDaySub','');setMetricSub('pkWeakDaySub','');
+ if(bestTrade){
+  rollNumber($('pkBestTrade'),bestTrade.v,{key:'pkBestTrade',format:money,className:cls(bestTrade.v)});
+  setMetricSub('pkBestTradeSub',bestTrade.x.desc||label(bestTrade.x.kind));
+ }else if($('pkBestTrade')){$('pkBestTrade').textContent='—';$('pkBestTrade').className='dim';setMetricSub('pkBestTradeSub','')}
+ if(worstTrade){
+  rollNumber($('pkWorstTrade'),worstTrade.v,{key:'pkWorstTrade',format:money,className:cls(worstTrade.v)});
+  setMetricSub('pkWorstTradeSub',worstTrade.x.desc||label(worstTrade.x.kind));
+ }else if($('pkWorstTrade')){$('pkWorstTrade').textContent='—';$('pkWorstTrade').className='dim';setMetricSub('pkWorstTradeSub','')}
+
+ // Keep month/year above week-of-month in sync, then refresh week P/L gauges + custom range
+ fillPeriodMonthSelect();
+ updateWeekButtons();
+ renderCustomRange();
+
+ let br='';
+ if(periodMode==='1m'||periodMode==='wm'){
+  const y=periodMode==='wm'?(+$('year').value||new Date().getFullYear()):new Date().getFullYear();
+  const monthRef=periodMode==='wm'?($('periodMonth')?+$('periodMonth').value:new Date().getMonth()):new Date().getMonth();
+  const yearRef=periodMode==='wm'?y:new Date().getFullYear();
+  // Week breakdown always after tax
+  const weeks=monthWeekBreakdown(yearRef,monthRef,'net');
+  const activeWeeks=weeks.filter(w=>w.start&&(Math.abs(w.total)>=0.005||w.n>0));
+  const weekAvg=activeWeeks.length?activeWeeks.reduce((s,w)=>s+w.total,0)/activeWeeks.length:0;
+  br='<h3 style="margin:12px 0 6px;font-size:14px">Weeks of '+MONTHS[monthRef]+'</h3>';
+  if(activeWeeks.length&&Math.abs(weekAvg)>=0.005){
+   br+=`<p class="muted" style="margin:0 0 8px">Weekly average (active weeks): <b class="${cls(weekAvg)}">${money(weekAvg)}</b></p>`;
+  }
+  weeks.forEach(w=>{
+   if(!w.start){br+=`<div class="mrow zero"><span>${ordinal[w.w]} week</span><span class="dim">—</span></div>`;return}
+   const on=periodMode==='wm'&&w.w===weekOfMonth;
+   let gaugePct=0,gaugeCls='';
+   if(activeWeeks.length&&Math.abs(weekAvg)>=0.005){
+    if(w.total>=0&&weekAvg>0){
+     gaugePct=Math.min(100,Math.round((w.total/weekAvg)*100));
+     gaugeCls=w.total>=weekAvg?'above':(gaugePct>=50?'':'below');
+    }else if(w.total<0){
+     gaugePct=Math.min(100,Math.round((Math.abs(w.total)/Math.max(Math.abs(weekAvg),0.01))*100));
+     gaugeCls='loss';
+    }
+   }else if(Math.abs(w.total)>=0.005){
+    gaugePct=w.total>0?60:40;gaugeCls=w.total>0?'above':'loss';
+   }
+   br+=`<div class="mrow"><span>${ordinal[w.w]} week <span class="dim">· ${w.start.slice(8)}–${w.end.slice(8)}</span>${on?' <em class="chip">selected</em>':''}</span><span class="r"><b class="${cls(w.total)}">${money(w.total)}</b><small>${w.n} trade${w.n===1?'':'s'}</small><span class="wm-gauge" style="display:block;width:72px;margin-left:auto;margin-top:4px" aria-hidden="true"><i class="${gaugeCls}" style="width:${gaugePct}%"></i></span></span></div>`;
+  });
+ }
+ $('weekBreakdown').innerHTML=br;
+}
+function exportPeriodCSV(){
+ const basis=state.settings.basis||'net';
+ const {start,end,emptyWeek}=periodWindow(0);
+ const list=emptyWeek?[]:periodTxns(start,end);
+ if(!list.length){toast('Nothing to export in this period.');return}
+ const rows=[['Date','Description','Category','Before tax','After tax'],
+  ...list.map(x=>{
+   if(x.kind==='taxRefund')return [x.date,x.desc||'',label(x.kind),'',r2(+x.amount||0)];
+   return [x.date,x.desc||'',label(x.kind),r2(val(x,'gross')),r2(val(x,'net'))];
+  })];
+ const csv=rows.map(r=>r.map(v=>`"${String(v).replaceAll('"','""')}"`).join(',')).join('\n');
+ const name='period_'+isoDay(start)+'_'+isoDay(end)+'.csv';
+ download(name,'text/csv;charset=utf-8','\ufeff'+csv);
+ toast('Period CSV exported.');
+}
+function normName(s){return String(s||'').trim().replace(/\s+/g,' ')}
+function nameKey(s){return normName(s).toLowerCase()}
+function tradeNamesFromTxns(){
+ const country=state.settings.country||'DE';
+ const map=new Map(); // key -> {name,count,last,plNet,plGross}
+ state.txns.forEach(x=>{
+  if(typeof txnCountry==='function'&&txnCountry(x)!==country)return;
+  if(x.kind==='taxRefund')return;
+  if(!(isGain(x.kind)||isLoss(x.kind)))return;
+  const name=normName(x.desc); if(!name)return;
+  const k=nameKey(name);
+  const cur=map.get(k)||{name,count:0,last:'',plNet:0,plGross:0};
+  cur.count++;
+  if(!cur.last||x.date>cur.last)cur.last=x.date;
+  // prefer original casing with most recent non-empty
+  cur.name=name;
+  cur.plNet+=val(x,'net');
+  cur.plGross+=val(x,'gross');
+  map.set(k,cur);
+ });
+ return map;
+}
+function buildWatchlistRows(){
+ const year=+$('year').value||new Date().getFullYear();
+ const basis=state.settings.basis||'net';
+ const auto=tradeNamesFromTxns();
+ const hidden=new Set((state.watchlist.hidden||[]).map(nameKey));
+ const rows=[];
+ // auto rows
+ auto.forEach((info,k)=>{
+  if(hidden.has(k))return;
+  // year-filtered PL
+  let yNet=0,yGross=0,yCount=0;
+  state.txns.forEach(x=>{
+   if(yearOf(x.date)!==year)return;
+   if(typeof txnCountry==='function'&&txnCountry(x)!==(state.settings.country||'DE'))return;
+   if(nameKey(x.desc)!==k)return;
+   if(!(isGain(x.kind)||isLoss(x.kind)))return;
+   yCount++; yNet+=val(x,'net'); yGross+=val(x,'gross');
+  });
+  rows.push({
+   key:k,name:info.name,source:'auto',note:'',
+   count:info.count,last:info.last,
+   yearCount:yCount,yearPL:basis==='gross'?yGross:yNet
+  });
+ });
+ // manual rows not already auto
+ (state.watchlist.manual||[]).forEach(m=>{
+  const k=nameKey(m.name); if(!k)return;
+  if(auto.has(k)){
+   // attach note onto existing auto row
+   const r=rows.find(x=>x.key===k);
+   if(r){r.note=m.note||'';r.manualId=m.id}
+   return;
+  }
+  if(hidden.has(k))return;
+  rows.push({key:k,name:m.name,source:'manual',note:m.note||'',count:0,last:'',yearCount:0,yearPL:0,manualId:m.id});
+ });
+ rows.sort((a,b)=>a.name.localeCompare(b.name));
+ return rows;
+}
+function renderWatchlist(){
+ if(!$('wlList'))return;
+ const q=($('wlSearch')?$('wlSearch').value:'').trim().toLowerCase();
+ const year=+$('year').value||new Date().getFullYear();
+ const basis=state.settings.basis||'net';
+ let rows=buildWatchlistRows();
+ if(q)rows=rows.filter(r=>r.name.toLowerCase().includes(q)||(r.note||'').toLowerCase().includes(q));
+ if($('wlCount'))$('wlCount').textContent=rows.length+' symbol'+(rows.length===1?'':'s');
+ if(!rows.length){
+  $('wlList').innerHTML='<div class="empty">No symbols yet. Add a trade or add one manually.</div>';
+  return;
+ }
+ $('wlList').innerHTML=rows.map(r=>{
+  const src=r.source==='auto'?`<em class="chip">${r.count} trade${r.count===1?'':'s'}</em>`:'<em class="chip">manual</em>';
+  const last=r.last?`<span class="dim"> · last ${escapeHtml(r.last)}</span>`:'';
+  const pl=r.yearCount?`<b class="${cls(r.yearPL)}">${r.yearPL>0?'+':''}${money(r.yearPL)}</b><small>${year} · ${basis==='net'?'after':'before'} tax · ${r.yearCount} trade${r.yearCount===1?'':'s'}</small>`:`<span class="dim">No trades in ${year}</span>`;
+  const note=r.note?`<div class="meta">${escapeHtml(r.note)}</div>`:'';
+  return `<div class="txn">
+   <div class="row">
+    <div><div class="title">${escapeHtml(r.name)} ${src}</div><div class="meta">${r.source==='auto'?'From trades':''}${last}</div>${note}</div>
+    <div class="amt">${pl}</div>
+   </div>
+   <div class="btns">
+    <button class="smallbtn" onclick="useWatchName('${escapeHtml(r.name).replace(/'/g,"\\'")}')">Use in Add</button>
+    <button class="smallbtn" onclick="watchToAvg('${escapeHtml(r.name).replace(/'/g,"\\'")}')">Avg Calculator</button>
+    ${r.source==='manual'?`<button class="smallbtn del" onclick="removeWatchManual('${r.manualId}')">Remove</button>`:`<button class="smallbtn del" onclick="hideWatchAuto('${escapeHtml(r.key).replace(/'/g,"\\'")}')">Hide</button>`}
+   </div>
+  </div>`;
+ }).join('');
+}
+function addWatchManual(){
+ const name=normName($('wlName').value);
+ if(!name){toast('Enter a name / ticker.');return}
+ const note=String($('wlNote').value||'').trim();
+ const k=nameKey(name);
+ // update existing manual or add
+ const list=state.watchlist.manual||(state.watchlist.manual=[]);
+ const i=list.findIndex(x=>nameKey(x.name)===k);
+ if(i>=0){list[i].name=name;list[i].note=note}
+ else list.push({id:newId(),name,note,added:today()});
+ // unhide if was hidden
+ state.watchlist.hidden=(state.watchlist.hidden||[]).filter(h=>h!==k);
+ $('wlName').value='';$('wlNote').value='';
+ persist();renderWatchlist();toast('Added to watchlist.');
+}
+function removeWatchManual(id){
+ state.watchlist.manual=(state.watchlist.manual||[]).filter(x=>x.id!==id);
+ persist();renderWatchlist();toast('Removed from watchlist.');
+}
+function hideWatchAuto(key){
+ const k=nameKey(key);
+ if(!(state.watchlist.hidden||[]).includes(k)){
+  state.watchlist.hidden=state.watchlist.hidden||[];
+  state.watchlist.hidden.push(k);
+ }
+ persist();renderWatchlist();toast('Hidden from watchlist.');
+}
+function useWatchName(name){
+ goTab('add');
+ $('desc').value=name;
+ hideDescSuggest();
+}
+function watchToAvg(name){
+ goTab('positions');
+ $('posName').value=name;
+ calcPos();
+}
+/* description autocomplete */
+let _sugIdx=-1;
+function suggestNames(q){
+ const qk=nameKey(q);
+ const rows=buildWatchlistRows();
+ let list=rows.map(r=>r.name);
+ // also include all trade names even if hidden
+ tradeNamesFromTxns().forEach(info=>{if(!list.some(n=>nameKey(n)===nameKey(info.name)))list.push(info.name)});
+ list=list.filter((n,i,a)=>a.findIndex(x=>nameKey(x)===nameKey(n))===i);
+ if(qk)list=list.filter(n=>nameKey(n).includes(qk));
+ list.sort((a,b)=>{
+  const as=nameKey(a).startsWith(qk)?0:1, bs=nameKey(b).startsWith(qk)?0:1;
+  return as-bs||a.localeCompare(b);
+ });
+ return list.slice(0,8);
+}
+function onDescInput(){
+ const box=$('descSuggest'); if(!box)return;
+ const q=$('desc').value;
+ const items=suggestNames(q);
+ _sugIdx=-1;
+ if(!items.length||!String(q).trim()){box.style.display='none';box.innerHTML='';return}
+ box.style.display='block';
+ box.innerHTML=items.map((n,i)=>`<button type="button" data-i="${i}" onmousedown="event.preventDefault();pickDescSuggest('${escapeHtml(n).replace(/'/g,"\\'")}')">${escapeHtml(n)}</button>`).join('');
+}
+function hideDescSuggest(){const box=$('descSuggest');if(box){box.style.display='none';box.innerHTML=''}_sugIdx=-1}
+function pickDescSuggest(name){$('desc').value=name;hideDescSuggest()}
+function onDescKey(e){
+ const box=$('descSuggest'); if(!box||box.style.display==='none')return;
+ const btns=[...box.querySelectorAll('button')];
+ if(e.key==='ArrowDown'){e.preventDefault();_sugIdx=Math.min(btns.length-1,_sugIdx+1);btns.forEach((b,i)=>b.classList.toggle('active',i===_sugIdx))}
+ else if(e.key==='ArrowUp'){e.preventDefault();_sugIdx=Math.max(0,_sugIdx-1);btns.forEach((b,i)=>b.classList.toggle('active',i===_sugIdx))}
+ else if(e.key==='Enter'&&_sugIdx>=0){e.preventDefault();btns[_sugIdx].dispatchEvent(new Event('mousedown'))}
+ else if(e.key==='Escape')hideDescSuggest();
+}
+document.addEventListener('click',e=>{
+ if($('descSuggest')&&!$('desc')?.contains(e.target)&&!$('descSuggest').contains(e.target))hideDescSuggest();
+});
+
+/* ---------- rolling number animation ---------- */
+const _rollCache={};
+const _rollRaf={};
+function prefersReducedMotion(){
+ return !!(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+}
+function easeOutCubic(t){return 1-Math.pow(1-t,3)}
+function rollNumber(el,to,opts){
+ if(!el)return;
+ opts=opts||{};
+ const key=opts.key||el.id||'';
+ const fmt=opts.format||money;
+ const dur=opts.duration!=null?opts.duration:720;
+ const toN=isFinite(+to)?+to:0;
+ // First time a key appears, roll up from 0 so the user sees the count
+ const from=Object.prototype.hasOwnProperty.call(_rollCache,key)&&isFinite(_rollCache[key])?_rollCache[key]:0;
+ _rollCache[key]=toN;
+ if(opts.className!=null){
+  // preserve extra base classes if provided
+  el.className=opts.className;
+ }
+ if(_rollRaf[key]){cancelAnimationFrame(_rollRaf[key]);_rollRaf[key]=null}
+ if(prefersReducedMotion()||Math.abs(from-toN)<0.005){
+  el.textContent=fmt(toN);
+  el.classList.remove('rolling');
+  return;
+ }
+ el.classList.add('rolling');
+ const t0=performance.now();
+ const delta=toN-from;
+ function frame(now){
+  const t=Math.min(1,(now-t0)/dur);
+  const e=easeOutCubic(t);
+  const cur=from+delta*e;
+  el.textContent=fmt(cur);
+  if(t<1){
+   _rollRaf[key]=requestAnimationFrame(frame);
+  }else{
+   el.textContent=fmt(toN);
+   el.classList.remove('rolling');
+   _rollRaf[key]=null;
+  }
+ }
+ _rollRaf[key]=requestAnimationFrame(frame);
+}
+function ensureKpiShell(){
+ const box=$('kpis'); if(!box)return;
+ if(box.dataset.shell==='1')return;
+ box.innerHTML=
+  '<div class="metric"><span class="muted">Gains · after tax</span><b id="kpiNetGains">—</b></div>'+
+  '<div class="metric"><span class="muted">Gains · before tax</span><b id="kpiGrossGains">—</b></div>'+
+  '<div class="metric"><span class="muted">Losses booked</span><b id="kpiGrossLosses">—</b></div>'+
+  '<div class="metric"><span class="muted">Losses used</span><b id="kpiLossUsed">—</b></div>';
+ box.dataset.shell='1';
+}
+function ensurePeriodKpiShell(){
+ const box=$('periodKpis'); if(!box)return;
+ if(box.dataset.shell==='1')return;
+ const ids=[
+  ['pkPl','Profit / loss'],['pkVs','vs previous'],['pkTrades','Trades'],['pkWinRate','Win rate'],
+  ['pkAvgWin','Avg win'],['pkAvgLoss','Avg loss'],['pkBestDay','Best day'],['pkWeakDay','Weakest day'],
+  ['pkBestTrade','Best trade'],['pkWorstTrade','Worst trade']
+ ];
+ box.innerHTML=ids.map(([id,l])=>`<div class="metric"><span class="muted">${l}</span><b id="${id}">—</b><small id="${id}Sub"></small></div>`).join('');
+ box.dataset.shell='1';
+}
+function setMetricSub(id,text){
+ const el=$(id); if(!el)return;
+ if(!text){el.textContent='';el.style.display='none';return}
+ el.style.display='block';el.textContent=text;
+}
+
+/* ---------- rendering ---------- */
+function render(){
+ const year=+$('year').value,R=taxRates(),basis=state.settings.basis,other=basis==='net'?'gross':'net';
+ const c=calcYear(year);
+ $('yearTitle').textContent=year;
+
+ // hero — rolling count
+ rollNumber($('net'),c.net,{key:'net',format:eur,className:'big '+cls(c.net),duration:900});
+ rollNumber($('netGross'),c.grossPL,{key:'netGross',format:eur,className:cls(c.grossPL),duration:800});
+ ensureKpiShell();
+ rollNumber($('kpiNetGains'),c.netGains,{key:'kpiNetGains',format:eur,className:cls(c.netGains)});
+ rollNumber($('kpiGrossGains'),c.grossGains,{key:'kpiGrossGains',format:eur,className:cls(c.grossGains)});
+ rollNumber($('kpiGrossLosses'),c.grossLosses,{key:'kpiGrossLosses',format:eur,className:c.grossLosses>0.005?'bad':'dim'});
+ rollNumber($('kpiLossUsed'),c.lossUsed,{key:'kpiLossUsed',format:eur,className:c.lossUsed>0.005?'warn':'dim'});
+
+ // allowance / exemption
+ if(isIN()){
+  const A=+state.settings.ltcgExempt||125000,used=Math.min(A,(+state.settings.ltcgUsed||0)+(c.exemptionUsed||0)),pct=A?Math.min(100,used/A*100):0;
+  $('allowFill').style.width=pct+'%';$('allowFill').className=pct>=100?'full':'';
+  $('allowText').innerHTML=`${money(used)} used of ${money(A)} · <b>${money(Math.max(0,A-used))}</b> left`;
+ }else if(isGross()){
+  const A=c.allowance||0,used=c.allowanceUsed||0,pct=A?Math.min(100,used/A*100):0;
+  $('allowFill').style.width=pct+'%';$('allowFill').className=pct>=100?'full':'';
+  $('allowText').innerHTML=A?`${money(used)} used of ${money(A)} · <b>${money(Math.max(0,A-used))}</b> left`:'This country has no annual exemption — every net gain is taxable';
+ }else{
+  const A=+state.settings.allowance||0,used=Math.min(A,(+state.settings.allowUsed||0)+c.allowanceUsed),pct=A?Math.min(100,used/A*100):0;
+  $('allowFill').style.width=pct+'%';$('allowFill').className=pct>=100?'full':'';
+  $('allowText').innerHTML=`${money(used)} used of ${money(A)} · <b>${money(Math.max(0,A-used))}</b> left`;
+ }
+
+ // tax estimate
+ const ln=(a,b,k='')=>`<div class="line ${k}"><span>${a}</span><b>${b}</b></div>`;
+ if(isIN()){
+  $('taxLines').innerHTML=
+   ln('STCG (net)',money(c.stNet))+
+   ln('LTCG (net, before exemption)',money(c.ltNet))+
+   ln('LTCG taxable after exemption',money(c.ltcgTaxable))+
+   ln('STCG tax',money(c.stTax))+
+   ln('LTCG tax',money(c.ltTax))+
+   ln('Total tax (est.)',money(c.totalTax),'net');
+  $('taxNote').textContent=`STCG ${pctFmt(R.stcg)} · LTCG ${pctFmt(R.ltcg)}${R.cess>1?' (incl. 4% cess)':''}.`;
+ }else if(isGross()){
+  $('taxLines').innerHTML=(c.lines||[]).map(l=>ln(l[0],l[1])).join('');
+  $('taxNote').textContent=c.note||'';
+ }else{
+  $('taxLines').innerHTML=ln('Taxable after losses & allowance',money(c.taxable))+ln('Capital gains tax',money(c.capTax))+ln('Solidarity surcharge',money(c.soli))+(R.k>0?ln('Church tax',money(c.church)):'')+ln('Total tax (est.)',money(c.totalTax),'net');
+  $('taxNote').textContent=`Combined rate ${pctFmt(R.total)} on the taxable amount.`;
+ }
+
+ // loss pots
+ if($('lossPotsCard'))$('lossPotsCard').style.display=(country()==='DE'||country()==='IN')?'':'none';
+ if($('stockCarry'))$('stockCarry').className=Math.abs(c.stockCarry)<0.005?'dim':'';
+ if($('otherCarry'))$('otherCarry').className=Math.abs(c.otherCarry)<0.005?'dim':'';
+ rollNumber($('stockCarry'),c.stockCarry,{key:'stockCarry',format:eur});
+ rollNumber($('otherCarry'),c.otherCarry,{key:'otherCarry',format:eur});
+
+ renderMonthly(year,R,basis,other);
+ renderPeriod();
+ renderStats(c,basis,R);
+ renderHistory();
+ renderWatchlist();
+ $('segNet').classList.toggle('on',basis==='net');$('segGross').classList.toggle('on',basis==='gross');
+}
+function renderMonthly(year,R,basis,other){
+ const mo=monthlyData(year,R),vals=mo.map(m=>m[basis]),ovals=mo.map(m=>m[other]);
+ const aN=avgActive(mo.map(m=>m.net)),aG=avgActive(mo.map(m=>m.gross)),aS=basis==='net'?aN:aG;
+ const now=new Date(),elapsed=year<now.getFullYear()?12:(year===now.getFullYear()?now.getMonth()+1:0);
+ const zeroPast=vals.slice(0,elapsed).filter(v=>Math.abs(v)<0.005).length;
+ const active=vals.map((v,i)=>Math.abs(v)>=0.005?i:-1).filter(i=>i>=0);
+ let best=-1,worst=-1;
+ if(active.length>1){best=active.reduce((a,i)=>vals[i]>vals[a]?i:a,active[0]);worst=active.reduce((a,i)=>vals[i]<vals[a]?i:a,active[0])}
+ const avgBox=$('avgBox');
+ if(avgBox&&avgBox.dataset.shell!=='1'){
+  avgBox.innerHTML=
+   '<div class="metric"><span class="muted">Monthly avg · after tax</span><b id="avgNet">—</b><small id="avgNetSub"></small></div>'+
+   '<div class="metric"><span class="muted">Monthly avg · before tax</span><b id="avgGross">—</b><small id="avgGrossSub"></small></div>'+
+   '<div class="metric"><span class="muted">Best month</span><b id="avgBest">—</b><small id="avgBestSub"></small></div>'+
+   '<div class="metric"><span class="muted">Weakest month</span><b id="avgWeak">—</b><small id="avgWeakSub"></small></div>';
+  avgBox.dataset.shell='1';
+ }
+ if(aN.n){rollNumber($('avgNet'),aN.avg,{key:'avgNet',format:eur,className:cls(aN.avg)});setMetricSub('avgNetSub',aN.n+' active month'+(aN.n===1?'':'s'))}
+ else if($('avgNet')){$('avgNet').textContent='—';$('avgNet').className='dim';setMetricSub('avgNetSub','')}
+ if(aG.n){rollNumber($('avgGross'),aG.avg,{key:'avgGross',format:eur,className:cls(aG.avg)});setMetricSub('avgGrossSub',aG.n+' active month'+(aG.n===1?'':'s'))}
+ else if($('avgGross')){$('avgGross').textContent='—';$('avgGross').className='dim';setMetricSub('avgGrossSub','')}
+ if(best>=0){rollNumber($('avgBest'),vals[best],{key:'avgBest',format:eur,className:cls(vals[best])});setMetricSub('avgBestSub',MONTHS[best])}
+ else if($('avgBest')){$('avgBest').textContent='—';$('avgBest').className='dim';setMetricSub('avgBestSub','')}
+ if(worst>=0){rollNumber($('avgWeak'),vals[worst],{key:'avgWeak',format:eur,className:cls(vals[worst])});setMetricSub('avgWeakSub',MONTHS[worst])}
+ else if($('avgWeak')){$('avgWeak').textContent='—';$('avgWeak').className='dim';setMetricSub('avgWeakSub','')}
+ $('avgNote').textContent=aS.n?`Averages skip months at €0${zeroPast?` (${zeroPast} empty month${zeroPast===1?'':'s'} so far this year)`:''}.`:'No months with activity in this year yet.';
+ $('chart').innerHTML=chartSVG(vals,aS.avg,aS.n);
+ let total=0;
+ const monthsEl=$('months');
+ if(monthsEl&&monthsEl.dataset.shell!=='1'){
+  monthsEl.innerHTML=MONTHS.map((m,i)=>`<div class="mrow" id="mrow${i}"><span>${m}<span id="mchip${i}"></span></span><span class="r"><b id="mval${i}">—</b><small id="msub${i}"></small></span></div>`).join('')
+   +`<div class="mrow"><b>Year total</b><b id="mYearTotal">—</b></div>`;
+  monthsEl.dataset.shell='1';
+ }
+ vals.forEach((v,i)=>{
+  const z=Math.abs(v)<0.005;total+=v;
+  const row=$('mrow'+i); if(row)row.classList.toggle('zero',z);
+  const chip=$('mchip'+i);
+  if(chip)chip.innerHTML=i===best?' <em class="chip">best</em>':(i===worst?' <em class="chip">weakest</em>':'');
+  if(z){
+   if($('mval'+i)){$('mval'+i).textContent='—';$('mval'+i).className='dim'}
+   if($('msub'+i))$('msub'+i).textContent='';
+   _rollCache['mval'+i]=0;
+  }else{
+   rollNumber($('mval'+i),v,{key:'mval'+i,format:eur,className:cls(v),duration:600});
+   if($('msub'+i))$('msub'+i).textContent=eur(ovals[i])+' '+(other==='net'?'after':'before')+' tax';
+  }
+ });
+ rollNumber($('mYearTotal'),total,{key:'mYearTotal',format:eur,className:cls(total),duration:800});
+}
+function chartSVG(vals,avg,n){
+ const W=460,H=150,top=12,bot=22,bw=24,cnt=12,gap=(W-cnt*bw)/(cnt+1);
+ const max=Math.max(0,...vals),min=Math.min(0,...vals),span=(max-min)||1,ph=H-top-bot,y0=top+ph*(max/span);
+ let s=`<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Monthly profit chart"><line x1="0" x2="${W}" y1="${y0}" y2="${y0}" class="axis"/>`;
+ vals.forEach((v,i)=>{
+  const x=gap+i*(bw+gap),z=Math.abs(v)<0.005,h=z?0:Math.max(2,Math.abs(v)/span*ph);
+  if(z)s+=`<rect x="${x}" y="${y0-1}" width="${bw}" height="2" rx="1" class="bz"/>`;
+  else s+=`<rect x="${x}" y="${v>0?y0-h:y0}" width="${bw}" height="${h}" rx="3" class="${v>0?'bp':'bn'}"/>`;
+  s+=`<text x="${x+bw/2}" y="${H-7}" text-anchor="middle" class="cl">${MONTHS[i]}</text>`;
+ });
+ if(n>0){const ya=y0-avg/span*ph;s+=`<line x1="0" x2="${W}" y1="${ya}" y2="${ya}" class="avgl"/>`}
+ return s+'</svg>';
+}
+function renderStats(c,basis,R){
+ const tr=c.t.filter(x=>isGain(x.kind)||isLoss(x.kind)).map(x=>({d:(x.desc||'Unnamed').trim()||'Unnamed',v:val(x,basis)}));
+ $('statsSub').textContent=(basis==='net'?'After tax':'Before tax')+' · switch above to change';
+ if(!tr.length){$('statsGrid').innerHTML='<div class="empty" style="grid-column:1/-1">No trades in this year yet.</div>';$('topWrap').innerHTML='';return}
+ const w=tr.filter(x=>x.v>0),l=tr.filter(x=>x.v<0);
+ const sw=w.reduce((a,x)=>a+x.v,0),sl=-l.reduce((a,x)=>a+x.v,0),total=sw-sl;
+ const bestT=tr.reduce((a,x)=>x.v>a.v?x:a,tr[0]),worstT=tr.reduce((a,x)=>x.v<a.v?x:a,tr[0]);
+ const met=(a,b,k,sub)=>`<div class="metric"><span class="muted">${a}</span><b class="${k||''}">${b}</b>${sub?`<small>${escapeHtml(sub)}</small>`:''}</div>`;
+ $('statsGrid').innerHTML=
+  met('Trades',String(tr.length),'',w.length+' wins · '+l.length+' losses')+
+  met('Win rate',(w.length/tr.length*100).toLocaleString('de-DE',{maximumFractionDigits:1})+' %')+
+  met('Avg win',w.length?eur(sw/w.length):'—','good')+
+  met('Avg loss',l.length?eur(-sl/l.length):'—',l.length?'bad':'dim')+
+  met('Profit factor',sl>0?(sw/sl).toLocaleString('de-DE',{maximumFractionDigits:2}):'—','','wins ÷ losses')+
+  met('Avg per trade',eur(total/tr.length),cls(total))+
+  met('Best trade',eur(bestT.v),cls(bestT.v),bestT.d)+
+  met('Worst trade',eur(worstT.v),cls(worstT.v),worstT.d);
+ const g={};
+ tr.forEach(x=>{const k=x.d.toLowerCase();(g[k]=g[k]||{d:x.d,v:0,n:0}).v+=x.v;g[k].n++});
+ const arr=Object.values(g).sort((a,b)=>b.v-a.v);
+ const top=arr.slice(0,5),bottom=arr.slice(-3).filter(x=>x.v<0&&!top.includes(x)).reverse();
+ const row=x=>`<div class="line"><span>${escapeHtml(x.d)} <span class="dim">· ${x.n}×</span></span><b class="${cls(x.v)}">${eur(x.v)}</b></div>`;
+ $('topWrap').innerHTML=`<h3 style="margin:16px 0 4px">Top by name</h3>${top.map(row).join('')}`+(bottom.length?`<h3 style="margin:16px 0 4px">Weakest</h3>${bottom.map(row).join('')}`:'');
+}
+function txnCountry(x){
+ // Infer country from kind if not stored (legacy data)
+ if(x.country&&COUNTRIES[x.country])return x.country;
+ const k=x.kind||'';
+ if(k==='stcg'||k==='ltcg'||k==='stcl'||k==='ltcl')return 'IN';
+ if(k==='stockGain'||k==='stockLoss'||k==='otherGain'||k==='otherLoss')return 'DE';
+ if(GENERIC_KINDS.has(k))return state.settings.country||'DE';
+ return state.settings.country||'DE';
+}
+function renderHistory(){
+ const el=$('historyList'),R=taxRates(),basis=state.settings.basis,other=basis==='net'?'gross':'net';
+ const q=$('hSearch').value.trim().toLowerCase(),kf=$('hKind').value,mf=$('hMonth').value,all=$('hAll').checked,y=+$('year').value;
+ const hc=$('hCountry')?$('hCountry').value:'auto';
+ const he=$('hEmotion')?$('hEmotion').value:'all';
+ const wantCountry=hc==='auto'?(state.settings.country||'DE'):hc;
+ const list=state.txns.filter(x=>{
+  if(!(all||yearOf(x.date)===y))return false;
+  if(q&&!(x.desc||'').toLowerCase().includes(q))return false;
+  if(kf!=='all'&&x.kind!==kf)return false;
+  if(mf!=='all'&&(+String(x.date).slice(5,7)-1)!==+mf)return false;
+  if(wantCountry!=='all'&&txnCountry(x)!==wantCountry)return false;
+  if(he!=='all'){
+   const em=x.emotion||'';
+   if(he==='unset'){if(em)return false}
+   else if(em!==he)return false;
+  }
+  return true;
+ }).sort((a,b)=>b.date.localeCompare(a.date)||String(b.id).localeCompare(String(a.id)));
+ if(!state.txns.length){$('histSummary').textContent='';el.innerHTML='<div class="empty">No transactions yet. Add one, or import your trade log in Settings.</div>';return}
+ if(!list.length){$('histSummary').textContent='';el.innerHTML='<div class="empty">No transactions match these filters.</div>';return}
+ const sum=b=>list.reduce((a,x)=>a+(x.kind==='taxRefund'?(b==='net'?+x.amount:0):val(x,b)),0);
+ $('histSummary').textContent=`${list.length} entr${list.length===1?'y':'ies'} · total ${eur(sum(basis))} ${basis==='net'?'after':'before'} tax`;
+ el.innerHTML=list.map(x=>{
+  const a=+x.amount||0;let main,sub='';
+  if(x.kind==='taxRefund')main=`<b class="good">+${eur(a)}</b>`;
+  else{
+   const v=val(x,basis),o=val(x,other);
+   main=`<b class="${cls(v)}">${v>0?'+':''}${eur(v)}</b>`;
+   sub=`<small>${eur(o)} ${other==='net'?'after':'before'} tax</small>`;
+  }
+  const id=escapeHtml(x.id);
+  return `<div class="txn"><div class="row"><div><div class="title">${escapeHtml(x.desc||'Transaction')}</div><div class="meta">${escapeHtml(x.date)} • ${label(x.kind)} • ${(COUNTRIES[txnCountry(x)]||{}).flag||'🏳️'}${x.emotion?` • ${emotionLabel(x.emotion)}`:''}</div></div><div class="amt">${main}${sub}</div></div><div class="btns"><button class="smallbtn" data-act="edit" data-id="${id}">Edit</button><button class="smallbtn del" data-act="del" data-id="${id}">Delete</button></div></div>`;
+ }).join('');
+}
+document.getElementById('posList').addEventListener('click',e=>{
+ const b=e.target.closest('button[data-pos]');if(!b)return;
+ b.dataset.pos==='del'?delPosition(b.dataset.id):loadPosition(b.dataset.id);
+});
+$('historyList').addEventListener('click',e=>{
+ const b=e.target.closest('button[data-act]');if(!b)return;
+ b.dataset.act==='del'?delTxn(b.dataset.id):editTxn(b.dataset.id);
+});
+
+/* ---------- export / backup ---------- */
+function download(name,type,text){
+ const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type}));a.download=name;
+ document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+}
+function exportCSV(){
+ const R=taxRates();
+ const sorted=[...state.txns].sort((a,b)=>a.date.localeCompare(b.date));
+ const rows=[['Date','Description','Category','Country','Emotion','Before tax','After tax (losses incl. refund)'],
+  ...sorted.map(x=>x.kind==='taxRefund'?[x.date,x.desc||'',label(x.kind),txnCountry(x),emotionLabel(x.emotion)||'','',r2(+x.amount)]:[x.date,x.desc||'',label(x.kind),txnCountry(x),emotionLabel(x.emotion)||'',r2(val(x,'gross')),r2(val(x,'net'))])];
+ const csv=rows.map(r=>r.map(v=>`"${String(v).replaceAll('"','""')}"`).join(',')).join('\n');
+ download('trade-tracker-transactions.csv','text/csv;charset=utf-8','\ufeff'+csv);
+}
+function exportJSON(){
+ download('trade-tracker-backup-'+today()+'.json','application/json',JSON.stringify({app:'deTaxTracker',version:2,exportedAt:new Date().toISOString(),txns:state.txns,positions:state.positions||[],settings:state.settings},null,1));
+}
+function importJSON(input){
+ const f=input.files[0];input.value='';if(!f)return;
+ const rd=new FileReader();
+ rd.onload=()=>{
+  try{
+   const d=JSON.parse(rd.result);
+   const ok=d&&Array.isArray(d.txns)&&d.txns.every(x=>x&&x.id!==undefined&&/^\d{4}-\d{2}-\d{2}$/.test(x.date)&&isFinite(+x.amount));
+   if(!ok)throw new Error('bad file');
+   if(!confirm('Replace everything in the app with this backup ('+d.txns.length+' transactions)?'))return;
+   const positions=Array.isArray(d.positions)?d.positions.map(p=>({
+    id:String(p.id||newId()),name:String(p.name||''),shares:+p.shares||0,avgCost:+p.avgCost||0
+   })).filter(p=>p.name&&p.shares>0):[];
+   state={txns:d.txns.map(x=>({id:String(x.id),date:x.date,desc:String(x.desc||''),kind:x.kind,amount:+x.amount})),positions,watchlist:normalizeWatchlist(d.watchlist),settings:Object.assign({},DEFAULTS,d.settings||{})};
+   persist();syncSettingsUI();rebuildKindSelect();populateYears();render();syncAmounts();renderPositions();toast('Backup restored.');
+  }catch(e){toast('That file is not a valid backup.')}
+ };
+ rd.readAsText(f);
+}
+function clearAll(){if(confirm('Delete all transactions, positions and settings?')){localStorage.removeItem(KEY);location.reload()}}
+
+/* ---------- positions / averaging ---------- */
+let posMode='qty'; // 'qty' = calculate shares from total+price; 'total' = calculate total from shares+price
+function setPosMode(mode){
+ posMode=mode==='total'?'total':'qty';
+ $('posModeQty').classList.toggle('on',posMode==='qty');
+ $('posModeTotal').classList.toggle('on',posMode==='total');
+ const shEl=$('posBuyShares'),totEl=$('posBuyTotal');
+ if(posMode==='qty'){
+  shEl.readOnly=true;totEl.readOnly=false;
+  shEl.style.opacity='.7';totEl.style.opacity='';
+  $('posModeNote').textContent='Enter price and total to invest. Quantity is calculated. Price is never calculated.';
+ }else{
+  shEl.readOnly=false;totEl.readOnly=true;
+  shEl.style.opacity='';totEl.style.opacity='.7';
+  $('posModeNote').textContent='Enter quantity and price. Total to invest is calculated. Price is never calculated.';
+ }
+ onPosBuyInput();
+}
+function onPosBuyInput(){
+ const shEl=$('posBuyShares'),prEl=$('posBuyPrice'),totEl=$('posBuyTotal');
+ const pr=parseFloat(prEl.value),sh=parseFloat(shEl.value),tot=parseFloat(totEl.value);
+ const hasPr=prEl.value!==''&&isFinite(pr)&&pr>0;
+ const hasSh=shEl.value!==''&&isFinite(sh)&&sh>0;
+ const hasTot=totEl.value!==''&&isFinite(tot)&&tot>0;
+ if(posMode==='qty'){
+  shEl.value=hasPr&&hasTot?String(r2(tot/pr*1e8)/1e8):'';
+ }else{
+  totEl.value=hasPr&&hasSh?r2(sh*pr).toFixed(2):'';
+ }
+ calcPos();
+}
+function calcPos(){
+ const shares=Math.max(0,parseFloat($('posShares').value)||0);
+ const avg=Math.max(0,parseFloat($('posAvg').value)||0);
+ const buyShares=Math.max(0,parseFloat($('posBuyShares').value)||0);
+ const buyPrice=Math.max(0,parseFloat($('posBuyPrice').value)||0);
+ const market=parseFloat($('posMarket').value);
+ const hasMarket=isFinite(market)&&market>=0&&$('posMarket').value!=='';
+
+ const oldTotal=shares*avg;
+ const buyCost=buyShares*buyPrice;
+ const newShares=shares+buyShares;
+ const newTotal=oldTotal+buyCost;
+ const newAvg=newShares>0?newTotal/newShares:0;
+
+ $('posNewShares').textContent=newShares?newShares.toLocaleString(isIN()?'en-IN':'de-DE',{maximumFractionDigits:6}):'—';
+ $('posNewAvg').textContent=newShares?money(newAvg):'—';
+ $('posBuyCost').textContent=buyShares?money(buyCost):'—';
+ $('posNewTotal').textContent=newShares?money(newTotal):'—';
+
+ if(hasMarket&&newShares>0){
+  const plAfter=(market-newAvg)*newShares;
+  const plBefore=shares>0?(market-avg)*shares:0;
+  $('posPl').textContent=money(plAfter);$('posPl').className=cls(plAfter);
+  $('posPlBefore').textContent=shares>0?money(plBefore):'—';$('posPlBefore').className=shares>0?cls(plBefore):'dim';
+  $('posPlRow').style.display='flex';$('posPlBeforeRow').style.display=shares>0?'flex':'none';
+ }else{
+  $('posPlRow').style.display='none';$('posPlBeforeRow').style.display='none';
+ }
+}
+function resetPosForm(){
+ editingPosId=null;
+ $('posName').value='';$('posShares').value='';$('posAvg').value='';
+ $('posBuyShares').value='';$('posBuyPrice').value='';$('posBuyTotal').value='';$('posMarket').value='';
+ $('posFormTitle').textContent='Average cost calculator';
+ $('posLoaded').style.display='none';
+ $('posUpdateBtn').style.display='none';
+ $('posSaveBtn').style.display='';
+ setPosMode(posMode||'qty');
+}
+function loadPosition(id){
+ const p=state.positions.find(x=>x.id===id);if(!p)return;
+ editingPosId=id;
+ $('posName').value=p.name;
+ $('posShares').value=p.shares;
+ $('posAvg').value=r2(p.avgCost).toFixed(2);
+ $('posBuyShares').value='';$('posBuyPrice').value='';$('posBuyTotal').value='';$('posMarket').value='';
+ $('posFormTitle').textContent='Edit / average up';
+ $('posLoaded').textContent='Loaded: '+p.name+' · '+p.shares.toLocaleString(isIN()?'en-IN':'de-DE')+' shares @ '+money(p.avgCost);
+ $('posLoaded').style.display='block';
+ $('posUpdateBtn').style.display='';
+ $('posSaveBtn').style.display='none';
+ calcPos();
+ window.scrollTo(0,0);
+}
+function getPosFromForm(applyBuy){
+ const name=$('posName').value.trim();
+ let shares=Math.max(0,parseFloat($('posShares').value)||0);
+ let avg=Math.max(0,parseFloat($('posAvg').value)||0);
+ const buyShares=Math.max(0,parseFloat($('posBuyShares').value)||0);
+ const buyPrice=Math.max(0,parseFloat($('posBuyPrice').value)||0);
+ if(applyBuy&&buyShares>0){
+  const newTotal=shares*avg+buyShares*buyPrice;
+  shares=shares+buyShares;
+  avg=shares>0?newTotal/shares:0;
+ }
+ return {name,shares:r2(shares*1e6)/1e6,avgCost:r2(avg)};
+}
+function saveAsNewPosition(){
+ const p=getPosFromForm(true);
+ if(!p.name){toast('Enter a name / ticker.');return}
+ if(p.shares<=0){toast('Shares must be greater than 0.');return}
+ state.positions.push({id:newId(),name:p.name,shares:p.shares,avgCost:p.avgCost});
+ persist();resetPosForm();renderPositions();
+ toast('Position saved.');
+}
+function updatePosition(){
+ if(!editingPosId)return;
+ const p=getPosFromForm(true);
+ if(!p.name){toast('Enter a name / ticker.');return}
+ if(p.shares<=0){toast('Shares must be greater than 0.');return}
+ const x=state.positions.find(t=>t.id===editingPosId);
+ if(x){x.name=p.name;x.shares=p.shares;x.avgCost=p.avgCost}
+ persist();resetPosForm();renderPositions();
+ toast('Position updated.');
+}
+function delPosition(id){
+ const i=state.positions.findIndex(t=>t.id===id);if(i<0)return;
+ const [x]=state.positions.splice(i,1);
+ if(editingPosId===id)resetPosForm();
+ persist();renderPositions();
+ toast('Position deleted.','Undo',()=>{state.positions.push(x);persist();renderPositions()});
+}
+function renderPositions(){
+ const el=$('posList'),list=state.positions||[];
+ if(!list.length){
+  el.innerHTML='';
+  $('posEmptyNote').style.display='block';
+  return;
+ }
+ $('posEmptyNote').style.display='none';
+ el.innerHTML=list.map(p=>{
+  const total=p.shares*p.avgCost;
+  const id=escapeHtml(p.id);
+  return `<div class="txn"><div class="row"><div><div class="title">${escapeHtml(p.name)}</div><div class="meta">${p.shares.toLocaleString(isIN()?'en-IN':'de-DE',{maximumFractionDigits:6})} shares · avg ${money(p.avgCost)}</div></div><div class="amt"><b>${money(total)}</b><small>invested</small></div></div><div class="btns"><button class="smallbtn" data-pos="load" data-id="${id}">Load</button><button class="smallbtn del" data-pos="del" data-id="${id}">Delete</button></div></div>`;
+ }).join('');
+}
+
+
+
+/* ---------- CSV import (multi-broker) ---------- */
+
+function parseCSVLine(line,delim){
+ delim=delim||',';
+ const out=[];let cur='',q=false;
+ for(let i=0;i<line.length;i++){
+  const c=line[i];
+  if(q){if(c==='"'&&line[i+1]==='"'){cur+='"';i++}else if(c==='"')q=false;else cur+=c}
+  else{if(c==='"')q=true;else if(c===delim){out.push(cur);cur=''}else cur+=c}
+ }
+ out.push(cur);return out;
+}
+function detectDelim(headerLine){
+ const sc=(headerLine.match(/;/g)||[]).length,cc=(headerLine.match(/,/g)||[]).length,tc=(headerLine.match(/\t/g)||[]).length;
+ if(tc>sc&&tc>cc)return '\t';
+ if(sc>cc)return ';';
+ return ',';
+}
+function normalizeKind(raw){
+ const s=String(raw||'').trim().toLowerCase();
+ const map={
+  'stock gain':'stockGain','stockgain':'stockGain','stock sale gain':'stockGain','aktiengewinn':'stockGain','aktienverkauf gewinn':'stockGain',
+  'stock loss':'stockLoss','stockloss':'stockLoss','stock sale loss':'stockLoss','aktienverlust':'stockLoss','aktienverkauf verlust':'stockLoss',
+  'other gain':'otherGain','othergain':'otherGain','other capital gain':'otherGain','sonstiger gewinn':'otherGain','dividend':'otherGain','dividende':'otherGain','interest':'otherGain','zinsen':'otherGain','distribution':'otherGain','ausschüttung':'otherGain',
+  'other loss':'otherLoss','otherloss':'otherLoss','other capital loss':'otherLoss','sonstiger verlust':'otherLoss',
+  'tax refund':'taxRefund','taxrefund':'taxRefund','refund':'taxRefund','steuerrückerstattung':'taxRefund','steuererstattung':'taxRefund',
+  'stcg':'stcg','stcg (≤12 mo)':'stcg','stcg (<=12 mo)':'stcg','short-term capital gain':'stcg','short term capital gain':'stcg',
+  'ltcg':'ltcg','ltcg (>12 mo)':'ltcg','long-term capital gain':'ltcg','long term capital gain':'ltcg',
+  'stcl':'stcl','stcl (short-term loss)':'stcl','short-term capital loss':'stcl','short term capital loss':'stcl',
+  'ltcl':'ltcl','ltcl (long-term loss)':'ltcl','long-term capital loss':'ltcl','long term capital loss':'ltcl',
+  'short gain':'shortGain','st gain':'shortGain','short-term gain':'shortGain','short term gain':'shortGain',
+  'long gain':'longGain','lt gain':'longGain','long-term gain':'longGain','long term gain':'longGain',
+  'short loss':'shortLoss','st loss':'shortLoss','short-term loss':'shortLoss','short term loss':'shortLoss',
+  'long loss':'longLoss','lt loss':'longLoss','long-term loss':'longLoss','long term loss':'longLoss',
+  'capital gain':'gain','gain':'gain','capital loss':'loss','loss':'loss'
+ };
+ return map[s]||null;
+}
+function parseNum(v){
+ let s=String(v||'').trim();
+ if(!s)return NaN;
+ s=s.replace(/\s/g,'').replace(/€|eur|usd|\$|£|₹|cny|jpy|gbp/gi,'');
+ if(/^-?\d{1,3}(\.\d{3})+(,\d+)?$/.test(s)||/^-?\d+,\d+$/.test(s))s=s.replace(/\./g,'').replace(',','.');
+ else if(/^-?\d{1,3}(,\d{3})+(\.\d+)?$/.test(s))s=s.replace(/,/g,'');
+ else s=s.replace(/[^0-9.\-]/g,'');
+ return parseFloat(s);
+}
+function parseFlexibleDate(raw){
+ let s=String(raw||'').trim();
+ if(!s)return '';
+ let m=s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+ if(m)return m[1]+'-'+m[2]+'-'+m[3];
+ m=s.match(/^(\d{1,2})\.(\d{1,2})\.(\d{2,4})/);
+ if(m){let y=m[3];if(y.length===2)y=(+y>50?'19':'20')+y;return y.padStart(4,'0')+'-'+m[2].padStart(2,'0')+'-'+m[1].padStart(2,'0')}
+ m=s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})/);
+ if(m){
+  let a=+m[1],b=+m[2],y=m[3];if(y.length===2)y=(+y>50?'19':'20')+y;
+  if(a>12)return y.padStart(4,'0')+'-'+String(b).padStart(2,'0')+'-'+String(a).padStart(2,'0');
+  if(b>12)return y.padStart(4,'0')+'-'+String(a).padStart(2,'0')+'-'+String(b).padStart(2,'0');
+  const eu=['DE','GB','IN','FR','JP','CN'].includes(country());
+  return eu
+   ?y.padStart(4,'0')+'-'+String(b).padStart(2,'0')+'-'+String(a).padStart(2,'0')
+   :y.padStart(4,'0')+'-'+String(a).padStart(2,'0')+'-'+String(b).padStart(2,'0');
+ }
+ m=s.match(/^(\d{4})(\d{2})(\d{2})$/);
+ if(m)return m[1]+'-'+m[2]+'-'+m[3];
+ return '';
+}
+function findCol(header,names){
+ for(const n of names){
+  const i=header.findIndex(h=>h===n);
+  if(i>=0)return i;
+ }
+ for(const n of names){
+  const i=header.findIndex(h=>h.includes(n));
+  if(i>=0)return i;
+ }
+ return -1;
+}
+function kindForCountryFromSign(isLoss,isStock){
+ const c=country();
+ if(c==='DE')return isLoss?(isStock?'stockLoss':'otherLoss'):(isStock?'stockGain':'otherGain');
+ if(c==='IN')return isLoss?(isStock?'stcl':'ltcl'):(isStock?'stcg':'ltcg');
+ if(c==='US')return isLoss?(isStock?'shortLoss':'longLoss'):(isStock?'shortGain':'longGain');
+ return isLoss?'loss':'gain';
+}
+function mapBrokerType(typeRaw,descRaw){
+ const t=String(typeRaw||'').trim().toLowerCase();
+ const d=String(descRaw||'').trim().toLowerCase();
+ const blob=t+' '+d;
+ if(/tax\s*refund|steuer.*(rück|erstatt)|erstattung|withholding.*refund|quellensteuer.*erstatt/.test(blob))return {kind:'taxRefund',stock:false};
+ if(/dividend|dividende|ausschüttung|distribution|zinsen|interest|coupon|ertrag/.test(blob)&&!/verkauf|sell|sale/.test(blob))
+  return {kind:kindForCountryFromSign(false,false),stock:false,forceOther:true};
+ if(/verlust|loss|verlusttopf/.test(blob)&&!/gewinn|gain|profit/.test(blob))return {kind:kindForCountryFromSign(true,/aktie|stock|equity|share/.test(blob)),stock:/aktie|stock|equity|share/.test(blob)};
+ if(/gewinn|gain|profit|realized/.test(blob))return {kind:kindForCountryFromSign(false,/aktie|stock|equity|share/.test(blob)),stock:/aktie|stock|equity|share/.test(blob)};
+ if(/^(sell|sale|verkauf|veräuß|dispose|redemption)$/.test(t)||/\bsell\b|\bsale\b|verkauf/.test(blob))
+  return {kind:null,sell:true,stock:true};
+ if(/^(buy|kauf|purchase|deposit|withdrawal|überweisung|sparplan|savings\s*plan|fee|gebühr|transfer|corporate)/.test(t))
+  return {kind:null,skip:true};
+ return {kind:null};
+}
+const BROKER_HELP={
+ DE:'• <b>Germany:</b> Trade Republic, Scalable Capital, comdirect, Consorsbank, flatex, ING, Smartbroker, justTrade — transaction or tax CSV exports<br>',
+ US:'• <b>US:</b> Interactive Brokers (Activity / Flex), Robinhood, Schwab, Fidelity, E*TRADE — trades or realized P/L CSV<br>',
+ IN:'• <b>India:</b> Zerodha Console, Groww, Upstox, Angel One — tradebook / P&L CSV<br>',
+ GB:'• <b>UK:</b> Hargreaves Lansdown, AJ Bell, Interactive Investor, Trading 212 — transaction or CGT CSV<br>',
+ FR:'• <b>France:</b> Broker transaction exports with gain/loss or IFU-style amounts<br>',
+ JP:'• <b>Japan:</b> Broker annual trade reports / CSV with realized gains<br>',
+ CN:'• <b>China:</b> Broker statements with realized P/L columns<br>'
+};
+function updateImportHelp(){
+ const el=$('importBrokersByCountry');
+ if(!el)return;
+ const c=country();
+ el.innerHTML=(BROKER_HELP[c]||'')+Object.keys(BROKER_HELP).filter(k=>k!==c).map(k=>BROKER_HELP[k]).join('');
+}
+function isTradeRepublicHeader(header){
+ return header.includes('transaction_id') && header.includes('asset_class') && header.includes('datetime')
+  && (header.includes('type')||header.includes('category')) && header.includes('amount');
+}
+function importTradeRepublicCSV(lines, delim, header){
+ const col=n=>{const i=findCol(header,[n]);return i};
+ const iDate=col('date'), iType=col('type'), iCat=col('category'), iName=col('name');
+ const iSym=col('symbol'), iShares=col('shares'), iPrice=col('price'), iAmt=col('amount');
+ const iFee=col('fee'), iTax=col('tax'), iDesc=col('description'), iAsset=col('asset_class');
+ const iDateTime=col('datetime');
+ if(iDate<0||iType<0||iAmt<0)return null;
+
+ const existingKeys=new Set(state.txns.map(x=>[x.date,x.kind,x.desc||'',r2(+x.amount)].join('|')));
+ let added=0, skipped=0;
+ const country=state.settings.country||'DE';
+
+ // Pass 1: dividends, interest, tax optimisations
+ for(let li=1;li<lines.length;li++){
+  const cols=parseCSVLine(lines[li],delim);
+  if(cols.every(c=>!String(c||'').trim()))continue;
+  const date=parseFlexibleDate(cols[iDate]);
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(date)){skipped++;continue}
+  const typ=String(cols[iType]||'').trim().toUpperCase();
+  const name=String(iName>=0?cols[iName]:'').trim();
+  const desc=String(iDesc>=0?cols[iDesc]:'').trim()||name;
+  const amount=parseNum(iAmt>=0?cols[iAmt]:'');
+  const tax=parseNum(iTax>=0?cols[iTax]:'');
+  let kind=null, amt=NaN, d=desc;
+
+  if(typ==='DIVIDEND'){
+   kind=country==='DE'?'otherGain':(country==='IN'?'stcg':'gain');
+   amt=Math.abs(amount);
+   d=name?('Dividend · '+name):desc;
+  }else if(typ==='INTEREST_PAYMENT'){
+   kind=country==='DE'?'otherGain':(country==='IN'?'stcg':'gain');
+   amt=Math.abs(amount);
+   d='Interest';
+  }else if(typ==='TAX_OPTIMIZATION'){
+   const refund=isFinite(tax)&&tax>0?tax:(isFinite(amount)&&amount>0?amount:0);
+   if(refund>0){kind='taxRefund';amt=r2(refund);d='Tax optimisation / refund'}
+   else{skipped++;continue}
+  }else if(typ==='STOCKPERK'){
+   if(isFinite(amount)&&amount>0){kind=country==='DE'?'otherGain':'gain';amt=Math.abs(amount);d=name||'Stock perk'}
+   else{skipped++;continue}
+  }else{
+   continue;
+  }
+  if(!kind||!isFinite(amt)||amt===0){skipped++;continue}
+  const key=[date,kind,d,r2(amt)].join('|');
+  if(existingKeys.has(key)){skipped++;continue}
+  state.txns.push({id:newId(),date,desc:d,kind,amount:r2(amt),country,emotion:''});
+  existingKeys.add(key);added++;
+ }
+
+ // Pass 2: collect BUY/SELL, then AGGREGATE Trade Republic split fills
+ // TR often splits one order into whole-share + fractional rows (same date, price, name).
+ // Without merging, 8 logical trades become 10 rows (e.g. Palantir).
+ const rawTrades=[];
+ for(let li=1;li<lines.length;li++){
+  const cols=parseCSVLine(lines[li],delim);
+  if(cols.every(c=>!String(c||'').trim()))continue;
+  const date=parseFlexibleDate(cols[iDate]);
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(date))continue;
+  const typ=String(cols[iType]||'').trim().toUpperCase();
+  if(typ!=='BUY'&&typ!=='SELL')continue;
+  const name=String(iName>=0?cols[iName]:'').trim();
+  const sym=String(iSym>=0?cols[iSym]:'').trim()||name;
+  if(!sym){skipped++;continue}
+  let shares=Math.abs(parseNum(iShares>=0?cols[iShares]:'')||0);
+  const price=parseNum(iPrice>=0?cols[iPrice]:'');
+  const amount=parseNum(iAmt>=0?cols[iAmt]:'');
+  const fee=Math.abs(parseNum(iFee>=0?cols[iFee]:'')||0);
+  const asset=String(iAsset>=0?cols[iAsset]:'').trim().toUpperCase();
+  const isStock=asset==='STOCK'||asset===''||asset==='ETF'||asset==='FUND'||asset==='SECURITY';
+  // bucket key: same calendar day + symbol + side + price (4 decimals) = one order fill group
+  const px=isFinite(price)?(Math.round(price*10000)/10000):0;
+  rawTrades.push({date,typ,name,sym,shares,price:px,amount:isFinite(amount)?amount:0,fee,isStock,li});
+ }
+
+ // Aggregate split fills
+ const aggMap=new Map();
+ rawTrades.forEach(tr=>{
+  const k=[tr.date,tr.sym,tr.typ,tr.price].join('|');
+  const cur=aggMap.get(k);
+  if(!cur){
+   aggMap.set(k,{date:tr.date,typ:tr.typ,name:tr.name,sym:tr.sym,shares:tr.shares,price:tr.price,amount:tr.amount,fee:tr.fee,isStock:tr.isStock,li:tr.li});
+  }else{
+   cur.shares+=tr.shares;
+   cur.amount+=tr.amount;
+   cur.fee+=tr.fee;
+   // keep earliest li for stable sort
+   if(tr.li<cur.li)cur.li=tr.li;
+   if(!cur.name&&tr.name)cur.name=tr.name;
+  }
+ });
+ const trades=[...aggMap.values()].sort((a,b)=>a.date.localeCompare(b.date)||a.li-b.li);
+
+ // FIFO realized P/L
+ const lots={};
+ for(const tr of trades){
+  const key=tr.sym;
+  if(!lots[key])lots[key]=[];
+  if(tr.typ==='BUY'){
+   const cash=Math.abs(tr.amount)|| (tr.shares*(tr.price||0));
+   const totalCost=cash+tr.fee;
+   if(tr.shares<=0){skipped++;continue}
+   lots[key].push({shares:tr.shares, cost:totalCost, date:tr.date});
+   continue;
+  }
+  // SELL
+  let remain=tr.shares;
+  if(remain<=0){skipped++;continue}
+  const proceedsCash=Math.abs(tr.amount)|| (tr.shares*(tr.price||0));
+  const netProceeds=Math.max(0, proceedsCash-tr.fee);
+  let costBasis=0, matched=0;
+  while(remain>1e-10 && lots[key].length){
+   const lot=lots[key][0];
+   const take=Math.min(remain, lot.shares);
+   const frac=take/lot.shares;
+   costBasis+=lot.cost*frac;
+   lot.shares-=take;
+   lot.cost-=lot.cost*frac;
+   matched+=take;
+   remain-=take;
+   if(lot.shares<=1e-10)lots[key].shift();
+  }
+  if(matched<=1e-10){skipped++;continue}
+  const scale=matched/tr.shares;
+  const proceeds=netProceeds*scale;
+  const pnl=proceeds-costBasis;
+  if(Math.abs(pnl)<0.005){skipped++;continue}
+
+  const isLoss=pnl<0;
+  let kind;
+  if(country==='DE')kind=tr.isStock?(isLoss?'stockLoss':'stockGain'):(isLoss?'otherLoss':'otherGain');
+  else if(country==='IN')kind=isLoss?'stcl':'stcg';
+  else if(country==='US')kind=isLoss?'shortLoss':'shortGain';
+  else kind=isLoss?'loss':'gain';
+
+  let amount;
+  if(country==='DE'){
+   if(isLoss) amount=r2(Math.abs(pnl));
+   else{
+    const R=taxRates();
+    amount=r2(Math.abs(pnl)*(1-R.total));
+   }
+  }else{
+   amount=r2(Math.abs(pnl));
+  }
+  const d=(tr.name||tr.sym)+' · realized';
+  const k=[tr.date,kind,d,r2(amount)].join('|');
+  if(existingKeys.has(k)){skipped++;continue}
+  state.txns.push({id:newId(),date:tr.date,desc:d,kind,amount,country,emotion:''});
+  existingKeys.add(k);added++;
+ }
+ return {added,skipped};
+}
+function importCSV(input){
+ const f=input.files[0];input.value='';if(!f)return;
+ const rd=new FileReader();
+ rd.onload=()=>{
+  try{
+   let text=String(rd.result||'').replace(/^\ufeff/,'');
+   let rawLines=text.split(/\r?\n/);
+   let startIdx=0;
+   for(let i=0;i<Math.min(rawLines.length,40);i++){
+    const low=rawLines[i].toLowerCase();
+    if(/date[,;\t].*(description|type|amount|symbol|isin|category|pnl|proceeds|quantity)/.test(low)
+     ||/(description|type|symbol)[,;\t].*date/.test(low)
+     ||/^\"?trades\"?[,;]/.test(low)
+     ||/datadiscriminator/.test(low)
+     ||/datetime.*account_type.*category.*type/.test(low))
+    {startIdx=i;break}
+   }
+   const lines=rawLines.slice(startIdx).filter(l=>l.trim());
+   if(lines.length<2){toast('CSV has no data rows.');return}
+   const delim=detectDelim(lines[0]);
+   const header=parseCSVLine(lines[0],delim).map(h=>String(h||'').trim().toLowerCase().replace(/\s+/g,' '));
+   const headerJoined=header.join('|');
+
+   // Trade Republic (and similar) transaction export: compute FIFO realized P/L
+   if(isTradeRepublicHeader(header)){
+    const res=importTradeRepublicCSV(lines,delim,header);
+    if(res){
+     if(!res.added){
+      toast(res.skipped
+       ?'No new taxable rows imported ('+res.skipped+' skipped). Buys need matching sells to compute realized P/L.'
+       :'No rows imported.');
+      return;
+     }
+     persist();populateYears();render();
+     toast(res.added+' transaction'+(res.added===1?'':'s')+' imported (Trade Republic FIFO)'+(res.skipped?' · '+res.skipped+' skipped':'')+'.');
+     return;
+    }
+   }
+
+   const iDate=findCol(header,['date','datum','buchungstag','valuta','trade date','settlement date','datetime','date/time','trade_date','booking date']);
+   const iDesc=findCol(header,['description','desc','beschreibung','note','title','name','bezeichnung','asset','security','wertpapier']);
+   const iSymbol=findCol(header,['symbol','ticker','isin','wkn','instrument','security id']);
+   const iKind=findCol(header,['transaction type','booking type','order type','side','action','type','typ','kind','transaktion','category']);
+   const iAmt=findCol(header,['amount','betrag','value','wert','sum','summe','proceeds','netto','net amount','cash amount']);
+   const iBefore=findCol(header,['before tax','vor steuer','gross','brutto']);
+   const iAfter=findCol(header,['after tax','nach steuer','net']);
+   const iPnl=findCol(header,['realized p/l','realized pl','realized pnl','p/l','pnl','profit','profit/loss','gewinn','gewinn/verlust','realized gain','capital gain','ergebnis','gain/loss','g/v']);
+   const iTax=findCol(header,['tax','taxes','steuer','steuern','withholding','quellensteuer']);
+   const iStatus=findCol(header,['status']);
+
+   const isAppExport=iKind>=0&&(iBefore>=0||iAfter>=0||header.includes('before tax')||header.some(h=>h.includes('after tax')));
+   const hasPnl=iPnl>=0;
+   const hasType=iKind>=0;
+
+   if(iDate<0){
+    toast('Could not find a Date column. Export a CSV with a date field.');
+    return;
+   }
+
+   const existingKeys=new Set(state.txns.map(x=>[x.date,x.kind,x.desc||'',r2(+x.amount)].join('|')));
+   let added=0,skipped=0,brokerHint='';
+
+   if(/trade\s*republic|isin\|shares\|fees\|taxes/.test(headerJoined)||header.includes('isin')&&header.includes('type')&&header.includes('value'))
+    brokerHint='Trade Republic-style';
+   else if(/scalable|assettype|reference/.test(headerJoined))
+    brokerHint='Scalable-style';
+   else if(/datadiscriminator|asset category|comm\/fee|t\. price/.test(headerJoined))
+    brokerHint='IBKR-style';
+   else if(isAppExport)brokerHint='this app';
+
+   for(let li=1;li<lines.length;li++){
+    const cols=parseCSVLine(lines[li],delim);
+    if(cols.every(c=>!String(c||'').trim()))continue;
+    if(cols[0]&&/^(total|subtotal|header|notes|trades|dividends|forex|deposits)/i.test(String(cols[0]).trim())){skipped++;continue}
+    if(iStatus>=0){
+     const st=String(cols[iStatus]||'').toLowerCase();
+     if(st&&/cancel|reject|pending|expired|void/.test(st)){skipped++;continue}
+    }
+
+    const date=parseFlexibleDate(cols[iDate]);
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(date)){skipped++;continue}
+
+    let desc='';
+    if(iDesc>=0)desc=String(cols[iDesc]||'').trim();
+    if(!desc&&iSymbol>=0)desc=String(cols[iSymbol]||'').trim();
+    if(desc.includes('|'))desc=desc.split('|')[0].trim();
+
+    let kind=null,amount=NaN;
+    const typeRaw=iKind>=0?cols[iKind]:'';
+
+    if(isAppExport||(hasType&&normalizeKind(typeRaw))){
+     kind=normalizeKind(typeRaw);
+     if(kind){
+      const deGain=kind==='stockGain'||kind==='otherGain';
+      const deLoss=kind==='stockLoss'||kind==='otherLoss';
+      const inGain=kind==='stcg'||kind==='ltcg';
+      const inLoss=kind==='stcl'||kind==='ltcl';
+      let raw;
+      if(kind==='taxRefund')raw=iAfter>=0?cols[iAfter]:(iAmt>=0?cols[iAmt]:(iBefore>=0?cols[iBefore]:''));
+      else if(deLoss)raw=iBefore>=0?cols[iBefore]:(iAmt>=0?cols[iAmt]:(iAfter>=0?cols[iAfter]:''));
+      else if(deGain)raw=iAfter>=0?cols[iAfter]:(iAmt>=0?cols[iAmt]:(iBefore>=0?cols[iBefore]:''));
+      else if(inGain||inLoss)raw=iBefore>=0?cols[iBefore]:(iAmt>=0?cols[iAmt]:(iAfter>=0?cols[iAfter]:''));
+      else raw=iAmt>=0?cols[iAmt]:(iPnl>=0?cols[iPnl]:(iAfter>=0?cols[iAfter]:(iBefore>=0?cols[iBefore]:'')));
+      amount=parseNum(raw);
+     }
+    }
+
+    if(!kind){
+     const mapped=mapBrokerType(typeRaw,desc);
+     if(mapped.skip){skipped++;continue}
+     if(mapped.kind==='taxRefund'){
+      kind='taxRefund';
+      amount=Math.abs(parseNum(iTax>=0?cols[iTax]:(iAmt>=0?cols[iAmt]:'')));
+     }else if(hasPnl){
+      const pnl=parseNum(cols[iPnl]);
+      if(isFinite(pnl)&&pnl!==0){
+       const isLoss=pnl<0;
+       const isStock=mapped.sell||mapped.stock!==false;
+       kind=mapped.forceOther?kindForCountryFromSign(isLoss,false):kindForCountryFromSign(isLoss,isStock);
+       amount=Math.abs(pnl);
+      }
+     }else if(mapped.kind){
+      kind=mapped.kind;
+      amount=Math.abs(parseNum(iAmt>=0?cols[iAmt]:(iBefore>=0?cols[iBefore]:'')));
+     }else if(mapped.sell&&iAmt>=0){
+      skipped++;continue;
+     }
+    }
+
+    if(!kind&&iAmt>=0){
+     const mapped=mapBrokerType('',desc);
+     if(mapped.kind){
+      kind=mapped.kind;
+      amount=Math.abs(parseNum(cols[iAmt]));
+     }
+    }
+
+    if(!kind){
+     const blob=(String(typeRaw)+' '+desc).toLowerCase();
+     if(/dividend|dividende|ausschüttung|interest|zinsen|distribution/.test(blob)){
+      kind=kindForCountryFromSign(false,false);
+      amount=Math.abs(parseNum(iAmt>=0?cols[iAmt]:(iPnl>=0?cols[iPnl]:'')));
+     }else if(/tax\s*refund|steuer.*(rück|erstatt)/.test(blob)){
+      kind='taxRefund';
+      amount=Math.abs(parseNum(iTax>=0?cols[iTax]:(iAmt>=0?cols[iAmt]:'')));
+     }
+    }
+
+    if(!kind||!isFinite(amount)||amount===0){skipped++;continue}
+    amount=Math.abs(amount);
+
+    const ctry=(kind==='stcg'||kind==='ltcg'||kind==='stcl'||kind==='ltcl')?'IN'
+     :((kind==='shortGain'||kind==='longGain'||kind==='shortLoss'||kind==='longLoss')?'US'
+     :((kind==='gain'||kind==='loss')?(state.settings.country||'DE')
+     :(kind==='stockGain'||kind==='stockLoss'||kind==='otherGain'||kind==='otherLoss'||kind==='taxRefund')?'DE'
+     :(state.settings.country||'DE')));
+    const finalCountry=(kind==='gain'||kind==='loss'||kind==='taxRefund')?(state.settings.country||'DE'):ctry;
+
+    const key=[date,kind,desc,r2(amount)].join('|');
+    if(existingKeys.has(key)){skipped++;continue}
+    state.txns.push({id:newId(),date,desc,kind,amount,country:finalCountry,emotion:''});
+    existingKeys.add(key);added++;
+   }
+
+   if(!added){
+    toast(skipped
+     ?'No new taxable rows imported ('+skipped+' skipped). Broker buy/sell rows need a Realized P/L column, or use this app’s category format.'
+     :'No rows imported.');
+    return;
+   }
+   persist();populateYears();render();
+   const hint=brokerHint?' ('+brokerHint+')':'';
+   toast(added+' transaction'+(added===1?'':'s')+' imported'+hint+(skipped?' · '+skipped+' skipped':'')+'.');
+  }catch(e){console.error(e);toast('Could not read that CSV file.')}
+ };
+ rd.readAsText(f);
+}
+
+
+/* ---------- live currency converter (Frankfurter / ECB) ---------- */
+let _fx={base:null,rates:{},date:'',fetchedAt:0,loading:false};
+function fxDefaults(){
+ const home=(P()&&P().currency)||'EUR';
+ const from=state.settings.fxFrom||home;
+ const to=state.settings.fxTo||(from==='EUR'?'USD':'EUR');
+ return {from,to,amount:state.settings.fxAmount!=null?state.settings.fxAmount:100};
+}
+function fillFxSelects(){
+ const fromEl=$('fxFrom'),toEl=$('fxTo'); if(!fromEl||!toEl)return;
+ const d=fxDefaults();
+ const opts=FX_CURRENCIES.map(c=>`<option value="${c}">${c}</option>`).join('');
+ fromEl.innerHTML=opts; toEl.innerHTML=opts;
+ fromEl.value=FX_CURRENCIES.includes(d.from)?d.from:'EUR';
+ toEl.value=FX_CURRENCIES.includes(d.to)?d.to:'USD';
+ if($('fxAmount')&&($('fxAmount').value===''||$('fxAmount').value==null))$('fxAmount').value=String(d.amount);
+}
+function saveFxPrefs(){
+ if($('fxFrom'))state.settings.fxFrom=$('fxFrom').value;
+ if($('fxTo'))state.settings.fxTo=$('fxTo').value;
+ if($('fxAmount'))state.settings.fxAmount=parseFloat($('fxAmount').value)||0;
+ persist();
+}
+function onFxCurrencyChange(){saveFxPrefs();refreshFxRates(false)}
+function swapFx(){
+ const a=$('fxFrom'),b=$('fxTo'); if(!a||!b)return;
+ const t=a.value;a.value=b.value;b.value=t;
+ saveFxPrefs();convertFx();
+}
+function rateBetween(from,to){
+ if(from===to)return 1;
+ // rates stored relative to _fx.base
+ if(!_fx.base||!_fx.rates)return null;
+ const rb=_fx.rates;
+ const fromRate=from===_fx.base?1:rb[from];
+ const toRate=to===_fx.base?1:rb[to];
+ if(!isFinite(fromRate)||!isFinite(toRate)||fromRate===0)return null;
+ return toRate/fromRate;
+}
+function convertFx(){
+ const from=$('fxFrom')?$('fxFrom').value:'EUR';
+ const to=$('fxTo')?$('fxTo').value:'USD';
+ const amt=parseFloat($('fxAmount')?$('fxAmount').value:0);
+ const rate=rateBetween(from,to);
+ const res=$('fxResult'),note=$('fxRateNote'),st=$('fxStatus');
+ if(!isFinite(amt)){if(res)res.textContent='—';return}
+ if(rate==null){
+  if(res)res.textContent='—';
+  if(st&&!_fx.loading)st.textContent='Rates unavailable — check connection and tap Refresh.';
+  return;
+ }
+ const out=amt*rate;
+ if(res){
+  res.textContent=new Intl.NumberFormat(undefined,{style:'currency',currency:to,maximumFractionDigits:to==='JPY'?0:4}).format(out);
+  res.className=cls(out);
+ }
+ if(note){
+  note.textContent=`1 ${from} = ${rate.toLocaleString(undefined,{maximumFractionDigits:6})} ${to}`
+   +(_fx.date?` · ECB date ${_fx.date}`:'')
+   +(_fx.fetchedAt?` · fetched ${new Date(_fx.fetchedAt).toLocaleTimeString()}`:'')
+   +'. Source: live FX API (ECB / public feed).';
+ }
+ if(st)_fx.loading?null:st.textContent='Live rates ready';
+ saveFxPrefs();
+}
+async function fetchFxPayload(from){
+ // api.frankfurter.app now 301s (breaks browser fetch). Use .dev + public fallback.
+ const urls=[
+  'https://api.frankfurter.dev/v1/latest?base='+encodeURIComponent(from),
+  'https://api.frankfurter.dev/v1/latest?from='+encodeURIComponent(from),
+  'https://open.er-api.com/v6/latest/'+encodeURIComponent(from)
+ ];
+ let lastErr=null;
+ for(const url of urls){
+  try{
+   const res=await fetch(url,{cache:'no-store',mode:'cors'});
+   if(!res.ok){lastErr=new Error('HTTP '+res.status);continue}
+   const data=await res.json();
+   if(data&&data.rates&&typeof data.rates==='object'&&(data.base||data.base_code||data.result==='success')){
+    return {
+     base:data.base||data.base_code||from,
+     rates:data.rates,
+     date:data.date||String(data.time_last_update_utc||'').slice(0,16)
+    };
+   }
+   lastErr=new Error('Bad payload');
+  }catch(e){lastErr=e}
+ }
+ throw lastErr||new Error('All FX endpoints failed');
+}
+async function refreshFxRates(force){
+ const st=$('fxStatus');
+ const from=$('fxFrom')?$('fxFrom').value:'EUR';
+ if(!force&&_fx.base===from&&_fx.fetchedAt&&(Date.now()-_fx.fetchedAt)<30*60*1000&&_fx.rates&&Object.keys(_fx.rates).length){
+  convertFx();
+  if(st)st.textContent='Live rates ready (cached)';
+  return;
+ }
+ _fx.loading=true;
+ if(st)st.textContent='Fetching live rates…';
+ try{
+  const data=await fetchFxPayload(from);
+  _fx.base=data.base||from;
+  _fx.rates=data.rates||{};
+  _fx.date=data.date||'';
+  _fx.fetchedAt=Date.now();
+  _fx.loading=false;
+  if(st)st.textContent='Live rates ready';
+  convertFx();
+ }catch(err){
+  _fx.loading=false;
+  console.warn('FX fetch failed',err);
+  if(st)st.textContent='Could not reach rate server. Avoid file:// — use a local server — or tap Refresh.';
+  convertFx();
+ }
+}
+function initFxConverter(){
+ fillFxSelects();
+ // Align default "from" with active country currency when unset
+ if(!state.settings.fxFrom&&P())state.settings.fxFrom=P().currency;
+ fillFxSelects();
+ refreshFxRates(false);
+}
+
+/* ---------- init ---------- */
+document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>goTab(b.dataset.tab));
+$('modelNote').textContent='Tax model: 25% Abgeltungsteuer plus 5.5% solidarity surcharge on that tax. With church tax (8/9%) the base rate is reduced to 25% ÷ (1 + 25% × church rate), the statutory adjustment. Gains are entered after tax. The year is replayed in date order: the first gains use up the Sparer-Pauschbetrag and any loss pots tax-free (after tax = before tax), and only the rest is grossed up with the combined rate. Losses are entered before tax and refund the tax already paid on earlier gains. Losses are offset before the Sparer-Pauschbetrag. Stock-sale losses only offset stock-sale gains; other capital losses offset any capital gain. Estimates only — your bank\'s figures and your tax return are what count.';
+populateYears();
+syncSettingsUI();
+applyTheme();
+applyChartColors();
+rebuildKindSelect();
+resetForm();
+fillPeriodMonthSelect();
+initFxConverter();
+render();
+renderPositions();
+setPosMode('qty');
+if(typeof updateImportHelp==='function')updateImportHelp();
+
+if('serviceWorker' in navigator){
+ window.addEventListener('load',()=>{
+  navigator.serviceWorker.register('sw.js').catch(()=>{});
+ });
+}
+</script>
+</body>
+</html>
